@@ -2,15 +2,14 @@
   "name": "AVA - Ambiente Virtual de Aprendizagem",
   "short_name": "AVA",
   "start_url": "./index.html",
-  "scope": "./",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#4338ca",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%234338ca'/><path d='M256 120 L420 200 L256 280 L92 200 Z' fill='%23ffffff'/><path d='M140 250 L140 370 C140 370 180 412 256 412 C332 412 372 370 372 370 L372 250 L256 310 Z' fill='%23818cf8'/></svg>",
+      "src": "./icone.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
