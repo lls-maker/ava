@@ -146,7 +146,7 @@
                             class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-xl bg-slate-50">
                     </div>
                     <button type="submit" id="uploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
-                        Enviar Material Instantâneo
+                        Enviar Material
                     </button>
                 </form>
             </div>
@@ -190,7 +190,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
-                        <input type="password" id="loginPass" required placeholder="••••••••" autocomplete="new-password"
+                        <input type="password" id="loginPass" required placeholder="••••••••" autocomplete="current-password"
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
@@ -211,7 +211,7 @@
                 </div>
                 <form id="formRegister" onsubmit="handleRegisterSubmit(event)" class="space-y-3">
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário (Nome próprio)</label>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
                         <input type="text" id="regName" required placeholder="Ex: JoaoSilva" autocomplete="off"
                             class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
@@ -223,7 +223,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha (Mínimo 6 caracteres)</label>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
                         <input type="password" id="regPass" required placeholder="••••••••" autocomplete="new-password"
                             class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
@@ -246,7 +246,7 @@
                 </div>
             </div>
 
-            <!-- TELA DE RECUPERAÇÃO DE SENHA POR PALAVRA SECRETA -->
+            <!-- TELA DE RECUPERAÇÃO DE SENHA -->
             <div id="viewForgot" class="space-y-4 hidden">
                 <div class="text-center mb-4">
                     <h3 class="font-bold text-slate-800 text-xl">Recuperar Senha</h3>
@@ -296,7 +296,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -400,10 +400,9 @@
 
         window.handleLoginSubmit = async function(e) {
             e.preventDefault();
-            const rawInput = document.getElementById('loginUser').value.trim();
+            const username = document.getElementById('loginUser').value.trim().toLowerCase();
             const pass = document.getElementById('loginPass').value;
-            const lookupKey = rawInput.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const internalEmail = `${lookupKey}@ava.internal`;
+            const internalEmail = `${username}@ava.internal`;
 
             try {
                 await signInWithEmailAndPassword(auth, internalEmail, pass);
@@ -414,33 +413,27 @@
 
         window.handleRegisterSubmit = async function(e) {
             e.preventDefault();
-            const rawUsername = document.getElementById('regName').value.trim();
+            const username = document.getElementById('regName').value.trim();
             const role = document.getElementById('regRole').value;
             const pass = document.getElementById('regPass').value;
             const passConfirm = document.getElementById('regPassConfirm').value;
-            const secretWord = document.getElementById('regSecret').value.trim().toLowerCase();
+            const secretWord = document.getElementById('regSecret').value.trim();
 
             if (pass !== passConfirm) {
                 alert('Erro: As senhas não coincidem.');
                 return;
             }
 
-            const lookupKey = rawUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
-            if (!lookupKey) {
-                alert('Por favor, insira um nome de usuário válido.');
-                return;
-            }
-
-            const internalEmail = `${lookupKey}@ava.internal`;
+            const cleanUsername = username.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const internalEmail = `${cleanUsername}@ava.internal`;
 
             try {
                 const cred = await createUserWithEmailAndPassword(auth, internalEmail, pass);
                 await setDoc(doc(db, "users", cred.user.uid), { 
-                    username: rawUsername, 
-                    lookupKey,             
+                    username, 
                     role, 
                     email: internalEmail,
-                    secretWord 
+                    secretWord: secretWord.toLowerCase() 
                 });
                 alert('Conta criada com sucesso!');
             } catch (err) {
@@ -454,13 +447,12 @@
 
         window.handleForgotSubmit = async function(e) {
             e.preventDefault();
-            const rawInput = document.getElementById('forgotUser').value.trim();
-            const lookupKey = rawInput.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const username = document.getElementById('forgotUser').value.trim().toLowerCase();
             const secretInput = document.getElementById('forgotSecret').value.trim().toLowerCase();
 
             try {
                 const usersRef = collection(db, "users");
-                const q = query(usersRef, where("lookupKey", "==", lookupKey));
+                const q = query(usersRef, where("username", "==", username));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
@@ -478,7 +470,7 @@
                     return;
                 }
 
-                alert('Palavra secreta confirmada! Faça login com sua conta e utilize a nova senha.');
+                alert('Palavra secreta confirmada! Faça login com sua conta e redefina sua senha.');
                 switchAuthView('login');
             } catch (err) {
                 alert('Erro na recuperação: ' + err.message);
@@ -517,7 +509,6 @@
             }
         };
 
-        // UPLOAD ASSÍNCRONO ULTRA-RÁPIDO COM STREAM RESUMÍVEL
         window.handleUploadMaterial = async function(e) {
             e.preventDefault();
             const title = document.getElementById('materialTitle').value;
@@ -528,57 +519,39 @@
             if (!file) return;
 
             const btn = document.getElementById('uploadBtn');
-            btn.innerText = "Enviando arquivo em segundo plano...";
+            btn.innerText = "Enviando arquivo...";
             btn.disabled = true;
 
             try {
                 const fileRef = ref(storage, `materials/${Date.now()}_${file.name}`);
-                
-                // Utiliza uploadBytesResumable para garantir alta performance sem travar a thread principal
-                const uploadTask = uploadBytesResumable(fileRef, file);
+                await uploadBytes(fileRef, file);
+                const fileUrl = await getDownloadURL(fileRef);
 
-                uploadTask.on('state_changed', 
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        btn.innerText = `Enviando... ${Math.round(progress)}%`;
-                    }, 
-                    (error) => {
-                        alert('Erro no envio: ' + error.message);
-                        btn.innerText = "Enviar Material Instantâneo";
-                        btn.disabled = false;
-                    }, 
-                    async () => {
-                        const fileUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                const newMaterial = {
+                    title,
+                    subject,
+                    desc,
+                    fileName: file.name,
+                    fileSize: (file.size / (1024*1024)).toFixed(2) + ' MB',
+                    fileUrl,
+                    storagePath: fileRef.fullPath,
+                    date: new Date().toLocaleDateString('pt-BR'),
+                    timestamp: Date.now(),
+                    views: [],
+                    downloads: []
+                };
 
-                        const newMaterial = {
-                            title,
-                            subject,
-                            desc,
-                            fileName: file.name,
-                            fileSize: (file.size / (1024*1024)).toFixed(2) + ' MB',
-                            fileUrl,
-                            storagePath: fileRef.fullPath,
-                            date: new Date().toLocaleDateString('pt-BR'),
-                            timestamp: Date.now(),
-                            views: [],
-                            downloads: []
-                        };
+                const docRef = await addDoc(collection(db, "materials"), newMaterial);
+                newMaterial.id = docRef.id;
+                materials.unshift(newMaterial);
 
-                        const docRef = await addDoc(collection(db, "materials"), newMaterial);
-                        newMaterial.id = docRef.id;
-                        materials.unshift(newMaterial);
-
-                        document.getElementById('uploadForm').reset();
-                        renderMaterials();
-                        btn.innerText = "Enviar Material Instantâneo";
-                        btn.disabled = false;
-                        alert('Material enviado com sucesso!');
-                    }
-                );
-
+                document.getElementById('uploadForm').reset();
+                renderMaterials();
+                alert('Material enviado com sucesso!');
             } catch (err) {
                 alert('Erro no upload: ' + err.message);
-                btn.innerText = "Enviar Material Instantâneo";
+            } finally {
+                btn.innerText = "Enviar Material";
                 btn.disabled = false;
             }
         };
@@ -717,12 +690,11 @@
                         </div>
                     `;
                 } else {
-                    actionButton = `
+                    actionButtons = `
                         <a href="${m.fileUrl}" target="_blank" download="${m.fileName}" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-download"></i> Baixar
                         </a>
                     `;
-                    actionButtons = actionButton;
                 }
 
                 grid.innerHTML += `
