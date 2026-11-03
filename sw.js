@@ -1,10 +1,9 @@
-const CACHE_NAME = 'ava-cache-v1';
+const CACHE_NAME = 'ava-cache-v2';
 const assetsToCache = [
     './index.html',
     './manifest.json'
 ];
 
-// Instalação do Service Worker e cache dos elementos essenciais
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
@@ -14,7 +13,6 @@ self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
-// Ativação e limpeza de versões antigas de cache
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) => {
@@ -30,7 +28,6 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Intercepta requisições de rede para suportar funcionamento online e offline
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         fetch(event.request).catch(() => {
