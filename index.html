@@ -509,7 +509,6 @@
             }
         };
 
-        // UPLOAD OTIMIZADO: Rápido e direto ao ponto
         window.handleUploadMaterial = async function(e) {
             e.preventDefault();
             const title = document.getElementById('materialTitle').value;
@@ -520,15 +519,13 @@
             if (!file) return;
 
             const btn = document.getElementById('uploadBtn');
-            btn.innerText = "Salvando arquivo na nuvem...";
+            btn.innerText = "Enviando arquivo...";
             btn.disabled = true;
 
             try {
                 const fileRef = ref(storage, `materials/${Date.now()}_${file.name}`);
-                
-                // Envio otimizado direto por bytes
-                const snapshot = await uploadBytes(fileRef, file);
-                const fileUrl = await getDownloadURL(snapshot.ref);
+                await uploadBytes(fileRef, file);
+                const fileUrl = await getDownloadURL(fileRef);
 
                 const newMaterial = {
                     title,
@@ -552,7 +549,7 @@
                 renderMaterials();
                 alert('Material enviado com sucesso!');
             } catch (err) {
-                alert('Erro no upload: Verifique as regras de Storage no Firebase. Detalhes: ' + err.message);
+                alert('Erro no upload: ' + err.message);
             } finally {
                 btn.innerText = "Enviar Material Rápido";
                 btn.disabled = false;
