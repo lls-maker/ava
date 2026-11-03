@@ -140,11 +140,21 @@
                         <textarea id="materialDesc" rows="2" placeholder="Resumo curto..." autocomplete="off"
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50"></textarea>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Arquivo (Qualquer tipo)</label>
-                        <input type="file" id="materialFile" required
-                            class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-xl bg-slate-50">
+
+                    <!-- SELETOR DO TIPO DE ENVIO (ARQUIVO OU LINK) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Opção 1: Enviar Arquivo (Até 1MB)</label>
+                            <input type="file" id="materialFile"
+                                class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-lg bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Opção 2: Ou Colar Link Externo</label>
+                            <input type="url" id="materialLink" placeholder="https://drive.google.com/..." autocomplete="off"
+                                class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                        </div>
                     </div>
+
                     <button type="submit" id="uploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
                         Cadastrar Material no Banco
                     </button>
@@ -497,13 +507,11 @@
                 const matSnap = await getDocs(collection(db, "materials"));
                 materials = matSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-                // Ordena do mais recente para o mais antigo para as notificações funcionarem corretamente
                 materials.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
                 renderSubjects();
                 renderMaterials();
 
-                // Atualiza o sininho de notificações caso seja aluno
                 if (currentUserData && currentUserData.role === 'aluno') {
                     updateStudentNotifications();
                 }
@@ -512,7 +520,6 @@
             }
         }
 
-        // Funções do Sininho de Notificações
         window.toggleNotifications = function() {
             const dropdown = document.getElementById('notifDropdown');
             if (dropdown) dropdown.classList.toggle('hidden');
@@ -552,34 +559,35 @@
             }
         };
 
-        // CONVERSÃO E GRAVAÇÃO DIRETA NO FIRESTORE (SEM PRECISAR DE STORAGE PAGO)
+        // CADASTRO INTELIGENTE (SUPORTA UPLOAD DE ATÉ 1MB OU LINK EXTERNO)
         window.handleUploadMaterial = async function(e) {
             e.preventDefault();
             const title = document.getElementById('materialTitle').value;
             const subject = document.getElementById('materialSubjectSelect').value;
             const desc = document.getElementById('materialDesc').value;
             const fileInput = document.getElementById('materialFile');
+            const linkInput = document.getElementById('materialLink').value.trim();
             const file = fileInput.files[0];
-            if (!file) return;
+
+            if (!file && !linkInput) {
+                alert('Por favor, selecione um arquivo ou cole um link externo.');
+                return;
+            }
 
             const btn = document.getElementById('uploadBtn');
-            btn.innerText = "A processar arquivo...";
+            btn.innerText = "A processar...";
             btn.disabled = true;
 
             try {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                
-                reader.onload = async function () {
-                    const fileBase64 = reader.result;
-
+                if (linkInput) {
+                    // Caso o professor tenha inserido um link externo
                     const newMaterial = {
                         title,
                         subject,
                         desc,
-                        fileName: file.name,
-                        fileSize: (file.size / (1024*1024)).toFixed(2) + ' MB',
-                        fileUrl: fileBase64,
+                        fileName: "Aceder ao Link Externo",
+                        fileSize: "Link",
+                        fileUrl: linkInput,
                         date: new Date().toLocaleDateString('pt-BR'),
                         timestamp: Date.now(),
                         views: [],
@@ -592,14 +600,51 @@
 
                     document.getElementById('uploadForm').reset();
                     renderMaterials();
-                    alert('Material cadastrado com sucesso no Firestore!');
+                    if (currentUserData && currentUserData.role === 'aluno') updateStudentNotifications();
+                    alert('Material via link cadastrado com sucesso!');
                     btn.innerText = "Cadastrar Material no Banco";
                     btn.disabled = false;
-                };
 
-                reader.onerror = function (error) {
-                    throw new Error("Erro ao ler o arquivo.");
-                };
+                } else {
+                    // Caso o professor tenha escolhido fazer upload direto de arquivo
+                    if (file.size > 1 * 1024 * 1024) {
+                        alert('O arquivo é maior que 1 MB! Para arquivos grandes, utilize a opção "Colar Link Externo" (Google Drive, OneDrive, etc.).');
+                        btn.innerText = "Cadastrar Material no Banco";
+                        btn.disabled = false;
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    
+                    reader.onload = async function () {
+                        const fileBase64 = reader.result;
+
+                        const newMaterial = {
+                            title,
+                            subject,
+                            desc,
+                            fileName: file.name,
+                            fileSize: (file.size / (1024*1024)).toFixed(2) + ' MB',
+                            fileUrl: fileBase64,
+                            date: new Date().toLocaleDateString('pt-BR'),
+                            timestamp: Date.now(),
+                            views: [],
+                            downloads: []
+                        };
+
+                        const docRef = await addDoc(collection(db, "materials"), newMaterial);
+                        newMaterial.id = docRef.id;
+                        materials.unshift(newMaterial);
+
+                        document.getElementById('uploadForm').reset();
+                        renderMaterials();
+                        if (currentUserData && currentUserData.role === 'aluno') updateStudentNotifications();
+                        alert('Arquivo cadastrado com sucesso no Firestore!');
+                        btn.innerText = "Cadastrar Material no Banco";
+                        btn.disabled = false;
+                    };
+                }
 
             } catch (err) {
                 console.error("Erro:", err);
@@ -655,7 +700,7 @@
             if (!mat) return;
 
             const isDl = type === 'download';
-            document.getElementById('modalReportTitle').innerText = `${isDl ? 'Baixados' : 'Visualizados'}: ${title}`;
+            document.getElementById('modalReportTitle').innerText = `${isDl ? 'Acessados' : 'Visualizados'}: ${title}`;
             const container = document.getElementById('reportListContainer');
             const list = isDl ? (mat.downloads || []) : (mat.views || []);
 
@@ -737,15 +782,15 @@
                                 Visto (${viewsCount})
                             </button>
                             <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'download')" class="text-blue-700 bg-blue-50 px-2 py-1 rounded-lg text-[11px] font-semibold">
-                                Baixado (${dlsCount})
+                                Acessos (${dlsCount})
                             </button>
                             <button onclick="deleteMaterial('${m.id}')" class="text-red-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     `;
                 } else {
                     actionButtons = `
-                        <a href="${m.fileUrl}" target="_blank" download="${m.fileName}" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-download"></i> Baixar
+                        <a href="${m.fileUrl}" target="_blank" download="${m.fileSize === 'Link' ? '' : m.fileName}" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Aceder / Baixar
                         </a>
                     `;
                 }
