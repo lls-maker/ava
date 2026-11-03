@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AVA Moderno</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ÍCONE DO NAVEGADOR -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234338ca'/><path d='M50 25 L80 40 L50 55 L20 40 Z' fill='%23ffffff'/><path d='M25 50.5 L25 70 C25 70 35 77 50 77 C65 77 75 70 75 70 L75 50.5 L50 63 Z' fill='%23818cf8'/></svg>">
+
+    <link rel="manifest" href="manifest.json">
+
+
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+    <!-- CABEÇALHO -->
+    <header class="bg-indigo-700 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-graduation-cap text-2xl"></i>
+                <h1 class="text-xl font-bold tracking-wide">AVA - Ambiente Virtual (Nuvem)</h1>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Sino de Notificações (Alunos) -->
+                <div id="notificationArea" class="relative hidden">
+                    <button onclick="toggleNotifications()" class="relative p-2 text-indigo-200 hover:text-white transition">
+                        <i class="fa-solid fa-bell text-xl"></i>
+                        <span id="notifBadge" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                    </button>
+                    <div id="notifDropdown" class="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 hidden p-3 z-50 text-slate-800">
+                        <h4 class="text-xs font-bold uppercase text-slate-400 mb-2 border-b pb-1">Novidades para você</h4>
+                        <div id="notifList" class="space-y-2 max-h-60 overflow-y-auto text-xs"></div>
+                    </div>
+                </div>
+
+                <div id="headerUserArea" class="flex items-center gap-3"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        
+        <!-- BARRA LATERAL (Matérias) -->
+        <aside class="lg:col-span-1 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 h-fit">
+            <h2 class="text-lg font-bold text-slate-700 mb-4 flex items-center justify-between">
+                <span>Matérias</span>
+                <i class="fa-solid fa-book-open text-indigo-600 text-sm"></i>
+            </h2>
+            <div id="sidebarSubjects" class="space-y-2"></div>
+
+            <div id="addSubjectContainer" class="mt-6 pt-4 border-t border-slate-100 hidden">
+                <h3 class="text-sm font-bold text-slate-600 mb-2">Adicionar Matéria</h3>
+                <form id="subjectForm" onsubmit="handleAddSubject(event)" class="space-y-2">
+                    <input type="text" id="newSubjectName" placeholder="Nome da Matéria..." required
+                        class="w-full text-sm px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm py-2 rounded-lg transition">
+                        Criar Matéria
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- ÁREA CENTRAL -->
+        <section class="lg:col-span-3 space-y-6">
+
+            <!-- PAINEL DE UPLOAD DO PROFESSOR -->
+            <div id="professorPanel" class="bg-white p-6 rounded-2xl shadow-sm border border-indigo-100 hidden">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-indigo-50">
+                    <h2 class="text-lg font-bold text-indigo-700 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-plus"></i> Painel de Upload do Professor (Firebase Storage)
+                    </h2>
+                    <span class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full font-semibold">Modo Administrador</span>
+                </div>
+
+                <form id="uploadForm" onsubmit="handleUploadMaterial(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Título do Material</label>
+                            <input type="text" id="materialTitle" required placeholder="Ex: Apostila de Geografia 01"
+                                class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Matéria / Disciplina</label>
+                            <select id="materialSubjectSelect" required
+                                class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Descrição / Observações</label>
+                        <textarea id="materialDesc" rows="2" placeholder="Resumo curto..."
+                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Arquivo</label>
+                        <input type="file" id="materialFile" required
+                            class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-xl bg-slate-50">
+                    </div>
+                    <button type="submit" id="uploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
+                        Enviar Material para a Nuvem
+                    </button>
+                </form>
+            </div>
+
+            <!-- LISTAGEM DE MATERIAIS -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                    <div>
+                        <h2 id="currentCategoryTitle" class="text-xl font-bold text-slate-800">Geografia (Todos os Materiais)</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Baixe os conteúdos da nuvem</p>
+                    </div>
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
+                        <input type="text" id="searchInput" oninput="renderMaterials()" placeholder="Pesquisar material..."
+                            class="w-full text-sm pl-9 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                    </div>
+                </div>
+
+                <div id="materialsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- MODAL DE AUTENTICAÇÃO -->
+    <div id="authModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-slate-100">
+            
+            <div id="viewLogin" class="space-y-4">
+                <div class="text-center mb-6">
+                    <h3 class="font-bold text-slate-800 text-2xl">Bem-vindo ao AVA</h3>
+                    <p class="text-xs text-slate-500 mt-1">Faça login com sua conta Firebase</p>
+                </div>
+                <form onsubmit="handleLoginSubmit(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail</label>
+                        <input type="email" id="loginEmail" required placeholder="seu@email.com"
+                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
+                        <input type="password" id="loginPass" required placeholder="••••••••"
+                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
+                        Entrar
+                    </button>
+                </form>
+                <div class="flex justify-between items-center text-xs pt-2">
+                    <button onclick="switchAuthView('register')" class="text-slate-600 font-semibold hover:underline">Criar conta nova</button>
+                </div>
+            </div>
+
+            <div id="viewRegister" class="space-y-4 hidden">
+                <div class="text-center mb-4">
+                    <h3 class="font-bold text-slate-800 text-xl">Criar Nova Conta</h3>
+                    <p class="text-xs text-slate-500">Cadastre-se na nuvem do Firebase</p>
+                </div>
+                <form onsubmit="handleRegisterSubmit(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Exibição</label>
+                        <input type="text" id="regName" required placeholder="Seu nome..."
+                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tipo de Perfil</label>
+                        <select id="regRole" class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                            <option value="aluno">Aluno</option>
+                            <option value="professor">Professor</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail</label>
+                        <input type="email" id="regEmail" required placeholder="seu@email.com"
+                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
+                        <input type="password" id="regPass" required placeholder="••••••••"
+                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
+                        Cadastrar na Nuvem
+                    </button>
+                </form>
+                <div class="text-center pt-2">
+                    <button onclick="switchAuthView('login')" class="text-xs text-indigo-600 hover:underline">Já tem conta? Faça login</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL DE RELATÓRIO DO PROFESSOR -->
+    <div id="reportModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-slate-100">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                <h3 id="modalReportTitle" class="font-bold text-slate-800 text-base">Relatório de Atividade</h3>
+                <button onclick="closeReportModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="reportListContainer" class="space-y-2 max-h-60 overflow-y-auto text-sm"></div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DA APLICAÇÃO (FIREBASE INTEGRADO) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCTNab5Tf_7q69r-JLzyK2u-bDF_4YRQxU",
+            authDomain: "ava-joao-victor.firebaseapp.com",
+            projectId: "ava-joao-victor",
+            storageBucket: "ava-joao-victor.firebasestorage.app",
+            messagingSenderId: "518053036575",
+            appId: "1:518053036575:web:0ea03eecba67599f13cb2a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        let subjects = ['Geografia'];
+        let materials = [];
+        let currentUserData = null;
+        let currentFilter = 'Geografia';
+
+        window.switchAuthView = function(view) {
+            document.getElementById('viewLogin').classList.add('hidden');
+            document.getElementById('viewRegister').classList.add('hidden');
+            if (view === 'login') document.getElementById('viewLogin').classList.remove('hidden');
+            if (view === 'register') document.getElementById('viewRegister').classList.remove('hidden');
+        };
+
+        // Monitorar autenticação do Firebase
+        onAuthStateChanged(auth, async (user) => {
+            const modal = document.getElementById('authModal');
+            const headerArea = document.getElementById('headerUserArea');
+            const profPanel = document.getElementById('professorPanel');
+            const addSubContainer = document.getElementById('addSubjectContainer');
+            const notifArea = document.getElementById('notificationArea');
+
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                currentUserData = userDoc.exists() ? userDoc.data() : { username: user.email, role: 'aluno' };
+                currentUserData.uid = user.uid;
+
+                modal.classList.add('hidden');
+                headerArea.innerHTML = `
+                    <div class="text-right">
+                        <span class="block text-xs font-semibold text-indigo-200">${currentUserData.role.toUpperCase()}</span>
+                        <span class="text-sm font-bold">${currentUserData.username}</span>
+                    </div>
+                    <button onclick="handleLogout()" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-indigo-500">
+                        Sair
+                    </button>
+                `;
+
+                if (currentUserData.role === 'professor') {
+                    profPanel.classList.remove('hidden');
+                    addSubContainer.classList.remove('hidden');
+                    notifArea.classList.add('hidden');
+                } else {
+                    profPanel.classList.add('hidden');
+                    addSubContainer.classList.add('hidden');
+                    notifArea.classList.remove('hidden');
+                }
+                loadDataFromCloud();
+            } else {
+                currentUserData = null;
+                modal.classList.remove('hidden');
+                headerArea.innerHTML = '';
+                profPanel.classList.add('hidden');
+                addSubContainer.classList.add('hidden');
+                notifArea.classList.add('hidden');
+            }
+        });
+
+        window.handleLoginSubmit = async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (err) {
+                alert('Erro ao entrar: ' + err.message);
+            }
+        };
+
+        window.handleRegisterSubmit = async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('regName').value.trim();
+            const role = document.getElementById('regRole').value;
+            const email = document.getElementById('regEmail').value;
+            const pass = document.getElementById('regPass').value;
+
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                await setDoc(doc(db, "users", cred.user.uid), { username, role, email });
+                alert('Conta criada na nuvem com sucesso!');
+            } catch (err) {
+                alert('Erro no cadastro: ' + err.message);
+            }
+        };
+
+        window.handleLogout = async function() {
+            await signOut(auth);
+        };
+
+        // Carregar dados da Nuvem (Firestore)
+        async function loadDataFromCloud() {
+            try {
+                // Carregar Matérias
+                const subSnap = await getDocs(collection(db, "subjects"));
+                if (!subSnap.empty) {
+                    subjects = subSnap.docs.map(d => d.data().name);
+                }
+
+                // Carregar Materiais
+                const matSnap = await getDocs(collection(db, "materials"));
+                materials = matSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                renderSubjects();
+                renderMaterials();
+            } catch (err) {
+                console.error("Erro ao carregar do Firestore:", err);
+            }
+        }
+
+        window.handleAddSubject = async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('newSubjectName').value.trim();
+            if (name && !subjects.includes(name)) {
+                await addDoc(collection(db, "subjects"), { name });
+                subjects.push(name);
+                document.getElementById('newSubjectName').value = '';
+                renderSubjects();
+            }
+        };
+
+        window.handleUploadMaterial = async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('materialTitle').value;
+            const subject = document.getElementById('materialSubjectSelect').value;
+            const desc = document.getElementById('materialDesc').value;
+            const fileInput = document.getElementById('materialFile');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const btn = document.getElementById('uploadBtn');
+            btn.innerText = "Enviando para o Storage...";
+            btn.disabled = true;
+
+            try {
+                // Salvar arquivo no Storage do Firebase
+                const fileRef = ref(storage, `materials/${Date.now()}_${file.name}`);
+                await uploadBytes(fileRef, file);
+                const fileUrl = await getDownloadURL(fileRef);
+
+                const newMaterial = {
+                    title,
+                    subject,
+                    desc,
+                    fileName: file.name,
+                    fileSize: (file.size / (1024*1024)).toFixed(2) + ' MB',
+                    fileUrl,
+                    storagePath: fileRef.fullPath,
+                    date: new Date().toLocaleDateString('pt-BR'),
+                    timestamp: Date.now(),
+                    views: [],
+                    downloads: []
+                };
+
+                const docRef = await addDoc(collection(db, "materials"), newMaterial);
+                newMaterial.id = docRef.id;
+                materials.unshift(newMaterial);
+
+                document.getElementById('uploadForm').reset();
+                renderMaterials();
+                alert('Material enviado para a nuvem com sucesso!');
+            } catch (err) {
+                alert('Erro no upload: ' + err.message);
+            } finally {
+                btn.innerText = "Enviar Material para a Nuvem";
+                btn.disabled = false;
+            }
+        };
+
+        window.deleteMaterial = async function(id, storagePath) {
+            if (confirm('Deseja excluir este material da nuvem?')) {
+                try {
+                    await deleteDoc(doc(db, "materials", id));
+                    materials = materials.filter(m => m.id !== id);
+                    renderMaterials();
+                    alert('Material excluído!');
+                } catch (err) {
+                    alert('Erro ao excluir: ' + err.message);
+                }
+            }
+        };
+
+        window.recordView = async function(materialId) {
+            if (!currentUserData || currentUserData.role !== 'aluno') return;
+            const mat = materials.find(m => m.id === materialId);
+            if (!mat) return;
+
+            if (!mat.views) mat.views = [];
+            const already = mat.views.some(v => v.username === currentUserData.username);
+            if (!already) {
+                const viewEntry = { username: currentUserData.username, date: new Date().toLocaleString('pt-BR') };
+                mat.views.push(viewEntry);
+                await updateDoc(doc(db, "materials", materialId), { views: arrayUnion(viewEntry) });
+            }
+        };
+
+        window.recordDownload = async function(materialId) {
+            if (!currentUserData || currentUserData.role !== 'aluno') return;
+            const mat = materials.find(m => m.id === materialId);
+            if (!mat) return;
+
+            if (!mat.downloads) mat.downloads = [];
+            const already = mat.downloads.some(v => v.username === currentUserData.username);
+            if (!already) {
+                const dlEntry = { username: currentUserData.username, date: new Date().toLocaleString('pt-BR') };
+                mat.downloads.push(dlEntry);
+                await updateDoc(doc(db, "materials", materialId), { downloads: arrayUnion(dlEntry) });
+            }
+        };
+
+        window.openReportModal = function(materialId, title, type) {
+            const mat = materials.find(m => m.id === materialId);
+            if (!mat) return;
+
+            const isDl = type === 'download';
+            document.getElementById('modalReportTitle').innerText = `${isDl ? 'Baixados' : 'Visualizados'}: ${title}`;
+            const container = document.getElementById('reportListContainer');
+            const list = isDl ? (mat.downloads || []) : (mat.views || []);
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-4">Nenhum registro encontrado.</p>`;
+            } else {
+                container.innerHTML = list.map(v => `
+                    <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border">
+                        <span class="font-bold text-slate-700"><i class="fa-solid fa-user-check text-indigo-600 mr-2"></i>${v.username}</span>
+                        <span class="text-xs text-slate-400">${v.date}</span>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('reportModal').classList.remove('hidden');
+        };
+
+        window.closeReportModal = function() {
+            document.getElementById('reportModal').classList.add('hidden');
+        };
+
+        window.filterBySubject = function(sub) {
+            currentFilter = sub;
+            document.getElementById('currentCategoryTitle').innerText = `${sub} (Materiais na Nuvem)`;
+            renderSubjects();
+            renderMaterials();
+        };
+
+        function renderSubjects() {
+            const container = document.getElementById('sidebarSubjects');
+            const select = document.getElementById('materialSubjectSelect');
+            container.innerHTML = '';
+            select.innerHTML = '';
+
+            subjects.forEach(sub => {
+                const isSelected = currentFilter === sub;
+                container.innerHTML += `
+                    <div onclick="filterBySubject('${sub}')" class="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-semibold cursor-pointer transition ${isSelected ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}">
+                        <span><i class="fa-solid fa-book mr-2 text-slate-400"></i> ${sub}</span>
+                    </div>
+                `;
+                select.innerHTML += `<option value="${sub}">${sub}</option>`;
+            });
+        }
+
+        function renderMaterials() {
+            const grid = document.getElementById('materialsGrid');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = materials.filter(m => {
+                const matchSubject = m.subject === currentFilter;
+                const matchSearch = m.title.toLowerCase().includes(search) || m.fileName.toLowerCase().includes(search);
+                return matchSubject && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400">
+                        <i class="fa-solid fa-folder-open text-4xl mb-2"></i>
+                        <p class="text-sm">Nenhum material em "${currentFilter}".</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = '';
+            filtered.forEach(m => {
+                if (currentUserData && currentUserData.role === 'aluno') {
+                    recordView(m.id);
+                }
+
+                let actionButtons = '';
+                const viewsCount = (m.views || []).length;
+                const dlsCount = (m.downloads || []).length;
+
+                if (currentUserData && currentUserData.role === 'professor') {
+                    actionButtons = `
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'view')" class="text-green-700 bg-green-50 px-2 py-1 rounded-lg text-[11px] font-semibold">
+                                Visto (${viewsCount})
+                            </button>
+                            <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'download')" class="text-blue-700 bg-blue-50 px-2 py-1 rounded-lg text-[11px] font-semibold">
+                                Baixado (${dlsCount})
+                            </button>
+                            <button onclick="deleteMaterial('${m.id}', '${m.storagePath}')" class="text-red-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                } else {
+                    actionButtons = `
+                        <a href="${m.fileUrl}" target="_blank" download="${m.fileName}" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-download"></i> Baixar
+                        </a>
+                    `;
+                }
+
+                grid.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col justify-between hover:shadow-md transition">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full font-semibold">${m.subject}</span>
+                                <span class="text-xs text-slate-400">${m.date}</span>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-base mb-1">${m.title}</h3>
+                            <p class="text-xs text-slate-500 mb-3">${m.desc || 'Sem descrição.'}</p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
+                            <div class="text-xs text-slate-500 truncate max-w-[130px]">
+                                <i class="fa-solid fa-file-arrow-down mr-1 text-indigo-600"></i> ${m.fileName} (${m.fileSize})
+                            </div>
+                            ${actionButtons}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
