@@ -146,7 +146,7 @@
                             class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-xl bg-slate-50">
                     </div>
                     <button type="submit" id="uploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
-                        Enviar Material
+                        Cadastrar Material no Banco
                     </button>
                 </form>
             </div>
@@ -296,7 +296,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -316,7 +315,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         let subjects = ['Geografia'];
         let materials = [];
@@ -383,7 +381,6 @@
                 mainAppView.classList.add('hidden');
                 currentUserData = null;
                 
-                // Limpa campos ao sair do sistema
                 document.getElementById('formLogin').reset();
                 document.getElementById('formRegister').reset();
                 document.getElementById('formForgot').reset();
@@ -518,7 +515,7 @@
             }
         };
 
-        // UPLOAD OTIMIZADO PARA QUALQUER FORMATO DE ARQUIVO
+        // CONVERSÃO E GRAVAÇÃO DIRETA NO FIRESTORE (SEM PRECISAR DE STORAGE PAGO)
         window.handleUploadMaterial = async function(e) {
             e.preventDefault();
             const title = document.getElementById('materialTitle').value;
@@ -529,47 +526,54 @@
             if (!file) return;
 
             const btn = document.getElementById('uploadBtn');
-            btn.innerText = "Enviando arquivo...";
+            btn.innerText = "A processar arquivo...";
             btn.disabled = true;
 
             try {
-                const safeName = file.name.replace(/[^a-zA-Z0-9_.-]/g, '_');
-                const fileRef = ref(storage, `materials/${Date.now()}_${safeName}`);
+                // Converte o arquivo localmente em Base64 para armazenar diretamente no Firestore de forma gratuita
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
                 
-                await uploadBytes(fileRef, file);
-                const fileUrl = await getDownloadURL(fileRef);
+                reader.onload = async function () {
+                    const fileBase64 = reader.result;
 
-                const newMaterial = {
-                    title,
-                    subject,
-                    desc,
-                    fileName: file.name,
-                    fileSize: (file.size / (1024*1024)).toFixed(2) + ' MB',
-                    fileUrl,
-                    storagePath: fileRef.fullPath,
-                    date: new Date().toLocaleDateString('pt-BR'),
-                    timestamp: Date.now(),
-                    views: [],
-                    downloads: []
+                    const newMaterial = {
+                        title,
+                        subject,
+                        desc,
+                        fileName: file.name,
+                        fileSize: (file.size / (1024*1024)).toFixed(2) + ' MB',
+                        fileUrl: fileBase64, // Guarda o arquivo em formato leve direto no banco de dados
+                        date: new Date().toLocaleDateString('pt-BR'),
+                        timestamp: Date.now(),
+                        views: [],
+                        downloads: []
+                    };
+
+                    const docRef = await addDoc(collection(db, "materials"), newMaterial);
+                    newMaterial.id = docRef.id;
+                    materials.unshift(newMaterial);
+
+                    document.getElementById('uploadForm').reset();
+                    renderMaterials();
+                    alert('Material cadastrado com sucesso no Firestore!');
+                    btn.innerText = "Cadastrar Material no Banco";
+                    btn.disabled = false;
                 };
 
-                const docRef = await addDoc(collection(db, "materials"), newMaterial);
-                newMaterial.id = docRef.id;
-                materials.unshift(newMaterial);
+                reader.onerror = function (error) {
+                    throw new Error("Erro ao ler o arquivo.");
+                };
 
-                document.getElementById('uploadForm').reset();
-                renderMaterials();
-                alert('Material enviado com sucesso!');
             } catch (err) {
-                console.error("Erro no upload:", err);
-                alert('Erro no upload: ' + err.message);
-            } finally {
-                btn.innerText = "Enviar Material";
+                console.error("Erro:", err);
+                alert('Erro ao processar: ' + err.message);
+                btn.innerText = "Cadastrar Material no Banco";
                 btn.disabled = false;
             }
         };
 
-        window.deleteMaterial = async function(id, storagePath) {
+        window.deleteMaterial = async function(id) {
             if (confirm('Deseja excluir este material?')) {
                 try {
                     await deleteDoc(doc(db, "materials", id));
@@ -699,7 +703,7 @@
                             <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'download')" class="text-blue-700 bg-blue-50 px-2 py-1 rounded-lg text-[11px] font-semibold">
                                 Baixado (${dlsCount})
                             </button>
-                            <button onclick="deleteMaterial('${m.id}', '${m.storagePath}')" class="text-red-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="deleteMaterial('${m.id}')" class="text-red-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     `;
                 } else {
