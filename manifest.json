@@ -2,6 +2,7 @@
   "name": "AVA - Ambiente Virtual de Aprendizagem",
   "short_name": "AVA",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#4338ca",
@@ -10,7 +11,7 @@
       "src": "./icone.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
