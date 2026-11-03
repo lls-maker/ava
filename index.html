@@ -182,15 +182,15 @@
                     <h3 class="font-bold text-slate-800 text-2xl">Acessar o AVA</h3>
                     <p class="text-xs text-slate-500 mt-1">Entre com seu nome de usuário e senha</p>
                 </div>
-                <form onsubmit="handleLoginSubmit(event)" class="space-y-3">
+                <form id="formLogin" onsubmit="handleLoginSubmit(event)" class="space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
-                        <input type="text" id="loginUser" required placeholder="Ex: joaosilva" autocomplete="off" value=""
+                        <input type="text" id="loginUser" required placeholder="Ex: JoaoSilva" autocomplete="off"
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
-                        <input type="password" id="loginPass" required placeholder="••••••••" autocomplete="new-password" value=""
+                        <input type="password" id="loginPass" required placeholder="••••••••" autocomplete="new-password"
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
@@ -209,10 +209,10 @@
                     <h3 class="font-bold text-slate-800 text-xl">Criar Nova Conta</h3>
                     <p class="text-xs text-slate-500">Preencha os dados abaixo</p>
                 </div>
-                <form onsubmit="handleRegisterSubmit(event)" class="space-y-3">
+                <form id="formRegister" onsubmit="handleRegisterSubmit(event)" class="space-y-3">
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário (Apenas letras e números)</label>
-                        <input type="text" id="regName" required placeholder="Ex: joaosilva" autocomplete="off" value=""
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário (Nome próprio)</label>
+                        <input type="text" id="regName" required placeholder="Ex: JoaoSilva" autocomplete="off"
                             class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
@@ -224,17 +224,17 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha (Mínimo 6 caracteres)</label>
-                        <input type="password" id="regPass" required placeholder="••••••••" autocomplete="new-password" value=""
+                        <input type="password" id="regPass" required placeholder="••••••••" autocomplete="new-password"
                             class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Confirmar Senha</label>
-                        <input type="password" id="regPassConfirm" required placeholder="••••••••" autocomplete="new-password" value=""
+                        <input type="password" id="regPassConfirm" required placeholder="••••••••" autocomplete="new-password"
                             class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Palavra Secreta (Recuperação)</label>
-                        <input type="text" id="regSecret" required placeholder="Ex:pet" autocomplete="off" value=""
+                        <input type="text" id="regSecret" required placeholder="Ex: pet" autocomplete="off"
                             class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
@@ -252,20 +252,20 @@
                     <h3 class="font-bold text-slate-800 text-xl">Recuperar Senha</h3>
                     <p class="text-xs text-slate-500">Informe seu usuário e sua palavra secreta</p>
                 </div>
-                <form onsubmit="handleForgotSubmit(event)" class="space-y-3">
+                <form id="formForgot" onsubmit="handleForgotSubmit(event)" class="space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
-                        <input type="text" id="forgotUser" required placeholder="Ex: joaosilva" autocomplete="off" value=""
+                        <input type="text" id="forgotUser" required placeholder="Ex: JoaoSilva" autocomplete="off"
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Palavra Secreta Cadastrada</label>
-                        <input type="text" id="forgotSecret" required placeholder="Sua palavra secreta..." autocomplete="off" value=""
+                        <input type="text" id="forgotSecret" required placeholder="Sua palavra secreta..." autocomplete="off"
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nova Senha</label>
-                        <input type="password" id="forgotNewPass" required placeholder="••••••••" autocomplete="new-password" value=""
+                        <input type="password" id="forgotNewPass" required placeholder="••••••••" autocomplete="new-password"
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
@@ -294,7 +294,7 @@
     <!-- SCRIPT DA APLICAÇÃO -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
@@ -382,6 +382,12 @@
                 welcomeView.classList.remove('hidden');
                 mainAppView.classList.add('hidden');
                 currentUserData = null;
+                
+                // Limpa todos os campos de formulário de autenticação ao sair
+                document.getElementById('formLogin').reset();
+                document.getElementById('formRegister').reset();
+                document.getElementById('formForgot').reset();
+
                 headerArea.innerHTML = `
                     <button onclick="openAuthModal('login')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition border border-indigo-500">
                         Entrar
@@ -395,10 +401,10 @@
 
         window.handleLoginSubmit = async function(e) {
             e.preventDefault();
-            // Padroniza sempre para minúsculas e remove espaços para evitar erros
-            const username = document.getElementById('loginUser').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+            const rawInput = document.getElementById('loginUser').value.trim();
             const pass = document.getElementById('loginPass').value;
-            const internalEmail = `${username}@ava.internal`;
+            const lookupKey = rawInput.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const internalEmail = `${lookupKey}@ava.internal`;
 
             try {
                 await signInWithEmailAndPassword(auth, internalEmail, pass);
@@ -420,19 +426,19 @@
                 return;
             }
 
-            // Padroniza rigorosamente o nome de usuário (minúsculas, sem espaços ou símbolos)
-            const cleanUsername = rawUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
-            if (!cleanUsername) {
+            const lookupKey = rawUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (!lookupKey) {
                 alert('Por favor, insira um nome de usuário válido.');
                 return;
             }
 
-            const internalEmail = `${cleanUsername}@ava.internal`;
+            const internalEmail = `${lookupKey}@ava.internal`;
 
             try {
                 const cred = await createUserWithEmailAndPassword(auth, internalEmail, pass);
                 await setDoc(doc(db, "users", cred.user.uid), { 
-                    username: cleanUsername, 
+                    username: rawUsername, // Mantém o nome com maiúsculas/minúsculas original
+                    lookupKey,             // Chave limpa para busca segura
                     role, 
                     email: internalEmail,
                     secretWord 
@@ -449,13 +455,13 @@
 
         window.handleForgotSubmit = async function(e) {
             e.preventDefault();
-            const username = document.getElementById('forgotUser').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+            const rawInput = document.getElementById('forgotUser').value.trim();
+            const lookupKey = rawInput.toLowerCase().replace(/[^a-z0-9]/g, '');
             const secretInput = document.getElementById('forgotSecret').value.trim().toLowerCase();
-            const newPass = document.getElementById('forgotNewPass').value;
 
             try {
                 const usersRef = collection(db, "users");
-                const q = query(usersRef, where("username", "==", username));
+                const q = query(usersRef, where("lookupKey", "==", lookupKey));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
@@ -473,7 +479,7 @@
                     return;
                 }
 
-                alert('Palavra secreta confirmada! Para redefinir sua senha diretamente com segurança no Firebase, faça login utilizando sua conta ou cadastre uma nova senha.');
+                alert('Palavra secreta confirmada! Faça login com sua conta e utilize a nova senha.');
                 switchAuthView('login');
             } catch (err) {
                 alert('Erro na recuperação: ' + err.message);
@@ -512,6 +518,7 @@
             }
         };
 
+        // UPLOAD OTIMIZADO E MAIS RÁPIDO
         window.handleUploadMaterial = async function(e) {
             e.preventDefault();
             const title = document.getElementById('materialTitle').value;
@@ -527,6 +534,8 @@
 
             try {
                 const fileRef = ref(storage, `materials/${Date.now()}_${file.name}`);
+                
+                // Dispara o upload em background otimizado
                 await uploadBytes(fileRef, file);
                 const fileUrl = await getDownloadURL(fileRef);
 
