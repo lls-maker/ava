@@ -14,7 +14,25 @@
     <header class="bg-indigo-600 text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <h1 class="text-xl font-bold tracking-wide">AVA - Ambiente Virtual de Aprendizagem</h1>
-            <span id="userInfo" class="text-sm font-medium bg-indigo-700 px-3 py-1.5 rounded-full">Carregando...</span>
+            
+            <div class="flex items-center gap-4">
+                <!-- Sininho de Notificações para Alunos -->
+                <div id="notificationArea" class="relative hidden">
+                    <button onclick="toggleNotifications()" class="relative p-2 text-white hover:bg-indigo-700 rounded-full transition">
+                        🔔
+                        <span id="notifBadge" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full hidden">0</span>
+                    </button>
+                    
+                    <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-72 bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-100 z-50 p-3">
+                        <h3 class="font-bold text-sm text-slate-500 border-b pb-2 mb-2">Novos Materiais</h3>
+                        <div id="notifList" class="max-h-60 overflow-y-auto space-y-2">
+                            <p class="text-slate-400 text-center py-2 text-sm">Nenhuma novidade.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <span id="userInfo" class="text-sm font-medium bg-indigo-700 px-3 py-1.5 rounded-full">Carregando...</span>
+            </div>
         </div>
     </header>
 
@@ -114,8 +132,14 @@
                 const matSnap = await getDocs(collection(db, "materials"));
                 materials = matSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
+                materials.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
                 renderSubjects();
                 renderMaterials();
+
+                if (currentUserData && currentUserData.role === 'aluno') {
+                    updateStudentNotifications();
+                }
             } catch (err) {
                 console.error("Erro ao carregar do Firestore:", err);
             }
@@ -189,8 +213,9 @@
                             title,
                             subject,
                             fileName: file.name,
-                            fileData: reader.result, // Base64 direto no Firestore
-                            date: new Date().toLocaleDateString('pt-BR')
+                            fileData: reader.result,
+                            date: new Date().toLocaleDateString('pt-BR'),
+                            timestamp: Date.now()
                         };
 
                         await addDoc(collection(db, "materials"), newMaterial);
@@ -207,6 +232,38 @@
                     }
                 };
             });
+        }
+
+        window.toggleNotifications = function() {
+            const dropdown = document.getElementById('notifDropdown');
+            if (dropdown) dropdown.classList.toggle('hidden');
+        };
+
+        function updateStudentNotifications() {
+            const notifArea = document.getElementById('notificationArea');
+            const notifBadge = document.getElementById('notifBadge');
+            const notifList = document.getElementById('notifList');
+
+            if (!notifArea || !notifBadge || !notifList) return;
+
+            notifArea.classList.remove('hidden');
+
+            if (materials.length === 0) {
+                notifBadge.classList.add('hidden');
+                notifList.innerHTML = `<p class="text-slate-400 text-center py-2 text-sm">Nenhuma novidade.</p>`;
+                return;
+            }
+
+            notifBadge.innerText = materials.length;
+            notifBadge.classList.remove('hidden');
+
+            notifList.innerHTML = materials.slice(0, 5).map(m => `
+                <div onclick="filterBySubject('${m.subject}'); toggleNotifications();" class="p-2 hover:bg-slate-50 rounded-xl cursor-pointer transition border-b border-slate-50 last:border-0">
+                    <span class="font-bold text-indigo-600 block text-xs">${m.subject}</span>
+                    <span class="text-slate-700 font-medium block truncate text-sm">${m.title}</span>
+                    <span class="text-[10px] text-slate-400">${m.date || 'Recente'}</span>
+                </div>
+            `).join('');
         }
     </script>
 
