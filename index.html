@@ -4,139 +4,506 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AVA - Ambiente Virtual de Aprendizagem</title>
+    
+    <!-- CONFIGURAÇÃO DO PWA -->
     <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#4338ca">
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col">
 
-    <!-- Navbar -->
-    <header class="bg-indigo-600 text-white shadow-md">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ÍCONE DO NAVEGADOR -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234338ca'/><path d='M50 25 L80 40 L50 55 L20 40 Z' fill='%23ffffff'/><path d='M25 50.5 L25 70 C25 70 35 77 50 77 C65 77 75 70 75 70 L75 50.5 L50 63 Z' fill='%23818cf8'/></svg>">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+    <!-- CABEÇALHO -->
+    <header class="bg-indigo-700 text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold tracking-wide">AVA - Ambiente Virtual de Aprendizagem</h1>
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-graduation-cap text-2xl"></i>
+                <h1 class="text-xl font-bold tracking-wide">AVA - Ambiente Virtual</h1>
+            </div>
             
             <div class="flex items-center gap-4">
-                <!-- Sininho de Notificações para Alunos -->
+                <!-- Sino de Notificações (Alunos) -->
                 <div id="notificationArea" class="relative hidden">
-                    <button onclick="toggleNotifications()" class="relative p-2 text-white hover:bg-indigo-700 rounded-full transition">
-                        🔔
-                        <span id="notifBadge" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full hidden">0</span>
+                    <button onclick="toggleNotifications()" class="relative p-2 text-indigo-200 hover:text-white transition">
+                        <i class="fa-solid fa-bell text-xl"></i>
+                        <span id="notifBadge" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
                     </button>
-                    
-                    <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-72 bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-100 z-50 p-3">
-                        <h3 class="font-bold text-sm text-slate-500 border-b pb-2 mb-2">Novos Materiais</h3>
-                        <div id="notifList" class="max-h-60 overflow-y-auto space-y-2">
-                            <p class="text-slate-400 text-center py-2 text-sm">Nenhuma novidade.</p>
-                        </div>
+                    <div id="notifDropdown" class="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 hidden p-3 z-50 text-slate-800">
+                        <h4 class="text-xs font-bold uppercase text-slate-400 mb-2 border-b pb-1">Novidades para você</h4>
+                        <div id="notifList" class="space-y-2 max-h-60 overflow-y-auto text-xs"></div>
                     </div>
                 </div>
 
-                <span id="userInfo" class="text-sm font-medium bg-indigo-700 px-3 py-1.5 rounded-full">Carregando...</span>
+                <!-- Área de Usuário / Botões no Topo (Deslogado) -->
+                <div id="headerUserArea" class="flex items-center gap-2">
+                    <button onclick="openAuthModal('login')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition border border-indigo-500">
+                        Entrar
+                    </button>
+                    <button onclick="openAuthModal('register')" class="bg-white text-indigo-700 hover:bg-indigo-50 text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition shadow-sm">
+                        Criar Conta
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- Conteúdo Principal -->
-    <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full grid grid-cols-1 md:grid-cols-4 gap-6">
+    <!-- TELA DE APRESENTAÇÃO / LANDING PAGE -->
+    <div id="welcomeView" class="flex-grow flex items-center justify-center p-6 bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white">
+        <div class="max-w-3xl w-full text-center space-y-8 py-12">
+            <div class="inline-flex p-4 bg-indigo-700/50 rounded-3xl backdrop-blur-md border border-indigo-500/30 shadow-2xl">
+                <i class="fa-solid fa-graduation-cap text-6xl text-indigo-200"></i>
+            </div>
+            
+            <div class="space-y-3">
+                <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight">Ambiente Virtual de Aprendizagem</h2>
+                <p class="text-indigo-200 text-base md:text-lg max-w-xl mx-auto">
+                    A plataforma inteligente para professores compartilharem materiais e alunos acompanharem conteúdos em tempo real, com total segurança e sincronização.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-2xl mx-auto pt-4">
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                    <i class="fa-solid fa-cloud-arrow-up text-indigo-300 text-xl mb-2"></i>
+                    <h3 class="font-bold text-sm">Materiais Dinâmicos</h3>
+                    <p class="text-xs text-indigo-200 mt-1">Apostilas e arquivos acessíveis de qualquer dispositivo.</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                    <i class="fa-solid fa-bell text-indigo-300 text-xl mb-2"></i>
+                    <h3 class="font-bold text-sm">Notificações</h3>
+                    <p class="text-xs text-indigo-200 mt-1">Fique sabendo imediatamente quando um novo conteúdo for postado.</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                    <i class="fa-solid fa-chart-line text-indigo-300 text-xl mb-2"></i>
+                    <h3 class="font-bold text-sm">Controle Pedagógico</h3>
+                    <p class="text-xs text-indigo-200 mt-1">Professores acompanham quem visualizou e baixou os arquivos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL (Exibido apenas quando logado) -->
+    <main id="mainAppView" class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6 hidden">
         
-        <!-- Sidebar de Matérias -->
-        <aside class="md:col-span-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 h-fit">
-            <h2 class="font-bold text-slate-700 mb-3 text-lg">Matérias</h2>
-            <div id="subjectsList" class="space-y-1">
-                <!-- Preenchido via script -->
+        <!-- BARRA LATERAL (Matérias) -->
+        <aside class="lg:col-span-1 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 h-fit">
+            <h2 class="text-lg font-bold text-slate-700 mb-4 flex items-center justify-between">
+                <span>Matérias</span>
+                <i class="fa-solid fa-book-open text-indigo-600 text-sm"></i>
+            </h2>
+            <div id="sidebarSubjects" class="space-y-2"></div>
+
+            <div id="addSubjectContainer" class="mt-6 pt-4 border-t border-slate-100 hidden">
+                <h3 class="text-sm font-bold text-slate-600 mb-2">Adicionar Matéria</h3>
+                <form id="subjectForm" onsubmit="handleAddSubject(event)" class="space-y-2">
+                    <input type="text" id="newSubjectName" placeholder="Nome da Matéria..." required autocomplete="off"
+                        class="w-full text-sm px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm py-2 rounded-lg transition">
+                        Criar Matéria
+                    </button>
+                </form>
             </div>
         </aside>
 
-        <!-- Área de Conteúdos e Upload -->
-        <section class="md:col-span-3 space-y-6">
-            
-            <!-- Painel do Professor (Upload) -->
-            <div id="teacherPanel" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-indigo-100">
-                <h3 class="font-bold text-indigo-900 text-lg mb-4">Publicar Novo Material</h3>
-                <form id="uploadForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Título da Matéria / Aula</label>
-                        <input type="text" id="matTitle" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+        <!-- ÁREA CENTRAL -->
+        <section class="lg:col-span-3 space-y-6">
+
+            <!-- PAINEL DE UPLOAD DO PROFESSOR -->
+            <div id="professorPanel" class="bg-white p-6 rounded-2xl shadow-sm border border-indigo-100 hidden">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-indigo-50">
+                    <h2 class="text-lg font-bold text-indigo-700 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-plus"></i> Painel de Upload do Professor
+                    </h2>
+                    <span class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full font-semibold">Modo Administrador</span>
+                </div>
+
+                <form id="uploadForm" onsubmit="handleUploadMaterial(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Título do Material</label>
+                            <input type="text" id="materialTitle" required placeholder="Ex: Aula de Geografia" autocomplete="off"
+                                class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Matéria / Disciplina</label>
+                            <select id="materialSubjectSelect" required
+                                class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                            </select>
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Selecionar Matéria</label>
-                        <select id="matSubject" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <!-- Preenchido via script -->
-                        </select>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Descrição / Observações</label>
+                        <textarea id="materialDesc" rows="2" placeholder="Resumo curto..." autocomplete="off"
+                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Ficheiro</label>
-                        <input type="file" id="matFile" required class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Arquivo (Qualquer tipo)</label>
+                        <input type="file" id="materialFile" required
+                            class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-xl bg-slate-50">
                     </div>
-                    <button type="submit" id="btnUpload" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition">
-                        Publicar Material Rapidamente
+                    <button type="submit" id="uploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
+                        Cadastrar Material no Banco
                     </button>
                 </form>
             </div>
 
-            <!-- Lista de Materiais -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="font-bold text-slate-800 text-lg mb-4">Materiais Disponíveis</h3>
-                <div id="materialsList" class="space-y-3">
-                    <p class="text-slate-400">A carregar conteúdos...</p>
+            <!-- LISTAGEM DE MATERIAIS -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                    <div>
+                        <h2 id="currentCategoryTitle" class="text-xl font-bold text-slate-800">Geografia (Todos os Materiais)</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Baixe os conteúdos disponibilizados</p>
+                    </div>
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
+                        <input type="text" id="searchInput" oninput="renderMaterials()" placeholder="Pesquisar material..." autocomplete="off"
+                            class="w-full text-sm pl-9 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                    </div>
                 </div>
+
+                <div id="materialsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
         </section>
     </main>
 
-    <!-- Firebase SDKs -->
+    <!-- MODAL DE AUTENTICAÇÃO -->
+    <div id="authModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-slate-100 relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <!-- TELA DE LOGIN -->
+            <div id="viewLogin" class="space-y-4">
+                <div class="text-center mb-6">
+                    <h3 class="font-bold text-slate-800 text-2xl">Acessar o AVA</h3>
+                    <p class="text-xs text-slate-500 mt-1">Entre com seu nome de usuário e senha</p>
+                </div>
+                <form id="formLogin" onsubmit="handleLoginSubmit(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
+                        <input type="text" id="loginUser" required placeholder="Ex: JoaoSilva" autocomplete="off"
+                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
+                        <input type="password" id="loginPass" required placeholder="••••••••" autocomplete="new-password"
+                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
+                        Entrar
+                    </button>
+                </form>
+                <div class="flex justify-between items-center text-xs pt-2">
+                    <button onclick="switchAuthView('forgot')" class="text-indigo-600 hover:underline">Esqueci a senha</button>
+                    <button onclick="switchAuthView('register')" class="text-slate-600 font-semibold hover:underline">Criar conta nova</button>
+                </div>
+            </div>
+
+            <!-- TELA DE CADASTRO -->
+            <div id="viewRegister" class="space-y-4 hidden">
+                <div class="text-center mb-4">
+                    <h3 class="font-bold text-slate-800 text-xl">Criar Nova Conta</h3>
+                    <p class="text-xs text-slate-500">Preencha os dados abaixo</p>
+                </div>
+                <form id="formRegister" onsubmit="handleRegisterSubmit(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário (Nome próprio)</label>
+                        <input type="text" id="regName" required placeholder="Ex: JoaoSilva" autocomplete="off"
+                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tipo de Perfil</label>
+                        <select id="regRole" class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                            <option value="aluno">Aluno</option>
+                            <option value="professor">Professor</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha (Mínimo 6 caracteres)</label>
+                        <input type="password" id="regPass" required placeholder="••••••••" autocomplete="new-password"
+                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Confirmar Senha</label>
+                        <input type="password" id="regPassConfirm" required placeholder="••••••••" autocomplete="new-password"
+                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Palavra Secreta (Recuperação)</label>
+                        <input type="text" id="regSecret" required placeholder="Ex: pet" autocomplete="off"
+                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
+                        Cadastrar
+                    </button>
+                </form>
+                <div class="text-center pt-2">
+                    <button onclick="switchAuthView('login')" class="text-xs text-indigo-600 hover:underline">Já tem conta? Faça login</button>
+                </div>
+            </div>
+
+            <!-- TELA DE RECUPERAÇÃO DE SENHA POR PALAVRA SECRETA -->
+            <div id="viewForgot" class="space-y-4 hidden">
+                <div class="text-center mb-4">
+                    <h3 class="font-bold text-slate-800 text-xl">Recuperar Senha</h3>
+                    <p class="text-xs text-slate-500">Informe seu usuário e sua palavra secreta</p>
+                </div>
+                <form id="formForgot" onsubmit="handleForgotSubmit(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
+                        <input type="text" id="forgotUser" required placeholder="Ex: JoaoSilva" autocomplete="off"
+                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Palavra Secreta Cadastrada</label>
+                        <input type="text" id="forgotSecret" required placeholder="Sua palavra secreta..." autocomplete="off"
+                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nova Senha</label>
+                        <input type="password" id="forgotNewPass" required placeholder="••••••••" autocomplete="new-password"
+                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
+                        Redefinir Senha
+                    </button>
+                </form>
+                <div class="text-center pt-2">
+                    <button onclick="switchAuthView('login')" class="text-xs text-indigo-600 hover:underline">Voltar para o Login</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL DE RELATÓRIO DO PROFESSOR -->
+    <div id="reportModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-slate-100">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                <h3 id="modalReportTitle" class="font-bold text-slate-800 text-base">Relatório de Atividade</h3>
+                <button onclick="closeReportModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="reportListContainer" class="space-y-2 max-h-60 overflow-y-auto text-sm"></div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DA APLICAÇÃO -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW:', err));
+            });
+        }
 
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "seu-projeto.firebaseapp.com",
-            projectId: "seu-projeto",
-            storageBucket: "seu-projeto.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456:web:abcd"
+            apiKey: "AIzaSyCTNab5Tf_7q69r-JLzyK2u-bDF_4YRQxU",
+            authDomain: "ava-joao-victor.firebaseapp.com",
+            projectId: "ava-joao-victor",
+            storageBucket: "ava-joao-victor.firebasestorage.app",
+            messagingSenderId: "518053036575",
+            appId: "1:518053036575:web:0ea03eecba67599f13cb2a"
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUserData = { role: 'aluno', name: 'Estudante' }; 
-        let subjects = ['Matemática', 'Português', 'Programação', 'História'];
+        let subjects = ['Geografia'];
         let materials = [];
+        let currentUserData = null;
+        let currentFilter = 'Geografia';
 
-        window.addEventListener('DOMContentLoaded', () => {
-            initApp();
+        window.openAuthModal = function(view) {
+            document.getElementById('authModal').classList.remove('hidden');
+            switchAuthView(view);
+        };
+
+        window.closeAuthModal = function() {
+            document.getElementById('authModal').classList.add('hidden');
+        };
+
+        window.switchAuthView = function(view) {
+            document.getElementById('viewLogin').classList.add('hidden');
+            document.getElementById('viewRegister').classList.add('hidden');
+            document.getElementById('viewForgot').classList.add('hidden');
+            if (view === 'login') document.getElementById('viewLogin').classList.remove('hidden');
+            if (view === 'register') document.getElementById('viewRegister').classList.remove('hidden');
+            if (view === 'forgot') document.getElementById('viewForgot').classList.remove('hidden');
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            const welcomeView = document.getElementById('welcomeView');
+            const mainAppView = document.getElementById('mainAppView');
+            const headerArea = document.getElementById('headerUserArea');
+            const profPanel = document.getElementById('professorPanel');
+            const addSubContainer = document.getElementById('addSubjectContainer');
+            const notifArea = document.getElementById('notificationArea');
+
+            if (user) {
+                welcomeView.classList.add('hidden');
+                mainAppView.classList.remove('hidden');
+                closeAuthModal();
+
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                currentUserData = userDoc.exists() ? userDoc.data() : { username: user.email, role: 'aluno' };
+                currentUserData.uid = user.uid;
+
+                headerArea.innerHTML = `
+                    <div class="text-right">
+                        <span class="block text-xs font-semibold text-indigo-200">${currentUserData.role.toUpperCase()}</span>
+                        <span class="text-sm font-bold">${currentUserData.username}</span>
+                    </div>
+                    <button onclick="handleLogout()" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-indigo-500">
+                        Sair
+                    </button>
+                `;
+
+                if (currentUserData.role === 'professor') {
+                    profPanel.classList.remove('hidden');
+                    addSubContainer.classList.remove('hidden');
+                    notifArea.classList.add('hidden');
+                } else {
+                    profPanel.classList.add('hidden');
+                    addSubContainer.classList.add('hidden');
+                    notifArea.classList.remove('hidden');
+                }
+                loadDataFromCloud();
+            } else {
+                welcomeView.classList.remove('hidden');
+                mainAppView.classList.add('hidden');
+                currentUserData = null;
+                
+                document.getElementById('formLogin').reset();
+                document.getElementById('formRegister').reset();
+                document.getElementById('formForgot').reset();
+
+                headerArea.innerHTML = `
+                    <button onclick="openAuthModal('login')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition border border-indigo-500">
+                        Entrar
+                    </button>
+                    <button onclick="openAuthModal('register')" class="bg-white text-indigo-700 hover:bg-indigo-50 text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition shadow-sm">
+                        Criar Conta
+                    </button>
+                `;
+            }
         });
 
-        async function initApp() {
-            setupUserInterface();
-            await loadDataFromCloud();
-            setupUploadListener();
-        }
+        window.handleLoginSubmit = async function(e) {
+            e.preventDefault();
+            const rawInput = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value;
+            const lookupKey = rawInput.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const internalEmail = `${lookupKey}@ava.internal`;
 
-        function setupUserInterface() {
-            const userInfo = document.getElementById('userInfo');
-            const teacherPanel = document.getElementById('teacherPanel');
-            
-            userInfo.innerText = `${currentUserData.name} (${currentUserData.role.toUpperCase()})`;
-
-            if (currentUserData.role === 'professor') {
-                teacherPanel.classList.remove('hidden');
+            try {
+                await signInWithEmailAndPassword(auth, internalEmail, pass);
+            } catch (err) {
+                alert('Erro ao entrar: Usuário ou senha incorretos.');
             }
-        }
+        };
+
+        window.handleRegisterSubmit = async function(e) {
+            e.preventDefault();
+            const rawUsername = document.getElementById('regName').value.trim();
+            const role = document.getElementById('regRole').value;
+            const pass = document.getElementById('regPass').value;
+            const passConfirm = document.getElementById('regPassConfirm').value;
+            const secretWord = document.getElementById('regSecret').value.trim().toLowerCase();
+
+            if (pass !== passConfirm) {
+                alert('Erro: As senhas não coincidem.');
+                return;
+            }
+
+            const lookupKey = rawUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (!lookupKey) {
+                alert('Por favor, insira um nome de usuário válido.');
+                return;
+            }
+
+            const internalEmail = `${lookupKey}@ava.internal`;
+
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, internalEmail, pass);
+                await setDoc(doc(db, "users", cred.user.uid), { 
+                    username: rawUsername, 
+                    lookupKey,             
+                    role, 
+                    email: internalEmail,
+                    secretWord 
+                });
+                alert('Conta criada com sucesso!');
+            } catch (err) {
+                if (err.code === 'auth/email-already-in-use') {
+                    alert('Erro no cadastro: Este nome de usuário já está em uso.');
+                } else {
+                    alert('Erro no cadastro: ' + err.message);
+                }
+            }
+        };
+
+        window.handleForgotSubmit = async function(e) {
+            e.preventDefault();
+            const rawInput = document.getElementById('forgotUser').value.trim();
+            const lookupKey = rawInput.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const secretInput = document.getElementById('forgotSecret').value.trim().toLowerCase();
+
+            try {
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("lookupKey", "==", lookupKey));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    alert('Usuário não encontrado.');
+                    return;
+                }
+
+                let userData = null;
+                querySnapshot.forEach((d) => {
+                    userData = d.data();
+                });
+
+                if (userData.secretWord !== secretInput) {
+                    alert('Palavra secreta incorreta.');
+                    return;
+                }
+
+                alert('Palavra secreta confirmada! Faça login com sua conta.');
+                switchAuthView('login');
+            } catch (err) {
+                alert('Erro na recuperação: ' + err.message);
+            }
+        };
+
+        window.handleLogout = async function() {
+            await signOut(auth);
+        };
 
         async function loadDataFromCloud() {
             try {
+                const subSnap = await getDocs(collection(db, "subjects"));
+                if (!subSnap.empty) {
+                    subjects = subSnap.docs.map(d => d.data().name);
+                }
+
                 const matSnap = await getDocs(collection(db, "materials"));
                 materials = matSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
+                // Ordena do mais recente para o mais antigo para as notificações funcionarem corretamente
                 materials.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
                 renderSubjects();
                 renderMaterials();
 
+                // Atualiza o sininho de notificações caso seja aluno
                 if (currentUserData && currentUserData.role === 'aluno') {
                     updateStudentNotifications();
                 }
@@ -145,112 +512,20 @@
             }
         }
 
-        function renderSubjects() {
-            const list = document.getElementById('subjectsList');
-            const select = document.getElementById('matSubject');
-
-            list.innerHTML = `<button onclick="filterBySubject('Todos')" class="w-full text-left px-3 py-2 rounded-xl bg-indigo-50 text-indigo-700 font-medium transition">Todas as Matérias</button>` +
-                subjects.map(s => `<button onclick="filterBySubject('${s}')" class="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-600 font-medium transition">${s}</button>`).join('');
-
-            if (select) {
-                select.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('');
-            }
-        }
-
-        function renderMaterials(filteredSubject = 'Todos') {
-            const container = document.getElementById('materialsList');
-            let data = materials;
-
-            if (filteredSubject !== 'Todos') {
-                data = materials.filter(m => m.subject === filteredSubject);
-            }
-
-            if (data.length === 0) {
-                container.innerHTML = `<p class="text-slate-400 text-center py-6">Nenhum material encontrado.</p>`;
-                return;
-            }
-
-            container.innerHTML = data.map(m => `
-                <div class="p-4 border border-slate-100 rounded-2xl flex justify-between items-center hover:bg-slate-50 transition">
-                    <div>
-                        <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">${m.subject}</span>
-                        <h4 class="font-bold text-slate-800 mt-1">${m.title}</h4>
-                        <span class="text-xs text-slate-400">Enviado em: ${m.date || 'Recente'}</span>
-                    </div>
-                    <a href="${m.fileData}" download="${m.fileName || 'material'}" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition">
-                        Descarregar
-                    </a>
-                </div>
-            `).join('');
-        }
-
-        window.filterBySubject = function(subject) {
-            renderMaterials(subject);
-        };
-
-        function setupUploadListener() {
-            const form = document.getElementById('uploadForm');
-            if (!form) return;
-
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const title = document.getElementById('matTitle').value;
-                const subject = document.getElementById('matSubject').value;
-                const fileInput = document.getElementById('matFile');
-                const btn = document.getElementById('btnUpload');
-
-                if (fileInput.files.length === 0) return;
-                const file = fileInput.files[0];
-
-                btn.innerText = "A enviar rapidamente...";
-                btn.disabled = true;
-
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = async () => {
-                    try {
-                        const newMaterial = {
-                            title,
-                            subject,
-                            fileName: file.name,
-                            fileData: reader.result,
-                            date: new Date().toLocaleDateString('pt-BR'),
-                            timestamp: Date.now()
-                        };
-
-                        await addDoc(collection(db, "materials"), newMaterial);
-                        
-                        form.reset();
-                        alert("Material publicado com sucesso!");
-                        await loadDataFromCloud();
-                    } catch (err) {
-                        console.error("Erro ao enviar:", err);
-                        alert("Erro ao publicar material.");
-                    } finally {
-                        btn.innerText = "Publicar Material Rapidamente";
-                        btn.disabled = false;
-                    }
-                };
-            });
-        }
-
+        // Funções do Sininho de Notificações
         window.toggleNotifications = function() {
             const dropdown = document.getElementById('notifDropdown');
             if (dropdown) dropdown.classList.toggle('hidden');
         };
 
         function updateStudentNotifications() {
-            const notifArea = document.getElementById('notificationArea');
             const notifBadge = document.getElementById('notifBadge');
             const notifList = document.getElementById('notifList');
-
-            if (!notifArea || !notifBadge || !notifList) return;
-
-            notifArea.classList.remove('hidden');
+            if (!notifBadge || !notifList) return;
 
             if (materials.length === 0) {
                 notifBadge.classList.add('hidden');
-                notifList.innerHTML = `<p class="text-slate-400 text-center py-2 text-sm">Nenhuma novidade.</p>`;
+                notifList.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">Nenhuma novidade.</p>`;
                 return;
             }
 
@@ -258,21 +533,242 @@
             notifBadge.classList.remove('hidden');
 
             notifList.innerHTML = materials.slice(0, 5).map(m => `
-                <div onclick="filterBySubject('${m.subject}'); toggleNotifications();" class="p-2 hover:bg-slate-50 rounded-xl cursor-pointer transition border-b border-slate-50 last:border-0">
+                <div onclick="filterBySubject('${m.subject}'); toggleNotifications();" class="p-2 hover:bg-slate-50 rounded-xl cursor-pointer transition border-b border-slate-100 last:border-0">
                     <span class="font-bold text-indigo-600 block text-xs">${m.subject}</span>
-                    <span class="text-slate-700 font-medium block truncate text-sm">${m.title}</span>
+                    <span class="text-slate-700 font-medium block truncate text-xs">${m.title}</span>
                     <span class="text-[10px] text-slate-400">${m.date || 'Recente'}</span>
                 </div>
             `).join('');
         }
-    </script>
 
-    <!-- Registo do Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-                .then(() => console.log("Service Worker registado com sucesso!"))
-                .catch(err => console.log("Erro no Service Worker:", err));
+        window.handleAddSubject = async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('newSubjectName').value.trim();
+            if (name && !subjects.includes(name)) {
+                await addDoc(collection(db, "subjects"), { name });
+                subjects.push(name);
+                document.getElementById('newSubjectName').value = '';
+                renderSubjects();
+            }
+        };
+
+        // CONVERSÃO E GRAVAÇÃO DIRETA NO FIRESTORE (SEM PRECISAR DE STORAGE PAGO)
+        window.handleUploadMaterial = async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('materialTitle').value;
+            const subject = document.getElementById('materialSubjectSelect').value;
+            const desc = document.getElementById('materialDesc').value;
+            const fileInput = document.getElementById('materialFile');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const btn = document.getElementById('uploadBtn');
+            btn.innerText = "A processar arquivo...";
+            btn.disabled = true;
+
+            try {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                
+                reader.onload = async function () {
+                    const fileBase64 = reader.result;
+
+                    const newMaterial = {
+                        title,
+                        subject,
+                        desc,
+                        fileName: file.name,
+                        fileSize: (file.size / (1024*1024)).toFixed(2) + ' MB',
+                        fileUrl: fileBase64,
+                        date: new Date().toLocaleDateString('pt-BR'),
+                        timestamp: Date.now(),
+                        views: [],
+                        downloads: []
+                    };
+
+                    const docRef = await addDoc(collection(db, "materials"), newMaterial);
+                    newMaterial.id = docRef.id;
+                    materials.unshift(newMaterial);
+
+                    document.getElementById('uploadForm').reset();
+                    renderMaterials();
+                    alert('Material cadastrado com sucesso no Firestore!');
+                    btn.innerText = "Cadastrar Material no Banco";
+                    btn.disabled = false;
+                };
+
+                reader.onerror = function (error) {
+                    throw new Error("Erro ao ler o arquivo.");
+                };
+
+            } catch (err) {
+                console.error("Erro:", err);
+                alert('Erro ao processar: ' + err.message);
+                btn.innerText = "Cadastrar Material no Banco";
+                btn.disabled = false;
+            }
+        };
+
+        window.deleteMaterial = async function(id) {
+            if (confirm('Deseja excluir este material?')) {
+                try {
+                    await deleteDoc(doc(db, "materials", id));
+                    materials = materials.filter(m => m.id !== id);
+                    renderMaterials();
+                    alert('Material excluído!');
+                } catch (err) {
+                    alert('Erro ao excluir: ' + err.message);
+                }
+            }
+        };
+
+        window.recordView = async function(materialId) {
+            if (!currentUserData || currentUserData.role !== 'aluno') return;
+            const mat = materials.find(m => m.id === materialId);
+            if (!mat) return;
+
+            if (!mat.views) mat.views = [];
+            const already = mat.views.some(v => v.username === currentUserData.username);
+            if (!already) {
+                const viewEntry = { username: currentUserData.username, date: new Date().toLocaleString('pt-BR') };
+                mat.views.push(viewEntry);
+                await updateDoc(doc(db, "materials", materialId), { views: arrayUnion(viewEntry) });
+            }
+        };
+
+        window.recordDownload = async function(materialId) {
+            if (!currentUserData || currentUserData.role !== 'aluno') return;
+            const mat = materials.find(m => m.id === materialId);
+            if (!mat) return;
+
+            if (!mat.downloads) mat.downloads = [];
+            const already = mat.downloads.some(v => v.username === currentUserData.username);
+            if (!already) {
+                const dlEntry = { username: currentUserData.username, date: new Date().toLocaleString('pt-BR') };
+                mat.downloads.push(dlEntry);
+                await updateDoc(doc(db, "materials", materialId), { downloads: arrayUnion(dlEntry) });
+            }
+        };
+
+        window.openReportModal = function(materialId, title, type) {
+            const mat = materials.find(m => m.id === materialId);
+            if (!mat) return;
+
+            const isDl = type === 'download';
+            document.getElementById('modalReportTitle').innerText = `${isDl ? 'Baixados' : 'Visualizados'}: ${title}`;
+            const container = document.getElementById('reportListContainer');
+            const list = isDl ? (mat.downloads || []) : (mat.views || []);
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-4">Nenhum registro encontrado.</p>`;
+            } else {
+                container.innerHTML = list.map(v => `
+                    <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border">
+                        <span class="font-bold text-slate-700"><i class="fa-solid fa-user-check text-indigo-600 mr-2"></i>${v.username}</span>
+                        <span class="text-xs text-slate-400">${v.date}</span>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('reportModal').classList.remove('hidden');
+        };
+
+        window.closeReportModal = function() {
+            document.getElementById('reportModal').classList.add('hidden');
+        };
+
+        window.filterBySubject = function(sub) {
+            currentFilter = sub;
+            document.getElementById('currentCategoryTitle').innerText = `${sub} (Materiais)`;
+            renderSubjects();
+            renderMaterials();
+        };
+
+        function renderSubjects() {
+            const container = document.getElementById('sidebarSubjects');
+            const select = document.getElementById('materialSubjectSelect');
+            container.innerHTML = '';
+            select.innerHTML = '';
+
+            subjects.forEach(sub => {
+                const isSelected = currentFilter === sub;
+                container.innerHTML += `
+                    <div onclick="filterBySubject('${sub}')" class="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-semibold cursor-pointer transition ${isSelected ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}">
+                        <span><i class="fa-solid fa-book mr-2 text-slate-400"></i> ${sub}</span>
+                    </div>
+                `;
+                select.innerHTML += `<option value="${sub}">${sub}</option>`;
+            });
+        }
+
+        function renderMaterials() {
+            const grid = document.getElementById('materialsGrid');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = materials.filter(m => {
+                const matchSubject = m.subject === currentFilter;
+                const matchSearch = m.title.toLowerCase().includes(search) || m.fileName.toLowerCase().includes(search);
+                return matchSubject && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400">
+                        <i class="fa-solid fa-folder-open text-4xl mb-2"></i>
+                        <p class="text-sm">Nenhum material em "${currentFilter}".</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = '';
+            filtered.forEach(m => {
+                if (currentUserData && currentUserData.role === 'aluno') {
+                    recordView(m.id);
+                }
+
+                let actionButtons = '';
+                const viewsCount = (m.views || []).length;
+                const dlsCount = (m.downloads || []).length;
+
+                if (currentUserData && currentUserData.role === 'professor') {
+                    actionButtons = `
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'view')" class="text-green-700 bg-green-50 px-2 py-1 rounded-lg text-[11px] font-semibold">
+                                Visto (${viewsCount})
+                            </button>
+                            <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'download')" class="text-blue-700 bg-blue-50 px-2 py-1 rounded-lg text-[11px] font-semibold">
+                                Baixado (${dlsCount})
+                            </button>
+                            <button onclick="deleteMaterial('${m.id}')" class="text-red-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                } else {
+                    actionButtons = `
+                        <a href="${m.fileUrl}" target="_blank" download="${m.fileName}" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-download"></i> Baixar
+                        </a>
+                    `;
+                }
+
+                grid.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col justify-between hover:shadow-md transition">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full font-semibold">${m.subject}</span>
+                                <span class="text-xs text-slate-400">${m.date}</span>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-base mb-1">${m.title}</h3>
+                            <p class="text-xs text-slate-500 mb-3">${m.desc || 'Sem descrição.'}</p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
+                            <div class="text-xs text-slate-500 truncate max-w-[130px]">
+                                <i class="fa-solid fa-file-arrow-down mr-1 text-indigo-600"></i> ${m.fileName} (${m.fileSize})
+                            </div>
+                            ${actionButtons}
+                        </div>
+                    </div>
+                `;
+            });
         }
     </script>
 </body>
