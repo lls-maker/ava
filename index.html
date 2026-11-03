@@ -146,7 +146,7 @@
                             class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-xl bg-slate-50">
                     </div>
                     <button type="submit" id="uploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
-                        Enviar Material
+                        Enviar Material Instantâneo
                     </button>
                 </form>
             </div>
@@ -296,7 +296,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -383,7 +383,6 @@
                 mainAppView.classList.add('hidden');
                 currentUserData = null;
                 
-                // Limpa todos os campos de formulário de autenticação ao sair
                 document.getElementById('formLogin').reset();
                 document.getElementById('formRegister').reset();
                 document.getElementById('formForgot').reset();
@@ -437,8 +436,8 @@
             try {
                 const cred = await createUserWithEmailAndPassword(auth, internalEmail, pass);
                 await setDoc(doc(db, "users", cred.user.uid), { 
-                    username: rawUsername, // Mantém o nome com maiúsculas/minúsculas original
-                    lookupKey,             // Chave limpa para busca segura
+                    username: rawUsername, 
+                    lookupKey,             
                     role, 
                     email: internalEmail,
                     secretWord 
@@ -518,7 +517,7 @@
             }
         };
 
-        // UPLOAD OTIMIZADO E MAIS RÁPIDO
+        // UPLOAD ASSÍNCRONO ULTRA-RÁPIDO COM STREAM RESUMÍVEL
         window.handleUploadMaterial = async function(e) {
             e.preventDefault();
             const title = document.getElementById('materialTitle').value;
@@ -529,41 +528,57 @@
             if (!file) return;
 
             const btn = document.getElementById('uploadBtn');
-            btn.innerText = "Enviando arquivo...";
+            btn.innerText = "Enviando arquivo em segundo plano...";
             btn.disabled = true;
 
             try {
                 const fileRef = ref(storage, `materials/${Date.now()}_${file.name}`);
                 
-                // Dispara o upload em background otimizado
-                await uploadBytes(fileRef, file);
-                const fileUrl = await getDownloadURL(fileRef);
+                // Utiliza uploadBytesResumable para garantir alta performance sem travar a thread principal
+                const uploadTask = uploadBytesResumable(fileRef, file);
 
-                const newMaterial = {
-                    title,
-                    subject,
-                    desc,
-                    fileName: file.name,
-                    fileSize: (file.size / (1024*1024)).toFixed(2) + ' MB',
-                    fileUrl,
-                    storagePath: fileRef.fullPath,
-                    date: new Date().toLocaleDateString('pt-BR'),
-                    timestamp: Date.now(),
-                    views: [],
-                    downloads: []
-                };
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        btn.innerText = `Enviando... ${Math.round(progress)}%`;
+                    }, 
+                    (error) => {
+                        alert('Erro no envio: ' + error.message);
+                        btn.innerText = "Enviar Material Instantâneo";
+                        btn.disabled = false;
+                    }, 
+                    async () => {
+                        const fileUrl = await getDownloadURL(uploadTask.snapshot.ref);
 
-                const docRef = await addDoc(collection(db, "materials"), newMaterial);
-                newMaterial.id = docRef.id;
-                materials.unshift(newMaterial);
+                        const newMaterial = {
+                            title,
+                            subject,
+                            desc,
+                            fileName: file.name,
+                            fileSize: (file.size / (1024*1024)).toFixed(2) + ' MB',
+                            fileUrl,
+                            storagePath: fileRef.fullPath,
+                            date: new Date().toLocaleDateString('pt-BR'),
+                            timestamp: Date.now(),
+                            views: [],
+                            downloads: []
+                        };
 
-                document.getElementById('uploadForm').reset();
-                renderMaterials();
-                alert('Material enviado com sucesso!');
+                        const docRef = await addDoc(collection(db, "materials"), newMaterial);
+                        newMaterial.id = docRef.id;
+                        materials.unshift(newMaterial);
+
+                        document.getElementById('uploadForm').reset();
+                        renderMaterials();
+                        btn.innerText = "Enviar Material Instantâneo";
+                        btn.disabled = false;
+                        alert('Material enviado com sucesso!');
+                    }
+                );
+
             } catch (err) {
                 alert('Erro no upload: ' + err.message);
-            } finally {
-                btn.innerText = "Enviar Material";
+                btn.innerText = "Enviar Material Instantâneo";
                 btn.disabled = false;
             }
         };
@@ -702,11 +717,12 @@
                         </div>
                     `;
                 } else {
-                    actionButtons = `
+                    actionButton = `
                         <a href="${m.fileUrl}" target="_blank" download="${m.fileName}" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-download"></i> Baixar
                         </a>
                     `;
+                    actionButtons = actionButton;
                 }
 
                 grid.innerHTML += `
