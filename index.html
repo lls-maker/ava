@@ -52,7 +52,7 @@
         </div>
     </header>
 
-    <!-- TELA DE APRESENTAÇÃO / LANDING PAGE (Exibida para usuários deslogados) -->
+    <!-- TELA DE APRESENTAÇÃO / LANDING PAGE -->
     <div id="welcomeView" class="flex-grow flex items-center justify-center p-6 bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white">
         <div class="max-w-3xl w-full text-center space-y-8 py-12">
             <div class="inline-flex p-4 bg-indigo-700/50 rounded-3xl backdrop-blur-md border border-indigo-500/30 shadow-2xl">
@@ -62,15 +62,15 @@
             <div class="space-y-3">
                 <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight">Ambiente Virtual de Aprendizagem</h2>
                 <p class="text-indigo-200 text-base md:text-lg max-w-xl mx-auto">
-                    A plataforma inteligente para professores compartilharem materiais e alunos acompanharem conteúdos em tempo real, com total segurança em nuvem.
+                    A plataforma inteligente para professores compartilharem materiais e alunos acompanharem conteúdos em tempo real, com total segurança e sincronização.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-2xl mx-auto pt-4">
                 <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
                     <i class="fa-solid fa-cloud-arrow-up text-indigo-300 text-xl mb-2"></i>
-                    <h3 class="font-bold text-sm">Materiais em Nuvem</h3>
-                    <p class="text-xs text-indigo-200 mt-1">Apostilas e PDFs seguros e acessíveis de qualquer dispositivo.</p>
+                    <h3 class="font-bold text-sm">Materiais Dinâmicos</h3>
+                    <p class="text-xs text-indigo-200 mt-1">Apostilas e PDFs acessíveis de qualquer dispositivo.</p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
                     <i class="fa-solid fa-bell text-indigo-300 text-xl mb-2"></i>
@@ -82,12 +82,6 @@
                     <h3 class="font-bold text-sm">Controle Pedagógico</h3>
                     <p class="text-xs text-indigo-200 mt-1">Professores acompanham quem visualizou e baixou os arquivos.</p>
                 </div>
-            </div>
-
-            <div class="pt-4">
-                <button onclick="openAuthModal('register')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition border border-indigo-400">
-                    <i class="fa-solid fa-user-plus mr-2"></i> Começar Agora Gratuitamente
-                </button>
             </div>
         </div>
     </div>
@@ -106,7 +100,7 @@
             <div id="addSubjectContainer" class="mt-6 pt-4 border-t border-slate-100 hidden">
                 <h3 class="text-sm font-bold text-slate-600 mb-2">Adicionar Matéria</h3>
                 <form id="subjectForm" onsubmit="handleAddSubject(event)" class="space-y-2">
-                    <input type="text" id="newSubjectName" placeholder="Nome da Matéria..." required
+                    <input type="text" id="newSubjectName" placeholder="Nome da Matéria..." required autocomplete="off"
                         class="w-full text-sm px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm py-2 rounded-lg transition">
                         Criar Matéria
@@ -122,7 +116,7 @@
             <div id="professorPanel" class="bg-white p-6 rounded-2xl shadow-sm border border-indigo-100 hidden">
                 <div class="flex items-center justify-between mb-4 pb-3 border-b border-indigo-50">
                     <h2 class="text-lg font-bold text-indigo-700 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-plus"></i> Painel de Upload do Professor (Firebase Storage)
+                        <i class="fa-solid fa-circle-plus"></i> Painel de Upload do Professor
                     </h2>
                     <span class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full font-semibold">Modo Administrador</span>
                 </div>
@@ -131,7 +125,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Título do Material</label>
-                            <input type="text" id="materialTitle" required placeholder="Ex: Apostila de Geografia 01"
+                            <input type="text" id="materialTitle" required placeholder="Ex: Apostila de Geografia 01" autocomplete="off"
                                 class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
                         </div>
                         <div>
@@ -143,7 +137,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Descrição / Observações</label>
-                        <textarea id="materialDesc" rows="2" placeholder="Resumo curto..."
+                        <textarea id="materialDesc" rows="2" placeholder="Resumo curto..." autocomplete="off"
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50"></textarea>
                     </div>
                     <div>
@@ -152,7 +146,7 @@
                             class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-xl bg-slate-50">
                     </div>
                     <button type="submit" id="uploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
-                        Enviar Material para a Nuvem
+                        Enviar Material
                     </button>
                 </form>
             </div>
@@ -162,11 +156,11 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
                         <h2 id="currentCategoryTitle" class="text-xl font-bold text-slate-800">Geografia (Todos os Materiais)</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">Baixe os conteúdos da nuvem</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Baixe os conteúdos disponibilizados</p>
                     </div>
                     <div class="relative w-full sm:w-64">
                         <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
-                        <input type="text" id="searchInput" oninput="renderMaterials()" placeholder="Pesquisar material..."
+                        <input type="text" id="searchInput" oninput="renderMaterials()" placeholder="Pesquisar material..." autocomplete="off"
                             class="w-full text-sm pl-9 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
                     </div>
                 </div>
@@ -186,17 +180,17 @@
             <div id="viewLogin" class="space-y-4">
                 <div class="text-center mb-6">
                     <h3 class="font-bold text-slate-800 text-2xl">Acessar o AVA</h3>
-                    <p class="text-xs text-slate-500 mt-1">Entre com sua conta Firebase</p>
+                    <p class="text-xs text-slate-500 mt-1">Entre com sua conta</p>
                 </div>
                 <form onsubmit="handleLoginSubmit(event)" class="space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail</label>
-                        <input type="email" id="loginEmail" required placeholder="seu@email.com"
+                        <input type="email" id="loginEmail" required placeholder="seu@email.com" autocomplete="off" value=""
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
-                        <input type="password" id="loginPass" required placeholder="••••••••"
+                        <input type="password" id="loginPass" required placeholder="••••••••" autocomplete="new-password" value=""
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
@@ -213,12 +207,12 @@
             <div id="viewRegister" class="space-y-4 hidden">
                 <div class="text-center mb-4">
                     <h3 class="font-bold text-slate-800 text-xl">Criar Nova Conta</h3>
-                    <p class="text-xs text-slate-500">Cadastre-se na nuvem do Firebase</p>
+                    <p class="text-xs text-slate-500">Preencha os dados abaixo para se cadastrar</p>
                 </div>
                 <form onsubmit="handleRegisterSubmit(event)" class="space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Exibição</label>
-                        <input type="text" id="regName" required placeholder="Seu nome..."
+                        <input type="text" id="regName" required placeholder="Seu nome..." autocomplete="off" value=""
                             class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
@@ -230,16 +224,16 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail</label>
-                        <input type="email" id="regEmail" required placeholder="seu@email.com"
+                        <input type="email" id="regEmail" required placeholder="seu@email.com" autocomplete="off" value=""
                             class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
-                        <input type="password" id="regPass" required placeholder="••••••••"
+                        <input type="password" id="regPass" required placeholder="••••••••" autocomplete="new-password" value=""
                             class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
-                        Cadastrar na Nuvem
+                        Cadastrar
                     </button>
                 </form>
                 <div class="text-center pt-2">
@@ -256,7 +250,7 @@
                 <form onsubmit="handleForgotSubmit(event)" class="space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail Cadastrado</label>
-                        <input type="email" id="forgotEmail" required placeholder="seu@email.com"
+                        <input type="email" id="forgotEmail" required placeholder="seu@email.com" autocomplete="off" value=""
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
@@ -289,7 +283,6 @@
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        // Registrar Service Worker para PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW:', err));
@@ -333,7 +326,6 @@
             if (view === 'forgot') document.getElementById('viewForgot').classList.remove('hidden');
         };
 
-        // Monitorar autenticação do Firebase
         onAuthStateChanged(auth, async (user) => {
             const welcomeView = document.getElementById('welcomeView');
             const mainAppView = document.getElementById('mainAppView');
@@ -393,7 +385,7 @@
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
             } catch (err) {
-                alert('Erro ao entrar: ' + err.message);
+                alert('Erro ao entrar: Verifique seu e-mail e senha.');
             }
         };
 
@@ -407,9 +399,13 @@
             try {
                 const cred = await createUserWithEmailAndPassword(auth, email, pass);
                 await setDoc(doc(db, "users", cred.user.uid), { username, role, email });
-                alert('Conta criada na nuvem com sucesso!');
+                alert('Conta criada com sucesso!');
             } catch (err) {
-                alert('Erro no cadastro: ' + err.message);
+                if (err.code === 'auth/email-already-in-use') {
+                    alert('Erro no cadastro: Este e-mail já está cadastrado em outra conta.');
+                } else {
+                    alert('Erro no cadastro: ' + err.message);
+                }
             }
         };
 
@@ -467,7 +463,7 @@
             if (!file) return;
 
             const btn = document.getElementById('uploadBtn');
-            btn.innerText = "Enviando para o Storage...";
+            btn.innerText = "Enviando arquivo...";
             btn.disabled = true;
 
             try {
@@ -495,17 +491,17 @@
 
                 document.getElementById('uploadForm').reset();
                 renderMaterials();
-                alert('Material enviado para a nuvem com sucesso!');
+                alert('Material enviado com sucesso!');
             } catch (err) {
                 alert('Erro no upload: ' + err.message);
             } finally {
-                btn.innerText = "Enviar Material para a Nuvem";
+                btn.innerText = "Enviar Material";
                 btn.disabled = false;
             }
         };
 
         window.deleteMaterial = async function(id, storagePath) {
-            if (confirm('Deseja excluir este material da nuvem?')) {
+            if (confirm('Deseja excluir este material?')) {
                 try {
                     await deleteDoc(doc(db, "materials", id));
                     materials = materials.filter(m => m.id !== id);
@@ -573,7 +569,7 @@
 
         window.filterBySubject = function(sub) {
             currentFilter = sub;
-            document.getElementById('currentCategoryTitle').innerText = `${sub} (Materiais na Nuvem)`;
+            document.getElementById('currentCategoryTitle').innerText = `${sub} (Materiais)`;
             renderSubjects();
             renderMaterials();
         };
