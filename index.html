@@ -6,7 +6,7 @@
     <title>AVA Moderno - Ambiente Virtual de Aprendizagem</title>
     
     <!-- CONFIGURAÇÃO DO PWA -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -39,7 +39,15 @@
                     </div>
                 </div>
 
-                <div id="headerUserArea" class="flex items-center gap-3"></div>
+                <!-- Área de Usuário / Botões no Topo (Deslogado) -->
+                <div id="headerUserArea" class="flex items-center gap-2">
+                    <button onclick="openAuthModal('login')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition border border-indigo-500">
+                        Entrar
+                    </button>
+                    <button onclick="openAuthModal('register')" class="bg-white text-indigo-700 hover:bg-indigo-50 text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition shadow-sm">
+                        Criar Conta
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -76,12 +84,9 @@
                 </div>
             </div>
 
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                <button onclick="openAuthModal('login')" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition border border-indigo-400">
-                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Fazer Login
-                </button>
-                <button onclick="openAuthModal('register')" class="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-3.5 rounded-xl backdrop-blur-md transition border border-white/20">
-                    <i class="fa-solid fa-user-plus mr-2"></i> Criar Conta Nova
+            <div class="pt-4">
+                <button onclick="openAuthModal('register')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition border border-indigo-400">
+                    <i class="fa-solid fa-user-plus mr-2"></i> Começar Agora Gratuitamente
                 </button>
             </div>
         </div>
@@ -282,7 +287,14 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        // Registrar Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW:', err));
+            });
+        }
 
         const firebaseConfig = {
             apiKey: "AIzaSyCTNab5Tf_7q69r-JLzyK2u-bDF_4YRQxU",
@@ -303,7 +315,6 @@
         let currentUserData = null;
         let currentFilter = 'Geografia';
 
-        // Controle de Exibição das Telas de Autenticação
         window.openAuthModal = function(view) {
             document.getElementById('authModal').classList.remove('hidden');
             switchAuthView(view);
@@ -332,7 +343,6 @@
             const notifArea = document.getElementById('notificationArea');
 
             if (user) {
-                // Usuário logado: oculta tela de boas-vindas e mostra o sistema
                 welcomeView.classList.add('hidden');
                 mainAppView.classList.remove('hidden');
                 closeAuthModal();
@@ -362,11 +372,17 @@
                 }
                 loadDataFromCloud();
             } else {
-                // Usuário deslogado: mostra tela de boas-vindas e esconde o sistema
                 welcomeView.classList.remove('hidden');
                 mainAppView.classList.add('hidden');
                 currentUserData = null;
-                headerArea.innerHTML = '';
+                headerArea.innerHTML = `
+                    <button onclick="openAuthModal('login')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition border border-indigo-500">
+                        Entrar
+                    </button>
+                    <button onclick="openAuthModal('register')" class="bg-white text-indigo-700 hover:bg-indigo-50 text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition shadow-sm">
+                        Criar Conta
+                    </button>
+                `;
             }
         });
 
