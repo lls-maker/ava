@@ -70,7 +70,7 @@
                 <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
                     <i class="fa-solid fa-cloud-arrow-up text-indigo-300 text-xl mb-2"></i>
                     <h3 class="font-bold text-sm">Materiais Dinâmicos</h3>
-                    <p class="text-xs text-indigo-200 mt-1">Apostilas e PDFs acessíveis de qualquer dispositivo.</p>
+                    <p class="text-xs text-indigo-200 mt-1">Apostilas e arquivos acessíveis de qualquer dispositivo.</p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
                     <i class="fa-solid fa-bell text-indigo-300 text-xl mb-2"></i>
@@ -383,7 +383,7 @@
                 mainAppView.classList.add('hidden');
                 currentUserData = null;
                 
-                // Limpa campos ao sair
+                // Limpa campos ao sair do sistema
                 document.getElementById('formLogin').reset();
                 document.getElementById('formRegister').reset();
                 document.getElementById('formForgot').reset();
@@ -518,7 +518,7 @@
             }
         };
 
-        // UPLOAD OTIMIZADO PARA ACEITAR QUALQUER ARQUIVO COM MAIS FLUIDEZ
+        // UPLOAD OTIMIZADO PARA QUALQUER FORMATO DE ARQUIVO
         window.handleUploadMaterial = async function(e) {
             e.preventDefault();
             const title = document.getElementById('materialTitle').value;
@@ -533,7 +533,9 @@
             btn.disabled = true;
 
             try {
-                const fileRef = ref(storage, `materials/${Date.now()}_${file.name}`);
+                const safeName = file.name.replace(/[^a-zA-Z0-9_.-]/g, '_');
+                const fileRef = ref(storage, `materials/${Date.now()}_${safeName}`);
+                
                 await uploadBytes(fileRef, file);
                 const fileUrl = await getDownloadURL(fileRef);
 
@@ -559,6 +561,7 @@
                 renderMaterials();
                 alert('Material enviado com sucesso!');
             } catch (err) {
+                console.error("Erro no upload:", err);
                 alert('Erro no upload: ' + err.message);
             } finally {
                 btn.innerText = "Enviar Material";
