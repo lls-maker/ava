@@ -161,7 +161,7 @@
                 </form>
             </div>
 
-            <!-- LISTAGEM DE MATERIAIS -->
+            <!-- LISTAGEM DE MATERIAIS (COM SCROLL INTERNO / SEM ROLAGEM INFINITA NA PÁGINA) -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
@@ -175,7 +175,8 @@
                     </div>
                 </div>
 
-                <div id="materialsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <!-- Container com altura fixa máxima e scroll interno -->
+                <div id="materialsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[520px] overflow-y-auto pr-1"></div>
             </div>
 
         </section>
@@ -559,7 +560,6 @@
             }
         };
 
-        // CADASTRO INTELIGENTE (SUPORTA UPLOAD DE ATÉ 1MB OU LINK EXTERNO)
         window.handleUploadMaterial = async function(e) {
             e.preventDefault();
             const title = document.getElementById('materialTitle').value;
@@ -580,7 +580,6 @@
 
             try {
                 if (linkInput) {
-                    // Caso o professor tenha inserido um link externo
                     const newMaterial = {
                         title,
                         subject,
@@ -606,7 +605,6 @@
                     btn.disabled = false;
 
                 } else {
-                    // Caso o professor tenha escolhido fazer upload direto de arquivo
                     if (file.size > 1 * 1024 * 1024) {
                         alert('O arquivo é maior que 1 MB! Para arquivos grandes, utilize a opção "Colar Link Externo" (Google Drive, OneDrive, etc.).');
                         btn.innerText = "Cadastrar Material no Banco";
