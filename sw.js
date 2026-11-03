@@ -1,42 +1,40 @@
 const CACHE_NAME = 'ava-cache-v1';
-const urlsToCache = [
+const assetsToCache = [
     './index.html',
-    'https://cdn.tailwindcss.com',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+    './manifest.json'
 ];
 
-// Instalação do Service Worker
-self.addEventListener('install', event => {
+// Instalação do Service Worker e cache dos arquivos essenciais
+self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => {
-            return cache.addAll(urlsToCache);
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(assetsToCache);
         })
     );
+    self.skipWaiting();
 });
 
 // Ativação e limpeza de caches antigos
-self.addEventListener('activate', event => {
+self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then(cacheNames => {
+        caches.keys().then((keys) => {
             return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
+                keys.map((key) => {
+                    if (key !== CACHE_NAME) {
+                        return caches.delete(key);
                     }
                 })
             );
         })
     );
+    self.clients.claim();
 });
 
-// Interceptação de requisições para modo offline
-self.addEventListener('fetch', event => {
+// Intercepta requisições para garantir funcionamento online/offline com o Firebase
+self.addEventListener('fetch', (event) => {
     event.respondWith(
-        caches.match(event.request).then(response => {
-            return response || fetch(event.request);
-        }).catch(() => {
-            // Fallback caso esteja offline
-            return caches.match('./index.html');
+        fetch(event.request).catch(() => {
+            return caches.match(event.request);
         })
     );
 });
