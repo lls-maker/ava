@@ -124,8 +124,8 @@
                 <form id="uploadForm" onsubmit="handleUploadMaterial(event)" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Título do Material</label>
-                            <input type="text" id="materialTitle" required placeholder="Ex: Aula de Geografia" autocomplete="off"
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Título do Tópico / Aula</label>
+                            <input type="text" id="materialTitle" required placeholder="Ex: Unidade 1 - Introdução" autocomplete="off"
                                 class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
                         </div>
                         <div>
@@ -136,7 +136,7 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Descrição / Observações</label>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Descrição / Observações do Tópico</label>
                         <textarea id="materialDesc" rows="2" placeholder="Resumo curto..." autocomplete="off"
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50"></textarea>
                     </div>
@@ -144,39 +144,39 @@
                     <!-- SELETOR DO TIPO DE ENVIO (ARQUIVO OU LINK) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border">
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Opção 1: Enviar Arquivo (Até 1MB)</label>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Anexar Arquivo (Até 1MB)</label>
                             <input type="file" id="materialFile"
                                 class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-lg bg-white">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Opção 2: Ou Colar Link Externo</label>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Ou Colar Link Externo</label>
                             <input type="url" id="materialLink" placeholder="https://drive.google.com/..." autocomplete="off"
                                 class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
                         </div>
                     </div>
 
                     <button type="submit" id="uploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
-                        Cadastrar Material no Banco
+                        Publicar no Tópico
                     </button>
                 </form>
             </div>
 
-            <!-- LISTAGEM DE MATERIAIS (COM SCROLL INTERNO / SEM ROLAGEM INFINITA NA PÁGINA) -->
+            <!-- LISTAGEM DE TÓPICOS E MATERIAIS AGRUPADOS (COM SCROLL INTERNO) -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
-                        <h2 id="currentCategoryTitle" class="text-xl font-bold text-slate-800">Geografia (Todos os Materiais)</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">Baixe os conteúdos disponibilizados</p>
+                        <h2 id="currentCategoryTitle" class="text-xl font-bold text-slate-800">Geografia (Tópicos)</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Clique em um tópico para ver e baixar os arquivos</p>
                     </div>
                     <div class="relative w-full sm:w-64">
                         <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
-                        <input type="text" id="searchInput" oninput="renderMaterials()" placeholder="Pesquisar material..." autocomplete="off"
+                        <input type="text" id="searchInput" oninput="renderMaterials()" placeholder="Pesquisar tópico..." autocomplete="off"
                             class="w-full text-sm pl-9 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
                     </div>
                 </div>
 
-                <!-- Container com altura fixa máxima e scroll interno -->
-                <div id="materialsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[520px] overflow-y-auto pr-1"></div>
+                <!-- Container com scroll interno (sem rolagem infinita na página) -->
+                <div id="materialsGrid" class="space-y-4 max-h-[550px] overflow-y-auto pr-1"></div>
             </div>
 
         </section>
@@ -560,9 +560,16 @@
             }
         };
 
+        // Função rápida para preencher o título do tópico ao clicar no botão "Adicionar arquivo neste tópico"
+        window.preencherTopico = function(tituloTopico) {
+            document.getElementById('materialTitle').value = tituloTopico;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('materialFile').focus();
+        };
+
         window.handleUploadMaterial = async function(e) {
             e.preventDefault();
-            const title = document.getElementById('materialTitle').value;
+            const title = document.getElementById('materialTitle').value.trim();
             const subject = document.getElementById('materialSubjectSelect').value;
             const desc = document.getElementById('materialDesc').value;
             const fileInput = document.getElementById('materialFile');
@@ -600,14 +607,14 @@
                     document.getElementById('uploadForm').reset();
                     renderMaterials();
                     if (currentUserData && currentUserData.role === 'aluno') updateStudentNotifications();
-                    alert('Material via link cadastrado com sucesso!');
-                    btn.innerText = "Cadastrar Material no Banco";
+                    alert('Material adicionado ao tópico com sucesso!');
+                    btn.innerText = "Publicar no Tópico";
                     btn.disabled = false;
 
                 } else {
                     if (file.size > 1 * 1024 * 1024) {
-                        alert('O arquivo é maior que 1 MB! Para arquivos grandes, utilize a opção "Colar Link Externo" (Google Drive, OneDrive, etc.).');
-                        btn.innerText = "Cadastrar Material no Banco";
+                        alert('O arquivo é maior que 1 MB! Utilize a opção de Link Externo (Google Drive, OneDrive, etc.).');
+                        btn.innerText = "Publicar no Tópico";
                         btn.disabled = false;
                         return;
                     }
@@ -638,8 +645,8 @@
                         document.getElementById('uploadForm').reset();
                         renderMaterials();
                         if (currentUserData && currentUserData.role === 'aluno') updateStudentNotifications();
-                        alert('Arquivo cadastrado com sucesso no Firestore!');
-                        btn.innerText = "Cadastrar Material no Banco";
+                        alert('Arquivo adicionado ao tópico com sucesso!');
+                        btn.innerText = "Publicar no Tópico";
                         btn.disabled = false;
                     };
                 }
@@ -647,18 +654,18 @@
             } catch (err) {
                 console.error("Erro:", err);
                 alert('Erro ao processar: ' + err.message);
-                btn.innerText = "Cadastrar Material no Banco";
+                btn.innerText = "Publicar no Tópico";
                 btn.disabled = false;
             }
         };
 
         window.deleteMaterial = async function(id) {
-            if (confirm('Deseja excluir este material?')) {
+            if (confirm('Deseja excluir este arquivo?')) {
                 try {
                     await deleteDoc(doc(db, "materials", id));
                     materials = materials.filter(m => m.id !== id);
                     renderMaterials();
-                    alert('Material excluído!');
+                    alert('Arquivo excluído!');
                 } catch (err) {
                     alert('Erro ao excluir: ' + err.message);
                 }
@@ -721,7 +728,7 @@
 
         window.filterBySubject = function(sub) {
             currentFilter = sub;
-            document.getElementById('currentCategoryTitle').innerText = `${sub} (Materiais)`;
+            document.getElementById('currentCategoryTitle').innerText = `${sub} (Tópicos)`;
             renderSubjects();
             renderMaterials();
         };
@@ -743,6 +750,7 @@
             });
         }
 
+        // NOVO RENDERIZADOR: AGRUPA OS MATERIAIS POR TÓPICO (TÍTULO)
         function renderMaterials() {
             const grid = document.getElementById('materialsGrid');
             const search = document.getElementById('searchInput').value.toLowerCase();
@@ -755,59 +763,91 @@
 
             if (filtered.length === 0) {
                 grid.innerHTML = `
-                    <div class="col-span-full py-12 text-center text-slate-400">
+                    <div class="py-12 text-center text-slate-400">
                         <i class="fa-solid fa-folder-open text-4xl mb-2"></i>
-                        <p class="text-sm">Nenhum material em "${currentFilter}".</p>
+                        <p class="text-sm">Nenhum tópico em "${currentFilter}".</p>
                     </div>
                 `;
                 return;
             }
 
-            grid.innerHTML = '';
+            // Agrupa os materiais por Tópico (Título)
+            const grouped = {};
             filtered.forEach(m => {
-                if (currentUserData && currentUserData.role === 'aluno') {
-                    recordView(m.id);
+                if (!grouped[m.title]) {
+                    grouped[m.title] = { desc: m.desc || '', items: [] };
                 }
+                grouped[m.title].items.push(m);
+            });
 
-                let actionButtons = '';
-                const viewsCount = (m.views || []).length;
-                const dlsCount = (m.downloads || []).length;
+            grid.innerHTML = '';
+            Object.keys(grouped).forEach(topicTitle => {
+                const topicData = grouped[topicTitle];
+                
+                let itemsHtml = topicData.items.map(m => {
+                    if (currentUserData && currentUserData.role === 'aluno') {
+                        recordView(m.id);
+                    }
 
-                if (currentUserData && currentUserData.role === 'professor') {
-                    actionButtons = `
-                        <div class="flex flex-wrap items-center gap-1.5">
-                            <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'view')" class="text-green-700 bg-green-50 px-2 py-1 rounded-lg text-[11px] font-semibold">
-                                Visto (${viewsCount})
-                            </button>
-                            <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'download')" class="text-blue-700 bg-blue-50 px-2 py-1 rounded-lg text-[11px] font-semibold">
-                                Acessos (${dlsCount})
-                            </button>
-                            <button onclick="deleteMaterial('${m.id}')" class="text-red-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                    let actionButtons = '';
+                    const viewsCount = (m.views || []).length;
+                    const dlsCount = (m.downloads || []).length;
+
+                    if (currentUserData && currentUserData.role === 'professor') {
+                        actionButtons = `
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'view')" class="text-green-700 bg-green-50 px-2 py-1 rounded-lg text-[11px] font-semibold">
+                                    Visto (${viewsCount})
+                                </button>
+                                <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'download')" class="text-blue-700 bg-blue-50 px-2 py-1 rounded-lg text-[11px] font-semibold">
+                                    Acessos (${dlsCount})
+                                </button>
+                                <button onclick="deleteMaterial('${m.id}')" class="text-red-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        `;
+                    } else {
+                        actionButtons = `
+                            <a href="${m.fileUrl}" target="_blank" download="${m.fileSize === 'Link' ? '' : m.fileName}" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Aceder / Baixar
+                            </a>
+                        `;
+                    }
+
+                    return `
+                        <div class="bg-white border border-slate-100 p-3 rounded-xl flex items-center justify-between gap-3 shadow-sm">
+                            <div class="flex items-center gap-2 truncate">
+                                <i class="fa-solid fa-file-lines text-indigo-500"></i>
+                                <div class="truncate">
+                                    <p class="text-xs font-bold text-slate-800 truncate">${m.fileName}</p>
+                                    <span class="text-[10px] text-slate-400">${m.fileSize} • ${m.date}</span>
+                                </div>
+                            </div>
+                            <div>${actionButtons}</div>
                         </div>
                     `;
-                } else {
-                    actionButtons = `
-                        <a href="${m.fileUrl}" target="_blank" download="${m.fileSize === 'Link' ? '' : m.fileName}" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Aceder / Baixar
-                        </a>
+                }).join('');
+
+                // Botão para o professor adicionar mais arquivos neste tópico específico de forma rápida
+                let addMoreBtn = '';
+                if (currentUserData && currentUserData.role === 'professor') {
+                    addMoreBtn = `
+                        <button onclick="preencherTopico('${topicTitle.replace(/'/g, "\\'")}')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Adicionar arquivo a este tópico
+                        </button>
                     `;
                 }
 
                 grid.innerHTML += `
-                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col justify-between hover:shadow-md transition">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full font-semibold">${m.subject}</span>
-                                <span class="text-xs text-slate-400">${m.date}</span>
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-2">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-folder-open text-indigo-600 mr-2"></i>${topicTitle}</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">${topicData.desc}</p>
                             </div>
-                            <h3 class="font-bold text-slate-800 text-base mb-1">${m.title}</h3>
-                            <p class="text-xs text-slate-500 mb-3">${m.desc || 'Sem descrição.'}</p>
+                            <div>${addMoreBtn}</div>
                         </div>
-                        <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
-                            <div class="text-xs text-slate-500 truncate max-w-[130px]">
-                                <i class="fa-solid fa-file-arrow-down mr-1 text-indigo-600"></i> ${m.fileName} (${m.fileSize})
-                            </div>
-                            ${actionButtons}
+                        <div class="space-y-2 pl-2">
+                            ${itemsHtml}
                         </div>
                     </div>
                 `;
