@@ -86,14 +86,14 @@
         </div>
     </div>
 
-    <!-- TELA DE ESPERA PARA ALUNOS NÃO APROVADOS -->
+    <!-- TELA DE ESPERA PARA ALUNOS NÃO APROVADOS OU BLOQUEADOS -->
     <div id="pendingView" class="flex-grow flex items-center justify-center p-6 hidden">
         <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl text-center space-y-4 border border-slate-100">
-            <div class="inline-flex p-4 bg-amber-50 text-amber-600 rounded-full text-3xl">
+            <div class="inline-flex p-4 bg-amber-50 text-amber-600 rounded-full text-3xl" id="pendingIcon">
                 <i class="fa-solid fa-clock-rotate-left"></i>
             </div>
-            <h3 class="text-xl font-bold text-slate-800">Aguardando Aprovação</h3>
-            <p class="text-xs text-slate-500">
+            <h3 class="text-xl font-bold text-slate-800" id="pendingTitle">Aguardando Aprovação</h3>
+            <p class="text-xs text-slate-500" id="pendingDesc">
                 Sua conta foi criada com sucesso, mas o professor responsável pela turma ainda precisa aprovar o seu acesso. Tente fazer login novamente mais tarde.
             </p>
             <button onclick="handleLogout()" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-2.5 rounded-xl text-xs font-semibold transition">
@@ -134,7 +134,7 @@
                 </h3>
                 
                 <button onclick="openStudentsModal()" class="relative w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 mb-2 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-user-check"></i> Aprovar Alunos
+                    <i class="fa-solid fa-user-gear"></i> Gerenciar Alunos
                     <span id="pendingStudentsBadge" class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
                 </button>
 
@@ -218,12 +218,12 @@
 
     <!-- MODAL DE GERENCIAMENTO DE ALUNOS (PROFESSOR) -->
     <div id="studentsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl border border-slate-100 relative">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-xl shadow-xl border border-slate-100 relative">
             <button onclick="closeStudentsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="font-bold text-slate-800 text-base mb-1">Aprovação de Alunos</h3>
-            <p class="text-xs text-slate-500 mb-4">Alunos aguardando liberação na sua turma</p>
+            <h3 class="font-bold text-slate-800 text-base mb-1">Gerenciamento de Alunos</h3>
+            <p class="text-xs text-slate-500 mb-4">Aprove novos cadastros, bloqueie ou remova alunos da turma</p>
             
-            <div id="pendingStudentsList" class="space-y-2 max-h-72 overflow-y-auto pr-1"></div>
+            <div id="pendingStudentsList" class="space-y-2 max-h-80 overflow-y-auto pr-1"></div>
         </div>
     </div>
 
@@ -510,11 +510,25 @@
                     </button>
                 `;
 
-                if (currentUserData.role === 'aluno' && currentUserData.status !== 'aprovado') {
-                    welcomeView.classList.add('hidden');
-                    mainAppView.classList.add('hidden');
-                    pendingView.classList.remove('hidden');
-                    return;
+                if (currentUserData.role === 'aluno') {
+                    if (currentUserData.status === 'bloqueado') {
+                        welcomeView.classList.add('hidden');
+                        mainAppView.classList.add('hidden');
+                        pendingView.classList.remove('hidden');
+                        document.getElementById('pendingIcon').className = "inline-flex p-4 bg-red-50 text-red-600 rounded-full text-3xl";
+                        document.getElementById('pendingTitle').innerText = "Acesso Bloqueado";
+                        document.getElementById('pendingDesc').innerText = "O acesso da sua conta a esta turma foi bloqueado pelo professor.";
+                        return;
+                    }
+                    if (currentUserData.status !== 'aprovado') {
+                        welcomeView.classList.add('hidden');
+                        mainAppView.classList.add('hidden');
+                        pendingView.classList.remove('hidden');
+                        document.getElementById('pendingIcon').className = "inline-flex p-4 bg-amber-50 text-amber-600 rounded-full text-3xl";
+                        document.getElementById('pendingTitle').innerText = "Aguardando Aprovação";
+                        document.getElementById('pendingDesc').innerText = "Sua conta foi criada com sucesso, mas o professor responsável pela turma ainda precisa aprovar o seu acesso. Tente fazer login novamente mais tarde.";
+                        return;
+                    }
                 }
 
                 pendingView.classList.add('hidden');
@@ -708,7 +722,7 @@
         async function checkPendingStudentsCount() {
             if (!currentUserData || currentUserData.role !== 'professor') return;
             try {
-                const q = query(collection(db, "users"), where("turmaCode", "==", currentUserData.turmaCode), where("status", "==", "pendente"));
+                const q = query(collection(db, "users"), where("turmaCode", "==", currentUserData.turmaCode), where("role", "==", "aluno"), where("status", "==", "pendente"));
                 const snap = await getDocs(q);
                 const badge = document.getElementById('pendingStudentsBadge');
                 
@@ -729,11 +743,11 @@
             document.getElementById('studentsModal').classList.remove('hidden');
 
             try {
-                const q = query(collection(db, "users"), where("turmaCode", "==", currentUserData.turmaCode), where("status", "==", "pendente"));
+                const q = query(collection(db, "users"), where("turmaCode", "==", currentUserData.turmaCode), where("role", "==", "aluno"));
                 const snap = await getDocs(q);
 
                 if (snap.empty) {
-                    container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhum aluno pendente no momento.</p>`;
+                    container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhum aluno cadastrado nesta turma.</p>`;
                     checkPendingStudentsCount();
                     return;
                 }
@@ -742,13 +756,39 @@
                 snap.forEach(d => {
                     const student = d.data();
                     const studentId = d.id;
+                    const status = student.status || 'pendente';
+
+                    let statusBadge = '';
+                    let actionButtons = '';
+
+                    if (status === 'pendente') {
+                        statusBadge = `<span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">Pendente</span>`;
+                        actionButtons = `
+                            <button onclick="updateStudentStatus('${studentId}', 'aprovado')" class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Aprovar</button>
+                            <button onclick="updateStudentStatus('${studentId}', 'bloqueado')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Bloquear</button>
+                            <button onclick="deleteStudent('${studentId}')" class="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Excluir</button>
+                        `;
+                    } else if (status === 'aprovado') {
+                        statusBadge = `<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Aprovado</span>`;
+                        actionButtons = `
+                            <button onclick="updateStudentStatus('${studentId}', 'bloqueado')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Bloquear</button>
+                            <button onclick="deleteStudent('${studentId}')" class="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Excluir</button>
+                        `;
+                    } else {
+                        statusBadge = `<span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">Bloqueado</span>`;
+                        actionButtons = `
+                            <button onclick="updateStudentStatus('${studentId}', 'aprovado')" class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Desbloquear</button>
+                            <button onclick="deleteStudent('${studentId}')" class="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Excluir</button>
+                        `;
+                    }
+
                     container.innerHTML += `
-                        <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border">
-                            <span class="font-bold text-slate-700 text-xs"><i class="fa-solid fa-user-clock text-indigo-600 mr-2"></i>${student.username}</span>
-                            <div class="flex gap-2">
-                                <button onclick="approveStudent('${studentId}', true)" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg text-[10px] font-semibold">Aprovar</button>
-                                <button onclick="approveStudent('${studentId}', false)" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-[10px] font-semibold">Recusar</button>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50 p-3 rounded-xl border gap-2">
+                            <div>
+                                <span class="font-bold text-slate-700 text-xs block"><i class="fa-solid fa-user text-indigo-600 mr-2"></i>${student.username}</span>
+                                <div class="mt-1">${statusBadge}</div>
                             </div>
+                            <div class="flex flex-wrap gap-1.5">${actionButtons}</div>
                         </div>
                     `;
                 });
@@ -762,19 +802,27 @@
             checkPendingStudentsCount();
         };
 
-        window.approveStudent = async function(studentId, approve) {
+        window.updateStudentStatus = async function(studentId, newStatus) {
             try {
-                if (approve) {
-                    await updateDoc(doc(db, "users", studentId), { status: 'aprovado' });
-                    alert('Aluno aprovado com sucesso!');
-                } else {
-                    await deleteDoc(doc(db, "users", studentId));
-                    alert('Cadastro do aluno recusado/removido.');
-                }
+                await updateDoc(doc(db, "users", studentId), { status: newStatus });
+                alert(`Status do aluno atualizado para: ${newStatus.toUpperCase()}`);
                 openStudentsModal();
                 checkPendingStudentsCount();
             } catch (err) {
-                alert('Erro ao processar aluno: ' + err.message);
+                alert('Erro ao atualizar status: ' + err.message);
+            }
+        };
+
+        window.deleteStudent = async function(studentId) {
+            if (confirm('Tem certeza que deseja excluir permanentemente este aluno da turma?')) {
+                try {
+                    await deleteDoc(doc(db, "users", studentId));
+                    alert('Aluno removido com sucesso!');
+                    openStudentsModal();
+                    checkPendingStudentsCount();
+                } catch (err) {
+                    alert('Erro ao excluir aluno: ' + err.message);
+                }
             }
         };
 
@@ -934,7 +982,7 @@
                     }
                     alert('Arquivo excluído!');
                 } catch (err) {
-                    alert('Erro ao excluir: ' + err.message);
+                    alert('Erro: ' + err.message);
                 }
             }
         };
