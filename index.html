@@ -52,7 +52,7 @@
         </div>
     </header>
 
-    <!-- TELA DE APRESENTAÇÃO / LANDING PAGE -->
+    <!-- TELA DE APRESENTAÇÃO / LANDING PAGE (ESTILO ANTIGO) -->
     <div id="welcomeView" class="flex-grow flex items-center justify-center p-6 bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white">
         <div class="max-w-3xl w-full text-center space-y-8 py-12">
             <div class="inline-flex p-4 bg-indigo-700/50 rounded-3xl backdrop-blur-md border border-indigo-500/30 shadow-2xl">
@@ -62,8 +62,26 @@
             <div class="space-y-3">
                 <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight">Ambiente Virtual de Aprendizagem</h2>
                 <p class="text-indigo-200 text-base md:text-lg max-w-xl mx-auto">
-                    A plataforma inteligente para professores gerenciarem suas turmas e alunos acompanharem conteúdos em tempo real com segurança total.
+                    A plataforma inteligente para professores compartilharem materiais e alunos acompanharem conteúdos em tempo real, com total segurança e sincronização.
                 </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-2xl mx-auto pt-4">
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                    <i class="fa-solid fa-cloud-arrow-up text-indigo-300 text-xl mb-2"></i>
+                    <h3 class="font-bold text-sm">Materiais Dinâmicos</h3>
+                    <p class="text-xs text-indigo-200 mt-1">Apostilas e arquivos acessíveis de qualquer dispositivo.</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                    <i class="fa-solid fa-bell text-indigo-300 text-xl mb-2"></i>
+                    <h3 class="font-bold text-sm">Notificações</h3>
+                    <p class="text-xs text-indigo-200 mt-1">Fique sabendo imediatamente quando um novo conteúdo for postado.</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                    <i class="fa-solid fa-chart-line text-indigo-300 text-xl mb-2"></i>
+                    <h3 class="font-bold text-sm">Controle Pedagógico</h3>
+                    <p class="text-xs text-indigo-200 mt-1">Professores acompanham quem visualizou e baixou os arquivos.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -437,7 +455,6 @@
                     </button>
                 `;
 
-                // VERIFICAÇÃO DE APROVAÇÃO DO ALUNO
                 if (currentUserData.role === 'aluno' && currentUserData.status !== 'aprovado') {
                     welcomeView.classList.add('hidden');
                     mainAppView.classList.add('hidden');
@@ -529,13 +546,11 @@
                 };
 
                 if (role === 'professor') {
-                    // Gera um código de turma único baseado no nome do professor
                     const turmaCode = `PROF-${lookupKey.toUpperCase()}`;
                     userData.turmaCode = turmaCode;
                     userData.status = 'aprovado';
                 } else {
                     const turmaCodeInput = document.getElementById('regTurmaCode').value.trim().toUpperCase();
-                    // Verifica se a turma do professor existe
                     const profQuery = await getDocs(query(collection(db, "users"), where("turmaCode", "==", turmaCodeInput), where("role", "==", "professor")));
                     if (profQuery.empty) {
                         alert('Código da turma do professor não encontrado! Verifique com ele o código correto.');
@@ -546,7 +561,7 @@
 
                     userData.turmaCode = turmaCodeInput;
                     userData.professorUid = profUid;
-                    userData.status = 'pendente'; // Requer aprovação
+                    userData.status = 'pendente';
                 }
 
                 await setDoc(doc(db, "users", cred.user.uid), userData);
@@ -604,7 +619,6 @@
             try {
                 let profIdToFilter = currentUserData.role === 'professor' ? currentUserData.uid : currentUserData.professorUid;
 
-                // Carrega materiais apenas do professor da turma
                 const matSnap = await getDocs(query(collection(db, "materials"), where("professorUid", "==", profIdToFilter)));
                 materials = matSnap.docs.map(d => ({ id: d.id, ...d.data() }));
                 materials.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
@@ -635,7 +649,6 @@
             }
         }
 
-        // PAINEL DE APROVAÇÃO DE ALUNOS DO PROFESSOR
         window.openStudentsModal = async function() {
             const container = document.getElementById('pendingStudentsList');
             container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">A carregar alunos...</p>`;
