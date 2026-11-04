@@ -20,10 +20,10 @@
 
     <!-- CABEÇALHO -->
     <header class="bg-indigo-700 text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-graduation-cap text-2xl"></i>
-                <h1 class="text-xl font-bold tracking-wide">AVA - Ambiente Virtual</h1>
+                <i class="fa-solid fa-graduation-cap text-xl"></i>
+                <h1 class="text-lg font-bold tracking-wide">AVA - Ambiente Virtual</h1>
             </div>
             
             <div class="flex items-center gap-4">
@@ -90,19 +90,19 @@
     <main id="mainAppView" class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6 hidden">
         
         <!-- BARRA LATERAL (Matérias) -->
-        <aside class="lg:col-span-1 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 h-fit">
-            <h2 class="text-lg font-bold text-slate-700 mb-4 flex items-center justify-between">
+        <aside class="lg:col-span-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 h-fit">
+            <h2 class="text-base font-bold text-slate-700 mb-3 flex items-center justify-between">
                 <span>Matérias</span>
                 <i class="fa-solid fa-book-open text-indigo-600 text-sm"></i>
             </h2>
-            <div id="sidebarSubjects" class="space-y-2"></div>
+            <div id="sidebarSubjects" class="space-y-1.5"></div>
 
-            <div id="addSubjectContainer" class="mt-6 pt-4 border-t border-slate-100 hidden">
-                <h3 class="text-sm font-bold text-slate-600 mb-2">Adicionar Matéria</h3>
+            <div id="addSubjectContainer" class="mt-4 pt-3 border-t border-slate-100 hidden">
+                <h3 class="text-xs font-bold text-slate-600 mb-2">Adicionar Matéria</h3>
                 <form id="subjectForm" onsubmit="handleAddSubject(event)" class="space-y-2">
                     <input type="text" id="newSubjectName" placeholder="Nome da Matéria..." required autocomplete="off"
-                        class="w-full text-sm px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm py-2 rounded-lg transition">
+                        class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs py-2 rounded-lg transition">
                         Criar Matéria
                     </button>
                 </form>
@@ -110,94 +110,89 @@
         </aside>
 
         <!-- ÁREA CENTRAL -->
-        <section class="lg:col-span-3 space-y-6">
+        <section class="lg:col-span-3 space-y-5">
 
-            <!-- PAINEL DE UPLOAD DO PROFESSOR -->
-            <div id="professorPanel" class="bg-white p-6 rounded-2xl shadow-sm border border-indigo-100 hidden">
-                <div class="flex items-center justify-between mb-4 pb-3 border-b border-indigo-50">
-                    <h2 class="text-lg font-bold text-indigo-700 flex items-center gap-2">
+            <!-- PAINEL DE UPLOAD DO PROFESSOR (COMPACTO) -->
+            <div id="professorPanel" class="bg-white p-4 rounded-2xl shadow-sm border border-indigo-100 hidden">
+                <div class="flex items-center justify-between mb-3 pb-2 border-b border-indigo-50">
+                    <h2 class="text-sm font-bold text-indigo-700 flex items-center gap-2">
                         <i class="fa-solid fa-circle-plus"></i> Painel de Upload do Professor
                     </h2>
-                    <span class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full font-semibold">Modo Administrador</span>
+                    <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Administrador</span>
                 </div>
 
-                <form id="uploadForm" onsubmit="handleUploadMaterial(event)" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form id="uploadForm" onsubmit="handleUploadMaterial(event)" class="space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Título do Tópico / Aula</label>
-                            <input type="text" id="materialTitle" required placeholder="Ex: Unidade 1 - Introdução" autocomplete="off"
-                                class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Título do Tópico</label>
+                            <input type="text" id="materialTitle" required placeholder="Ex: Unidade 1" autocomplete="off"
+                                class="w-full text-xs px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Matéria / Disciplina</label>
+                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Matéria</label>
                             <select id="materialSubjectSelect" required
-                                class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                                class="w-full text-xs px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
                             </select>
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Descrição / Observações do Tópico</label>
-                        <textarea id="materialDesc" rows="2" placeholder="Resumo curto..." autocomplete="off"
-                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50"></textarea>
-                    </div>
-
-                    <!-- SELETOR DO TIPO DE ENVIO (ARQUIVO OU LINK) -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border">
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Anexar Arquivo (Até 1MB)</label>
-                            <input type="file" id="materialFile"
-                                class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer border rounded-lg bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Ou Colar Link Externo</label>
-                            <input type="url" id="materialLink" placeholder="https://drive.google.com/..." autocomplete="off"
-                                class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Descrição Curta</label>
+                            <input type="text" id="materialDesc" placeholder="Resumo..." autocomplete="off"
+                                class="w-full text-xs px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
                         </div>
                     </div>
 
-                    <button type="submit" id="uploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition shadow-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border text-xs">
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Arquivo (Até 1MB)</label>
+                            <input type="file" id="materialFile" class="w-full text-[11px] text-slate-500 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[11px] file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Ou Link Externo</label>
+                            <input type="url" id="materialLink" placeholder="https://drive.google.com/..." class="w-full px-3 py-1.5 border rounded-lg bg-white">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="uploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 rounded-xl transition shadow-sm">
                         Publicar no Tópico
                     </button>
                 </form>
             </div>
 
-            <!-- LISTAGEM DE TÓPICOS LADO A LADO (COM SCROLL INTERNO) -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <!-- LISTAGEM DE TÓPICOS LADO A LADO COM SCROLL INTERNO -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                     <div>
-                        <h2 id="currentCategoryTitle" class="text-xl font-bold text-slate-800">Geografia (Tópicos)</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">Clique em um tópico para abrir e ver os arquivos</p>
+                        <h2 id="currentCategoryTitle" class="text-base font-bold text-slate-800">Geografia (Tópicos)</h2>
+                        <p class="text-xs text-slate-500">Clique em um tópico para abrir os arquivos</p>
                     </div>
-                    <div class="relative w-full sm:w-64">
-                        <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
+                    <div class="relative w-full sm:w-56">
+                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-xs"></i>
                         <input type="text" id="searchInput" oninput="renderMaterials()" placeholder="Pesquisar tópico..." autocomplete="off"
-                            class="w-full text-sm pl-9 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                            class="w-full text-xs pl-8 pr-3 py-1.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
                     </div>
                 </div>
 
-                <!-- Grid Lado a Lado com Scroll Interno -->
-                <div id="materialsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[550px] overflow-y-auto pr-1"></div>
+                <!-- Grid Lado a Lado com Altura Fixa e Scroll Próprio -->
+                <div id="materialsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[480px] overflow-y-auto pr-1"></div>
             </div>
 
         </section>
     </main>
 
-    <!-- MODAL PARA EXIBIR OS ARQUIVOS DO TÓPICO AO CLICAR -->
+    <!-- MODAL PARA EXIBIR OS ARQUIVOS DO TÓPICO -->
     <div id="topicModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl border border-slate-100 relative">
             <button onclick="closeTopicModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             <div class="mb-4 pb-2 border-b">
-                <span id="modalTopicSubject" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Matéria</span>
-                <h3 id="modalTopicTitle" class="font-bold text-slate-800 text-lg mt-1">Título do Tópico</h3>
+                <span id="modalTopicSubject" class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Matéria</span>
+                <h3 id="modalTopicTitle" class="font-bold text-slate-800 text-base mt-1">Título do Tópico</h3>
                 <p id="modalTopicDesc" class="text-xs text-slate-500 mt-0.5">Descrição do tópico</p>
             </div>
             
-            <!-- Lista de arquivos dentro do modal com scroll próprio -->
+            <!-- Lista de arquivos dentro do modal com scroll próprio e links clicáveis -->
             <div id="modalTopicFilesList" class="space-y-2 max-h-72 overflow-y-auto pr-1 mb-4"></div>
 
-            <div id="modalTopicProfessorAction" class="pt-3 border-t flex justify-end">
-                <!-- Botão dinâmico para o professor adicionar mais arquivos neste tópico -->
-            </div>
+            <div id="modalTopicProfessorAction" class="pt-3 border-t flex justify-end"></div>
         </div>
     </div>
 
@@ -209,7 +204,7 @@
             <!-- TELA DE LOGIN -->
             <div id="viewLogin" class="space-y-4">
                 <div class="text-center mb-6">
-                    <h3 class="font-bold text-slate-800 text-2xl">Acessar o AVA</h3>
+                    <h3 class="font-bold text-slate-800 text-xl">Acessar o AVA</h3>
                     <p class="text-xs text-slate-500 mt-1">Entre com seu nome de usuário e senha</p>
                 </div>
                 <form id="formLogin" onsubmit="handleLoginSubmit(event)" class="space-y-3">
@@ -350,7 +345,7 @@
         let materials = [];
         let currentUserData = null;
         let currentFilter = 'Geografia';
-        let groupedMaterials = {}; // Guarda os tópicos agrupados para uso no Modal
+        let groupedMaterials = {};
 
         window.openAuthModal = function(view) {
             document.getElementById('authModal').classList.remove('hidden');
@@ -389,8 +384,8 @@
 
                 headerArea.innerHTML = `
                     <div class="text-right">
-                        <span class="block text-xs font-semibold text-indigo-200">${currentUserData.role.toUpperCase()}</span>
-                        <span class="text-sm font-bold">${currentUserData.username}</span>
+                        <span class="block text-[10px] font-semibold text-indigo-200">${currentUserData.role.toUpperCase()}</span>
+                        <span class="text-xs font-bold">${currentUserData.username}</span>
                     </div>
                     <button onclick="handleLogout()" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-indigo-500">
                         Sair
@@ -672,13 +667,18 @@
             }
         };
 
-        window.deleteMaterial = async function(id) {
+        window.deleteMaterial = async function(id, topicTitle) {
             if (confirm('Deseja excluir este arquivo?')) {
                 try {
                     await deleteDoc(doc(db, "materials", id));
                     materials = materials.filter(m => m.id !== id);
                     renderMaterials();
-                    closeTopicModal();
+                    
+                    if (groupedMaterials[topicTitle] && groupedMaterials[topicTitle].items.length > 0) {
+                        openTopicModal(topicTitle);
+                    } else {
+                        closeTopicModal();
+                    }
                     alert('Arquivo excluído!');
                 } catch (err) {
                     alert('Erro ao excluir: ' + err.message);
@@ -742,6 +742,21 @@
 
         // CONTROLE DO MODAL DE TÓPICO
         window.openTopicModal = function(topicTitle) {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = materials.filter(m => {
+                const matchSubject = m.subject === currentFilter;
+                const matchSearch = m.title.toLowerCase().includes(search) || m.fileName.toLowerCase().includes(search);
+                return matchSubject && matchSearch;
+            });
+            
+            groupedMaterials = {};
+            filtered.forEach(m => {
+                if (!groupedMaterials[m.title]) {
+                    groupedMaterials[m.title] = { desc: m.desc || '', items: [] };
+                }
+                groupedMaterials[m.title].items.push(m);
+            });
+
             const topicData = groupedMaterials[topicTitle];
             if (!topicData) return;
 
@@ -760,21 +775,26 @@
                 const dlsCount = (m.downloads || []).length;
 
                 if (currentUserData && currentUserData.role === 'professor') {
+                    // O PROFESSOR PODE TANTO VER O RELATÓRIO QUANTO CLICAR PARA ABRIR O ARQUIVO/LINK E EXCLUÍ-LO
                     actionButtons = `
                         <div class="flex items-center gap-1">
+                            <a href="${m.fileUrl}" target="_blank" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir
+                            </a>
                             <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'view')" class="text-green-700 bg-green-50 px-2 py-1 rounded-lg text-[10px] font-semibold">
                                 Vistos (${viewsCount})
                             </button>
                             <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'download')" class="text-blue-700 bg-blue-50 px-2 py-1 rounded-lg text-[10px] font-semibold">
                                 Acessos (${dlsCount})
                             </button>
-                            <button onclick="deleteMaterial('${m.id}')" class="text-red-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="deleteMaterial('${m.id}', '${topicTitle.replace(/'/g, "\\'")}')" class="text-red-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     `;
                 } else {
+                    // ALUNO VÊ O BOTÃO DE ACEDER / BAIXAR
                     actionButtons = `
                         <a href="${m.fileUrl}" target="_blank" download="${m.fileSize === 'Link' ? '' : m.fileName}" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Aceder
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Aceder / Baixar
                         </a>
                     `;
                 }
@@ -793,11 +813,10 @@
                 `;
             }).join('');
 
-            // Botão para o professor adicionar mais arquivos direto a este tópico
             const actionContainer = document.getElementById('modalTopicProfessorAction');
             if (currentUserData && currentUserData.role === 'professor') {
                 actionContainer.innerHTML = `
-                    <button onclick="preencherTopicoDoModal('${topicTitle.replace(/'/g, "\\'")}')" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2 rounded-xl transition flex items-center justify-center gap-2">
+                    <button onclick="preencherTopicoDoModal('${topicTitle.replace(/'/g, "\\'")}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 rounded-xl transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-plus"></i> Adicionar novo arquivo a este tópico
                     </button>
                 `;
@@ -835,7 +854,7 @@
             subjects.forEach(sub => {
                 const isSelected = currentFilter === sub;
                 container.innerHTML += `
-                    <div onclick="filterBySubject('${sub}')" class="flex items-center justify-between px-3 py-2 rounded-xl text-sm font-semibold cursor-pointer transition ${isSelected ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}">
+                    <div onclick="filterBySubject('${sub}')" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition ${isSelected ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}">
                         <span><i class="fa-solid fa-book mr-2 text-slate-400"></i> ${sub}</span>
                     </div>
                 `;
@@ -843,7 +862,6 @@
             });
         }
 
-        // RENDERIZA OS TÓPICOS LADO A LADO E ATUALIZA O AGRUPAMENTO
         function renderMaterials() {
             const grid = document.getElementById('materialsGrid');
             const search = document.getElementById('searchInput').value.toLowerCase();
@@ -856,15 +874,14 @@
 
             if (filtered.length === 0) {
                 grid.innerHTML = `
-                    <div class="col-span-full py-12 text-center text-slate-400">
-                        <i class="fa-solid fa-folder-open text-4xl mb-2"></i>
-                        <p class="text-sm">Nenhum tópico em "${currentFilter}".</p>
+                    <div class="col-span-full py-10 text-center text-slate-400">
+                        <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
+                        <p class="text-xs">Nenhum tópico em "${currentFilter}".</p>
                     </div>
                 `;
                 return;
             }
 
-            // Agrupa por Tópico (Título)
             groupedMaterials = {};
             filtered.forEach(m => {
                 if (!groupedMaterials[m.title]) {
@@ -879,16 +896,16 @@
                 const totalFiles = topicData.items.length;
 
                 grid.innerHTML += `
-                    <div onclick="openTopicModal('${topicTitle.replace(/'/g, "\\'")}')" class="bg-white border border-slate-200 p-5 rounded-2xl flex flex-col justify-between hover:shadow-md hover:border-indigo-300 cursor-pointer transition group">
+                    <div onclick="openTopicModal('${topicTitle.replace(/'/g, "\\'")}')" class="bg-white border border-slate-200 p-4 rounded-2xl flex flex-col justify-between hover:shadow-md hover:border-indigo-300 cursor-pointer transition group">
                         <div>
                             <div class="flex justify-between items-start mb-2">
-                                <span class="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full font-semibold group-hover:bg-indigo-600 group-hover:text-white transition">Tópico</span>
-                                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium"><i class="fa-solid fa-file mr-1"></i>${totalFiles} ${totalFiles === 1 ? 'arquivo' : 'arquivos'}</span>
+                                <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-semibold group-hover:bg-indigo-600 group-hover:text-white transition">Tópico</span>
+                                <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium"><i class="fa-solid fa-file mr-1"></i>${totalFiles}</span>
                             </div>
-                            <h3 class="font-bold text-slate-800 text-base mb-1 group-hover:text-indigo-600 transition">${topicTitle}</h3>
-                            <p class="text-xs text-slate-500 line-clamp-2">${topicData.desc || 'Clique para ver os arquivos...'}</p>
+                            <h3 class="font-bold text-slate-800 text-sm mb-1 group-hover:text-indigo-600 transition truncate">${topicTitle}</h3>
+                            <p class="text-[11px] text-slate-500 line-clamp-2">${topicData.desc || 'Clique para ver os arquivos...'}</p>
                         </div>
-                        <div class="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs text-indigo-600 font-semibold">
+                        <div class="pt-2 mt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-indigo-600 font-semibold">
                             <span>Ver conteúdos</span>
                             <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
                         </div>
