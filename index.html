@@ -161,12 +161,12 @@
                 </form>
             </div>
 
-            <!-- LISTAGEM DE TÓPICOS E MATERIAIS AGRUPADOS (COM SCROLL INTERNO) -->
+            <!-- LISTAGEM DE TÓPICOS LADO A LADO (COM SCROLL INTERNO) -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
                         <h2 id="currentCategoryTitle" class="text-xl font-bold text-slate-800">Geografia (Tópicos)</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">Clique em um tópico para ver e baixar os arquivos</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Clique em um tópico para abrir e ver os arquivos</p>
                     </div>
                     <div class="relative w-full sm:w-64">
                         <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
@@ -175,12 +175,31 @@
                     </div>
                 </div>
 
-                <!-- Container com scroll interno (sem rolagem infinita na página) -->
-                <div id="materialsGrid" class="space-y-4 max-h-[550px] overflow-y-auto pr-1"></div>
+                <!-- Grid Lado a Lado com Scroll Interno -->
+                <div id="materialsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[550px] overflow-y-auto pr-1"></div>
             </div>
 
         </section>
     </main>
+
+    <!-- MODAL PARA EXIBIR OS ARQUIVOS DO TÓPICO AO CLICAR -->
+    <div id="topicModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl border border-slate-100 relative">
+            <button onclick="closeTopicModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div class="mb-4 pb-2 border-b">
+                <span id="modalTopicSubject" class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Matéria</span>
+                <h3 id="modalTopicTitle" class="font-bold text-slate-800 text-lg mt-1">Título do Tópico</h3>
+                <p id="modalTopicDesc" class="text-xs text-slate-500 mt-0.5">Descrição do tópico</p>
+            </div>
+            
+            <!-- Lista de arquivos dentro do modal com scroll próprio -->
+            <div id="modalTopicFilesList" class="space-y-2 max-h-72 overflow-y-auto pr-1 mb-4"></div>
+
+            <div id="modalTopicProfessorAction" class="pt-3 border-t flex justify-end">
+                <!-- Botão dinâmico para o professor adicionar mais arquivos neste tópico -->
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL DE AUTENTICAÇÃO -->
     <div id="authModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
@@ -331,6 +350,7 @@
         let materials = [];
         let currentUserData = null;
         let currentFilter = 'Geografia';
+        let groupedMaterials = {}; // Guarda os tópicos agrupados para uso no Modal
 
         window.openAuthModal = function(view) {
             document.getElementById('authModal').classList.remove('hidden');
@@ -560,13 +580,6 @@
             }
         };
 
-        // Função rápida para preencher o título do tópico ao clicar no botão "Adicionar arquivo neste tópico"
-        window.preencherTopico = function(tituloTopico) {
-            document.getElementById('materialTitle').value = tituloTopico;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            document.getElementById('materialFile').focus();
-        };
-
         window.handleUploadMaterial = async function(e) {
             e.preventDefault();
             const title = document.getElementById('materialTitle').value.trim();
@@ -665,6 +678,7 @@
                     await deleteDoc(doc(db, "materials", id));
                     materials = materials.filter(m => m.id !== id);
                     renderMaterials();
+                    closeTopicModal();
                     alert('Arquivo excluído!');
                 } catch (err) {
                     alert('Erro ao excluir: ' + err.message);
@@ -726,6 +740,85 @@
             document.getElementById('reportModal').classList.add('hidden');
         };
 
+        // CONTROLE DO MODAL DE TÓPICO
+        window.openTopicModal = function(topicTitle) {
+            const topicData = groupedMaterials[topicTitle];
+            if (!topicData) return;
+
+            document.getElementById('modalTopicSubject').innerText = currentFilter;
+            document.getElementById('modalTopicTitle').innerText = topicTitle;
+            document.getElementById('modalTopicDesc').innerText = topicData.desc || 'Sem descrição.';
+
+            const filesListContainer = document.getElementById('modalTopicFilesList');
+            filesListContainer.innerHTML = topicData.items.map(m => {
+                if (currentUserData && currentUserData.role === 'aluno') {
+                    recordView(m.id);
+                }
+
+                let actionButtons = '';
+                const viewsCount = (m.views || []).length;
+                const dlsCount = (m.downloads || []).length;
+
+                if (currentUserData && currentUserData.role === 'professor') {
+                    actionButtons = `
+                        <div class="flex items-center gap-1">
+                            <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'view')" class="text-green-700 bg-green-50 px-2 py-1 rounded-lg text-[10px] font-semibold">
+                                Vistos (${viewsCount})
+                            </button>
+                            <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'download')" class="text-blue-700 bg-blue-50 px-2 py-1 rounded-lg text-[10px] font-semibold">
+                                Acessos (${dlsCount})
+                            </button>
+                            <button onclick="deleteMaterial('${m.id}')" class="text-red-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                } else {
+                    actionButtons = `
+                        <a href="${m.fileUrl}" target="_blank" download="${m.fileSize === 'Link' ? '' : m.fileName}" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Aceder
+                        </a>
+                    `;
+                }
+
+                return `
+                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 truncate">
+                            <i class="fa-solid fa-file-lines text-indigo-600 text-sm"></i>
+                            <div class="truncate">
+                                <p class="text-xs font-bold text-slate-800 truncate">${m.fileName}</p>
+                                <span class="text-[10px] text-slate-400">${m.fileSize} • ${m.date}</span>
+                            </div>
+                        </div>
+                        <div>${actionButtons}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Botão para o professor adicionar mais arquivos direto a este tópico
+            const actionContainer = document.getElementById('modalTopicProfessorAction');
+            if (currentUserData && currentUserData.role === 'professor') {
+                actionContainer.innerHTML = `
+                    <button onclick="preencherTopicoDoModal('${topicTitle.replace(/'/g, "\\'")}')" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2 rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Adicionar novo arquivo a este tópico
+                    </button>
+                `;
+            } else {
+                actionContainer.innerHTML = '';
+            }
+
+            document.getElementById('topicModal').classList.remove('hidden');
+        };
+
+        window.closeTopicModal = function() {
+            document.getElementById('topicModal').classList.add('hidden');
+        };
+
+        window.preencherTopicoDoModal = function(topicTitle) {
+            closeTopicModal();
+            document.getElementById('materialTitle').value = topicTitle;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('materialFile').focus();
+        };
+
         window.filterBySubject = function(sub) {
             currentFilter = sub;
             document.getElementById('currentCategoryTitle').innerText = `${sub} (Tópicos)`;
@@ -750,7 +843,7 @@
             });
         }
 
-        // NOVO RENDERIZADOR: AGRUPA OS MATERIAIS POR TÓPICO (TÍTULO)
+        // RENDERIZA OS TÓPICOS LADO A LADO E ATUALIZA O AGRUPAMENTO
         function renderMaterials() {
             const grid = document.getElementById('materialsGrid');
             const search = document.getElementById('searchInput').value.toLowerCase();
@@ -763,7 +856,7 @@
 
             if (filtered.length === 0) {
                 grid.innerHTML = `
-                    <div class="py-12 text-center text-slate-400">
+                    <div class="col-span-full py-12 text-center text-slate-400">
                         <i class="fa-solid fa-folder-open text-4xl mb-2"></i>
                         <p class="text-sm">Nenhum tópico em "${currentFilter}".</p>
                     </div>
@@ -771,83 +864,33 @@
                 return;
             }
 
-            // Agrupa os materiais por Tópico (Título)
-            const grouped = {};
+            // Agrupa por Tópico (Título)
+            groupedMaterials = {};
             filtered.forEach(m => {
-                if (!grouped[m.title]) {
-                    grouped[m.title] = { desc: m.desc || '', items: [] };
+                if (!groupedMaterials[m.title]) {
+                    groupedMaterials[m.title] = { desc: m.desc || '', items: [] };
                 }
-                grouped[m.title].items.push(m);
+                groupedMaterials[m.title].items.push(m);
             });
 
             grid.innerHTML = '';
-            Object.keys(grouped).forEach(topicTitle => {
-                const topicData = grouped[topicTitle];
-                
-                let itemsHtml = topicData.items.map(m => {
-                    if (currentUserData && currentUserData.role === 'aluno') {
-                        recordView(m.id);
-                    }
-
-                    let actionButtons = '';
-                    const viewsCount = (m.views || []).length;
-                    const dlsCount = (m.downloads || []).length;
-
-                    if (currentUserData && currentUserData.role === 'professor') {
-                        actionButtons = `
-                            <div class="flex flex-wrap items-center gap-1.5">
-                                <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'view')" class="text-green-700 bg-green-50 px-2 py-1 rounded-lg text-[11px] font-semibold">
-                                    Visto (${viewsCount})
-                                </button>
-                                <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'download')" class="text-blue-700 bg-blue-50 px-2 py-1 rounded-lg text-[11px] font-semibold">
-                                    Acessos (${dlsCount})
-                                </button>
-                                <button onclick="deleteMaterial('${m.id}')" class="text-red-500 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        `;
-                    } else {
-                        actionButtons = `
-                            <a href="${m.fileUrl}" target="_blank" download="${m.fileSize === 'Link' ? '' : m.fileName}" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Aceder / Baixar
-                            </a>
-                        `;
-                    }
-
-                    return `
-                        <div class="bg-white border border-slate-100 p-3 rounded-xl flex items-center justify-between gap-3 shadow-sm">
-                            <div class="flex items-center gap-2 truncate">
-                                <i class="fa-solid fa-file-lines text-indigo-500"></i>
-                                <div class="truncate">
-                                    <p class="text-xs font-bold text-slate-800 truncate">${m.fileName}</p>
-                                    <span class="text-[10px] text-slate-400">${m.fileSize} • ${m.date}</span>
-                                </div>
-                            </div>
-                            <div>${actionButtons}</div>
-                        </div>
-                    `;
-                }).join('');
-
-                // Botão para o professor adicionar mais arquivos neste tópico específico de forma rápida
-                let addMoreBtn = '';
-                if (currentUserData && currentUserData.role === 'professor') {
-                    addMoreBtn = `
-                        <button onclick="preencherTopico('${topicTitle.replace(/'/g, "\\'")}')" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-plus"></i> Adicionar arquivo a este tópico
-                        </button>
-                    `;
-                }
+            Object.keys(groupedMaterials).forEach(topicTitle => {
+                const topicData = groupedMaterials[topicTitle];
+                const totalFiles = topicData.items.length;
 
                 grid.innerHTML += `
-                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3 shadow-sm">
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b pb-2">
-                            <div>
-                                <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-folder-open text-indigo-600 mr-2"></i>${topicTitle}</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">${topicData.desc}</p>
+                    <div onclick="openTopicModal('${topicTitle.replace(/'/g, "\\'")}')" class="bg-white border border-slate-200 p-5 rounded-2xl flex flex-col justify-between hover:shadow-md hover:border-indigo-300 cursor-pointer transition group">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full font-semibold group-hover:bg-indigo-600 group-hover:text-white transition">Tópico</span>
+                                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium"><i class="fa-solid fa-file mr-1"></i>${totalFiles} ${totalFiles === 1 ? 'arquivo' : 'arquivos'}</span>
                             </div>
-                            <div>${addMoreBtn}</div>
+                            <h3 class="font-bold text-slate-800 text-base mb-1 group-hover:text-indigo-600 transition">${topicTitle}</h3>
+                            <p class="text-xs text-slate-500 line-clamp-2">${topicData.desc || 'Clique para ver os arquivos...'}</p>
                         </div>
-                        <div class="space-y-2 pl-2">
-                            ${itemsHtml}
+                        <div class="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs text-indigo-600 font-semibold">
+                            <span>Ver conteúdos</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
                         </div>
                     </div>
                 `;
