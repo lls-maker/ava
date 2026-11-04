@@ -27,11 +27,6 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <!-- Botão de Atualizar (Exibido APENAS no Desktop) -->
-                <button onclick="location.reload()" class="hidden lg:flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition border border-indigo-500 shadow-sm" title="Atualizar dados da página">
-                    <i class="fa-solid fa-rotate-right"></i> Atualizar
-                </button>
-
                 <!-- Sino de Notificações (Alunos) -->
                 <div id="notificationArea" class="relative hidden">
                     <button onclick="toggleNotifications(event)" class="relative p-2 text-indigo-200 hover:text-white transition">
@@ -486,6 +481,24 @@
             });
         };
 
+        // Função de Atualizar dados sem deslogar (Apenas desktop)
+        window.refreshAppData = async function() {
+            const btn = document.getElementById('desktopRefreshBtn');
+            if (btn) {
+                btn.innerHTML = `<i class="fa-solid fa-rotate-right fa-spin"></i> Atualizando...`;
+                btn.disabled = true;
+            }
+
+            await loadDataFromCloud();
+
+            if (btn) {
+                setTimeout(() => {
+                    btn.innerHTML = `<i class="fa-solid fa-rotate-right"></i> Atualizar`;
+                    btn.disabled = false;
+                }, 500);
+            }
+        };
+
         onAuthStateChanged(auth, async (user) => {
             const welcomeView = document.getElementById('welcomeView');
             const pendingView = document.getElementById('pendingView');
@@ -503,6 +516,10 @@
                 currentUserData.uid = user.uid;
 
                 headerArea.innerHTML = `
+                    <!-- Botão de Atualizar (Exibido APENAS no Desktop para usuários logados) -->
+                    <button id="desktopRefreshBtn" onclick="refreshAppData()" class="hidden lg:flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition border border-indigo-500 shadow-sm" title="Atualizar dados da página">
+                        <i class="fa-solid fa-rotate-right"></i> Atualizar
+                    </button>
                     <div class="text-right">
                         <span class="block text-[10px] font-semibold text-indigo-200">${currentUserData.role.toUpperCase()}</span>
                         <span class="text-xs font-bold">${currentUserData.username}</span>
