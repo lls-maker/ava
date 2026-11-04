@@ -29,7 +29,7 @@
             <div class="flex items-center gap-4">
                 <!-- Sino de Notificações (Alunos) -->
                 <div id="notificationArea" class="relative hidden">
-                    <button onclick="toggleNotifications()" class="relative p-2 text-indigo-200 hover:text-white transition">
+                    <button onclick="toggleNotifications(event)" class="relative p-2 text-indigo-200 hover:text-white transition">
                         <i class="fa-solid fa-bell text-xl"></i>
                         <span id="notifBadge" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
                     </button>
@@ -347,6 +347,15 @@
         let currentFilter = 'Geografia';
         let groupedMaterials = {};
 
+        // FECHAR O SININHO AO CLICAR EM QUALQUER LUGAR FORA DELE
+        window.addEventListener('click', function(e) {
+            const notifArea = document.getElementById('notificationArea');
+            const dropdown = document.getElementById('notifDropdown');
+            if (notifArea && dropdown && !notifArea.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
         window.openAuthModal = function(view) {
             document.getElementById('authModal').classList.remove('hidden');
             switchAuthView(view);
@@ -519,7 +528,6 @@
                 if (!subSnap.empty) {
                     subjects = subSnap.docs.map(d => d.data().name);
                 } else {
-                    // Garante Geografia se estiver vazio
                     await addDoc(collection(db, "subjects"), { name: 'Geografia' });
                     subjects = ['Geografia'];
                 }
@@ -544,7 +552,8 @@
             }
         }
 
-        window.toggleNotifications = function() {
+        window.toggleNotifications = function(e) {
+            if (e) e.stopPropagation();
             const dropdown = document.getElementById('notifDropdown');
             const notifBadge = document.getElementById('notifBadge');
             
@@ -593,7 +602,6 @@
             }
         };
 
-        // EXCLUIR MATÉRIA
         window.deleteSubject = async function(subName) {
             if (confirm(`Deseja excluir a matéria "${subName}"?`)) {
                 try {
