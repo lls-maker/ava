@@ -126,15 +126,18 @@
                 </div>
             </div>
 
-            <!-- PAINEL DE GERENCIAMENTO DE ALUNOS (PROFESSOR) -->
+            <!-- PAINEL DE GERENCIAMENTO DE ALUNOS (PROFESSOR COM NOTIFICAÇÃO) -->
             <div id="professorStudentManage" class="pt-4 border-t border-slate-100 hidden">
                 <h3 class="text-xs font-bold text-indigo-700 mb-2 flex items-center justify-between">
                     <span>Gerenciar Turma</span>
                     <i class="fa-solid fa-users"></i>
                 </h3>
-                <button onclick="openStudentsModal()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2 rounded-xl transition border border-indigo-200 mb-2">
-                    Liberar Acesso Alunos
+                
+                <button onclick="openStudentsModal()" class="relative w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 mb-2 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-user-check"></i> Aprovar Alunos
+                    <span id="pendingStudentsBadge" class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
                 </button>
+
                 <button onclick="copyInviteLink()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2 rounded-xl transition border border-slate-200 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-copy"></i> Copiar Link de Convite
                 </button>
@@ -271,8 +274,8 @@
             <!-- TELA DE CADASTRO -->
             <div id="viewRegister" class="space-y-4 hidden">
                 <div class="text-center mb-4">
-                    <h3 class="font-bold text-slate-800 text-xl">Criar Nova Conta</h3>
-                    <p class="text-xs text-slate-500">Preencha os dados abaixo</p>
+                    <h3 class="font-bold text-slate-800 text-xl" id="registerTitle">Criar Nova Conta</h3>
+                    <p class="text-xs text-slate-500" id="registerSubtitle">Preencha os dados abaixo</p>
                 </div>
                 <form id="formRegister" onsubmit="handleRegisterSubmit(event)" class="space-y-3">
                     <div>
@@ -280,7 +283,8 @@
                         <input type="text" id="regName" required placeholder="Ex: JoaoSilva" autocomplete="off"
                             class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
-                    <div>
+                    <!-- Grupo de Tipo de Perfil (Ocultado se entrar via link de convite) -->
+                    <div id="regRoleGroup">
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tipo de Perfil</label>
                         <select id="regRole" onchange="toggleTurmaInput()" class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
                             <option value="aluno">Aluno</option>
@@ -288,10 +292,10 @@
                         </select>
                     </div>
                     <div id="turmaCodeGroup" class="hidden">
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Código da Turma do Professor</label>
-                        <input type="text" id="regTurmaCode" placeholder="Ex: PROF-JOAO" autocomplete="off"
-                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 uppercase">
-                        <p class="text-[10px] text-slate-400 mt-1">Preenchido automaticamente pelo link do professor ou digite manualmente.</p>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Código da Turma</label>
+                        <input type="text" id="regTurmaCode" placeholder="Ex: PROF-JOAO" autocomplete="off" readonly
+                            class="w-full text-sm px-3.5 py-2 border rounded-xl bg-slate-100 text-slate-600 uppercase font-bold cursor-not-allowed">
+                        <p id="turmaCodeHint" class="text-[10px] text-emerald-600 mt-1 hidden"><i class="fa-solid fa-check-circle"></i> Turma vinculada automaticamente pelo link do professor!</p>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha (Mínimo 6 caracteres)</label>
@@ -392,16 +396,22 @@
         let currentUserData = null;
         let currentFilter = '';
         let groupedMaterials = {};
+        let urlTurmaCode = '';
 
-        // AO CARREGAR A PÁGINA, VERIFICA SE HÁ UM CÓDIGO DE TURMA NA URL (EX: ?turma=PROF-JOAO)
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const turmaParam = urlParams.get('turma');
-            if (turmaParam) {
+            urlTurmaCode = urlParams.get('turma');
+            if (urlTurmaCode) {
+                urlTurmaCode = urlTurmaCode.toUpperCase();
                 openAuthModal('register');
+                
+                // Configura visual e esconde a seleção de perfil se veio por link de convite
                 document.getElementById('regRole').value = 'aluno';
+                document.getElementById('regRoleGroup').classList.add('hidden');
+                document.getElementById('registerTitle').innerText = 'Cadastro de Aluno';
+                document.getElementById('registerSubtitle').innerText = `Entrando na turma: ${urlTurmaCode}`;
+                
                 toggleTurmaInput();
-                document.getElementById('regTurmaCode').value = turmaParam;
             }
         });
 
@@ -416,7 +426,9 @@
         window.openAuthModal = function(view) {
             document.getElementById('authModal').classList.remove('hidden');
             switchAuthView(view);
-            toggleTurmaInput();
+            if (!urlTurmaCode) {
+                toggleTurmaInput();
+            }
         };
 
         window.closeAuthModal = function() {
@@ -426,12 +438,27 @@
         window.toggleTurmaInput = function() {
             const role = document.getElementById('regRole').value;
             const turmaGroup = document.getElementById('turmaCodeGroup');
+            const turmaInput = document.getElementById('regTurmaCode');
+            const turmaHint = document.getElementById('turmaCodeHint');
+
             if (role === 'aluno') {
                 turmaGroup.classList.remove('hidden');
-                document.getElementById('regTurmaCode').required = true;
+                turmaInput.required = true;
+
+                if (urlTurmaCode) {
+                    turmaInput.value = urlTurmaCode;
+                    turmaInput.readOnly = true;
+                    turmaInput.classList.add('bg-slate-100', 'cursor-not-allowed');
+                    turmaHint.classList.remove('hidden');
+                } else {
+                    turmaInput.value = '';
+                    turmaInput.readOnly = false;
+                    turmaInput.classList.remove('bg-slate-100', 'cursor-not-allowed');
+                    turmaHint.classList.add('hidden');
+                }
             } else {
                 turmaGroup.classList.add('hidden');
-                document.getElementById('regTurmaCode').required = false;
+                turmaInput.required = false;
             }
         };
 
@@ -444,7 +471,6 @@
             if (view === 'forgot') document.getElementById('viewForgot').classList.remove('hidden');
         };
 
-        // FUNÇÃO PARA COPIAR O LINK DE CONVITE DA TURMA
         window.copyInviteLink = function() {
             if (!currentUserData || !currentUserData.turmaCode) return;
             const baseUrl = window.location.origin + window.location.pathname;
@@ -500,6 +526,7 @@
                     profStudentManage.classList.remove('hidden');
                     notifArea.classList.add('hidden');
                     document.getElementById('professorTurmaBadge').innerText = `Turma: ${currentUserData.turmaCode || 'N/A'}`;
+                    checkPendingStudentsCount();
                 } else {
                     profPanel.classList.add('hidden');
                     addSubContainer.classList.add('hidden');
@@ -545,7 +572,7 @@
         window.handleRegisterSubmit = async function(e) {
             e.preventDefault();
             const rawUsername = document.getElementById('regName').value.trim();
-            const role = document.getElementById('regRole').value;
+            const role = urlTurmaCode ? 'aluno' : document.getElementById('regRole').value;
             const pass = document.getElementById('regPass').value;
             const passConfirm = document.getElementById('regPassConfirm').value;
             const secretWord = document.getElementById('regSecret').value.trim().toLowerCase();
@@ -578,10 +605,10 @@
                     userData.turmaCode = turmaCode;
                     userData.status = 'aprovado';
                 } else {
-                    const turmaCodeInput = document.getElementById('regTurmaCode').value.trim().toUpperCase();
+                    const turmaCodeInput = (urlTurmaCode || document.getElementById('regTurmaCode').value).trim().toUpperCase();
                     const profQuery = await getDocs(query(collection(db, "users"), where("turmaCode", "==", turmaCodeInput), where("role", "==", "professor")));
                     if (profQuery.empty) {
-                        alert('Código da turma do professor não encontrado! Verifique com ele o código correto.');
+                        alert('Código da turma do professor não encontrado! Verifique o link ou o código correto.');
                         return;
                     }
                     let profUid = '';
@@ -677,6 +704,24 @@
             }
         }
 
+        async function checkPendingStudentsCount() {
+            if (!currentUserData || currentUserData.role !== 'professor') return;
+            try {
+                const q = query(collection(db, "users"), where("turmaCode", "==", currentUserData.turmaCode), where("status", "==", "pendente"));
+                const snap = await getDocs(q);
+                const badge = document.getElementById('pendingStudentsBadge');
+                
+                if (!snap.empty) {
+                    badge.innerText = snap.size;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            } catch (err) {
+                console.error("Erro ao verificar pendentes:", err);
+            }
+        }
+
         window.openStudentsModal = async function() {
             const container = document.getElementById('pendingStudentsList');
             container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">A carregar alunos...</p>`;
@@ -688,6 +733,7 @@
 
                 if (snap.empty) {
                     container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhum aluno pendente no momento.</p>`;
+                    checkPendingStudentsCount();
                     return;
                 }
 
@@ -712,6 +758,7 @@
 
         window.closeStudentsModal = function() {
             document.getElementById('studentsModal').classList.add('hidden');
+            checkPendingStudentsCount();
         };
 
         window.approveStudent = async function(studentId, approve) {
@@ -724,6 +771,7 @@
                     alert('Cadastro do aluno recusado/removido.');
                 }
                 openStudentsModal();
+                checkPendingStudentsCount();
             } catch (err) {
                 alert('Erro ao processar aluno: ' + err.message);
             }
@@ -883,7 +931,7 @@
                     }
                     alert('Arquivo excluído!');
                 } catch (err) {
-                    alert('Erro ao excluir: ' + err.message);
+                    alert('Erro: ' + err.message);
                 }
             }
         };
