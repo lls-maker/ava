@@ -518,6 +518,14 @@
                 const subSnap = await getDocs(collection(db, "subjects"));
                 if (!subSnap.empty) {
                     subjects = subSnap.docs.map(d => d.data().name);
+                } else {
+                    // Garante Geografia se estiver vazio
+                    await addDoc(collection(db, "subjects"), { name: 'Geografia' });
+                    subjects = ['Geografia'];
+                }
+
+                if (!subjects.includes(currentFilter) && subjects.length > 0) {
+                    currentFilter = subjects[0];
                 }
 
                 const matSnap = await getDocs(collection(db, "materials"));
@@ -536,7 +544,6 @@
             }
         }
 
-        // AGORA AO CLICAR NO SININHO, O BADGE É LIMPO (LIDO)
         window.toggleNotifications = function() {
             const dropdown = document.getElementById('notifDropdown');
             const notifBadge = document.getElementById('notifBadge');
@@ -544,7 +551,7 @@
             if (dropdown) {
                 dropdown.classList.toggle('hidden');
                 if (!dropdown.classList.contains('hidden')) {
-                    notifBadge.classList.add('hidden'); // Limpa a notificação ao abrir
+                    notifBadge.classList.add('hidden');
                 }
             }
         };
@@ -576,7 +583,6 @@
             e.preventDefault();
             const name = document.getElementById('newSubjectName').value.trim();
             if (name && !subjects.includes(name)) {
-                // Salva no Firestore se necessário ou mantém local
                 const subQuery = await getDocs(query(collection(db, "subjects"), where("name", "==", name)));
                 if (subQuery.empty) {
                     await addDoc(collection(db, "subjects"), { name });
@@ -587,9 +593,9 @@
             }
         };
 
-        // FUNÇÃO PARA EXCLUIR MATÉRIA
+        // EXCLUIR MATÉRIA
         window.deleteSubject = async function(subName) {
-            if (confirm(`Deseja excluir a matéria "${subName}"? Isso não apagará os materiais já enviados, mas removerá a disciplina da lista.`)) {
+            if (confirm(`Deseja excluir a matéria "${subName}"?`)) {
                 try {
                     const subQuery = await getDocs(query(collection(db, "subjects"), where("name", "==", subName)));
                     subQuery.forEach(async (d) => {
@@ -887,9 +893,8 @@
             subjects.forEach(sub => {
                 const isSelected = currentFilter === sub;
                 
-                // Botão de deletar matéria visível apenas para o professor
                 let deleteSubBtn = '';
-                if (currentUserData && currentUserData.role === 'professor' && subjects.length > 1) {
+                if (currentUserData && currentUserData.role === 'professor') {
                     deleteSubBtn = `<button onclick="event.stopPropagation(); deleteSubject('${sub}')" class="text-slate-400 hover:text-red-500 p-1 text-xs"><i class="fa-solid fa-trash"></i></button>`;
                 }
 
