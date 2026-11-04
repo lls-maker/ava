@@ -52,7 +52,7 @@
         </div>
     </header>
 
-    <!-- TELA DE APRESENTAÇÃO / LANDING PAGE (ESTILO ANTIGO) -->
+    <!-- TELA DE APRESENTAÇÃO / LANDING PAGE -->
     <div id="welcomeView" class="flex-grow flex items-center justify-center p-6 bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white">
         <div class="max-w-3xl w-full text-center space-y-8 py-12">
             <div class="inline-flex p-4 bg-indigo-700/50 rounded-3xl backdrop-blur-md border border-indigo-500/30 shadow-2xl">
@@ -132,8 +132,11 @@
                     <span>Gerenciar Turma</span>
                     <i class="fa-solid fa-users"></i>
                 </h3>
-                <button onclick="openStudentsModal()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2 rounded-xl transition border border-indigo-200">
+                <button onclick="openStudentsModal()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2 rounded-xl transition border border-indigo-200 mb-2">
                     Aprovar Alunos Pendentes
+                </button>
+                <button onclick="copyInviteLink()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2 rounded-xl transition border border-slate-200 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-copy"></i> Copiar Link de Convite
                 </button>
             </div>
         </aside>
@@ -288,7 +291,7 @@
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Código da Turma do Professor</label>
                         <input type="text" id="regTurmaCode" placeholder="Ex: PROF-JOAO" autocomplete="off"
                             class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 uppercase">
-                        <p class="text-[10px] text-slate-400 mt-1">Peça o código da turma diretamente ao seu professor.</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Preenchido automaticamente pelo link do professor ou digite manualmente.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha (Mínimo 6 caracteres)</label>
@@ -390,6 +393,18 @@
         let currentFilter = '';
         let groupedMaterials = {};
 
+        // AO CARREGAR A PÁGINA, VERIFICA SE HÁ UM CÓDIGO DE TURMA NA URL (EX: ?turma=PROF-JOAO)
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const turmaParam = urlParams.get('turma');
+            if (turmaParam) {
+                openAuthModal('register');
+                document.getElementById('regRole').value = 'aluno';
+                toggleTurmaInput();
+                document.getElementById('regTurmaCode').value = turmaParam;
+            }
+        });
+
         window.addEventListener('click', function(e) {
             const notifArea = document.getElementById('notificationArea');
             const dropdown = document.getElementById('notifDropdown');
@@ -427,6 +442,19 @@
             if (view === 'login') document.getElementById('viewLogin').classList.remove('hidden');
             if (view === 'register') document.getElementById('viewRegister').classList.remove('hidden');
             if (view === 'forgot') document.getElementById('viewForgot').classList.remove('hidden');
+        };
+
+        // FUNÇÃO PARA COPIAR O LINK DE CONVITE DA TURMA
+        window.copyInviteLink = function() {
+            if (!currentUserData || !currentUserData.turmaCode) return;
+            const baseUrl = window.location.origin + window.location.pathname;
+            const inviteLink = `${baseUrl}?turma=${currentUserData.turmaCode}`;
+            
+            navigator.clipboard.writeText(inviteLink).then(() => {
+                alert(`Link de convite copiado com sucesso!\n\n${inviteLink}\n\nEnvie este link para os seus alunos.`);
+            }).catch(err => {
+                alert('Erro ao copiar link: ' + err);
+            });
         };
 
         onAuthStateChanged(auth, async (user) => {
@@ -855,7 +883,7 @@
                     }
                     alert('Arquivo excluído!');
                 } catch (err) {
-                    alert('Erro: ' + err.message);
+                    alert('Erro ao excluir: ' + err.message);
                 }
             }
         };
