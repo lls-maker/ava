@@ -536,9 +536,17 @@
             }
         }
 
+        // AGORA AO CLICAR NO SININHO, O BADGE É LIMPO (LIDO)
         window.toggleNotifications = function() {
             const dropdown = document.getElementById('notifDropdown');
-            if (dropdown) dropdown.classList.toggle('hidden');
+            const notifBadge = document.getElementById('notifBadge');
+            
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
+                if (!dropdown.classList.contains('hidden')) {
+                    notifBadge.classList.add('hidden'); // Limpa a notificação ao abrir
+                }
+            }
         };
 
         function updateStudentNotifications() {
@@ -568,10 +576,38 @@
             e.preventDefault();
             const name = document.getElementById('newSubjectName').value.trim();
             if (name && !subjects.includes(name)) {
-                await addDoc(collection(db, "subjects"), { name });
+                // Salva no Firestore se necessário ou mantém local
+                const subQuery = await getDocs(query(collection(db, "subjects"), where("name", "==", name)));
+                if (subQuery.empty) {
+                    await addDoc(collection(db, "subjects"), { name });
+                }
                 subjects.push(name);
                 document.getElementById('newSubjectName').value = '';
                 renderSubjects();
+            }
+        };
+
+        // FUNÇÃO PARA EXCLUIR MATÉRIA
+        window.deleteSubject = async function(subName) {
+            if (confirm(`Deseja excluir a matéria "${subName}"? Isso não apagará os materiais já enviados, mas removerá a disciplina da lista.`)) {
+                try {
+                    const subQuery = await getDocs(query(collection(db, "subjects"), where("name", "==", subName)));
+                    subQuery.forEach(async (d) => {
+                        await deleteDoc(doc(db, "subjects", d.id));
+                    });
+                    
+                    subjects = subjects.filter(s => s !== subName);
+                    if (subjects.length > 0) {
+                        currentFilter = subjects[0];
+                    } else {
+                        currentFilter = '';
+                    }
+                    renderSubjects();
+                    renderMaterials();
+                    alert('Matéria excluída com sucesso!');
+                } catch (err) {
+                    alert('Erro ao excluir matéria: ' + err.message);
+                }
             }
         };
 
@@ -740,7 +776,6 @@
             document.getElementById('reportModal').classList.add('hidden');
         };
 
-        // CONTROLE DO MODAL DE TÓPICO
         window.openTopicModal = function(topicTitle) {
             const search = document.getElementById('searchInput').value.toLowerCase();
             let filtered = materials.filter(m => {
@@ -775,7 +810,6 @@
                 const dlsCount = (m.downloads || []).length;
 
                 if (currentUserData && currentUserData.role === 'professor') {
-                    // O PROFESSOR PODE TANTO VER O RELATÓRIO QUANTO CLICAR PARA ABRIR O ARQUIVO/LINK E EXCLUÍ-LO
                     actionButtons = `
                         <div class="flex items-center gap-1">
                             <a href="${m.fileUrl}" target="_blank" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 shadow-sm">
@@ -791,7 +825,6 @@
                         </div>
                     `;
                 } else {
-                    // ALUNO VÊ O BOTÃO DE ACEDER / BAIXAR
                     actionButtons = `
                         <a href="${m.fileUrl}" target="_blank" download="${m.fileSize === 'Link' ? '' : m.fileName}" onclick="recordDownload('${m.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-arrow-up-right-from-square"></i> Aceder / Baixar
@@ -853,9 +886,17 @@
 
             subjects.forEach(sub => {
                 const isSelected = currentFilter === sub;
+                
+                // Botão de deletar matéria visível apenas para o professor
+                let deleteSubBtn = '';
+                if (currentUserData && currentUserData.role === 'professor' && subjects.length > 1) {
+                    deleteSubBtn = `<button onclick="event.stopPropagation(); deleteSubject('${sub}')" class="text-slate-400 hover:text-red-500 p-1 text-xs"><i class="fa-solid fa-trash"></i></button>`;
+                }
+
                 container.innerHTML += `
                     <div onclick="filterBySubject('${sub}')" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition ${isSelected ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}">
-                        <span><i class="fa-solid fa-book mr-2 text-slate-400"></i> ${sub}</span>
+                        <span class="truncate"><i class="fa-solid fa-book mr-2 text-slate-400"></i> ${sub}</span>
+                        ${deleteSubBtn}
                     </div>
                 `;
                 select.innerHTML += `<option value="${sub}">${sub}</option>`;
