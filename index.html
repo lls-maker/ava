@@ -79,7 +79,7 @@
             </div>
             <h3 class="text-xl font-bold text-slate-800">Período de Teste Expirado</h3>
             <p class="text-xs text-slate-500">
-                Os seus 7 dias de teste grátis terminaram. Envie o comprovativo do plano (R$ 29,90/mês) pelo chat de suporte abaixo para renovar o acesso.
+                Os seus 7 dias de teste grátis terminaram. Envie o link do comprovativo do plano (R$ 29,90/mês) pelo chat de suporte abaixo para renovar o acesso.
             </p>
 
             <div class="bg-slate-50 border rounded-xl p-3 h-36 overflow-y-auto text-left text-xs space-y-2" id="supportChatBox">
@@ -87,9 +87,9 @@
             </div>
             
             <div class="space-y-2 text-left">
-                <input type="text" id="supportMsgInput" placeholder="Escreva uma mensagem..." class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <div class="flex items-center justify-between gap-2">
-                    <input type="file" id="supportFileInput" accept=".pdf,image/*" class="text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                <input type="text" id="supportMsgInput" placeholder="Escreva sua mensagem..." class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <div class="flex gap-2">
+                    <input type="url" id="supportLinkInput" placeholder="Cole o link do comprovativo (Drive, etc)..." class="flex-1 text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <button onclick="sendSupportMessage()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg font-semibold transition">Enviar</button>
                 </div>
             </div>
@@ -630,7 +630,7 @@
             carregarMensagensAlunoDireto();
         };
 
-        // SUPORTE TRIAL PROFESSOR COM COMPROVATIVO < 5MB
+        // SUPORTE TRIAL PROFESSOR COM LINK DE COMPROVATIVO
         window.carregarChatSuporteProfessor = async function() {
             const box = document.getElementById('supportChatBox');
             const messagesRef = collection(db, "users", currentUserData.uid, "supportMessages");
@@ -638,7 +638,7 @@
             
             box.innerHTML = '';
             if (snap.empty) {
-                box.innerHTML = `<p class="text-slate-400 text-center py-2">Envie uma mensagem ou o comprovativo (R$ 29,90).</p>`;
+                box.innerHTML = `<p class="text-slate-400 text-center py-2">Envie uma mensagem ou link do comprovativo (R$ 29,90).</p>`;
                 return;
             }
 
@@ -649,7 +649,7 @@
                 <div class="${m.sender === 'admin' ? 'text-left text-indigo-700 bg-indigo-50' : 'text-right text-slate-700 bg-slate-100'} p-2.5 rounded-lg space-y-1">
                     <b class="text-[10px] block">${m.sender === 'admin' ? 'Proprietário' : 'Você'}:</b> 
                     <p class="text-xs">${m.text}</p>
-                    ${m.file ? `<a href="${m.file.data}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-white border px-2 py-1 rounded-md text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-file-arrow-down"></i> Ver Comprovativo (${m.file.name})</a>` : ''}
+                    ${m.link ? `<a href="${m.link}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-white border px-2 py-1 rounded-md text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-external-link-alt"></i> Ver Comprovativo (${m.link})</a>` : ''}
                 </div>
             `).join('');
             box.scrollTop = box.scrollHeight;
@@ -657,37 +657,21 @@
 
         window.sendSupportMessage = async function() {
             const input = document.getElementById('supportMsgInput');
-            const fileInput = document.getElementById('supportFileInput');
+            const linkInput = document.getElementById('supportLinkInput');
             const text = input.value.trim();
-            let fileData = null;
+            const link = linkInput.value.trim();
 
-            if (fileInput && fileInput.files && fileInput.files[0]) {
-                const file = fileInput.files[0];
-                
-                // Validação estrita: menor que 5MB (5 * 1024 * 1024 bytes)
-                if (file.size > 5 * 1024 * 1024) {
-                    alert("O arquivo é muito grande! O comprovativo deve ser menor que 5MB.");
-                    return;
-                }
-
-                fileData = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve({ name: file.name, data: e.target.result });
-                    reader.readAsDataURL(file);
-                });
-            }
-
-            if (!text && !fileData) return;
+            if (!text && !link) return;
 
             await addDoc(collection(db, "users", currentUserData.uid, "supportMessages"), {
                 sender: 'professor',
-                text: text || "Enviei um comprovativo de pagamento.",
-                file: fileData,
+                text: text || "Enviei o link do comprovativo de pagamento.",
+                link: link || null,
                 timestamp: Date.now()
             });
 
             input.value = '';
-            if (fileInput) fileInput.value = '';
+            linkInput.value = '';
             carregarChatSuporteProfessor();
         };
 
@@ -802,7 +786,7 @@
                 <div class="${m.sender === 'admin' ? 'text-right text-indigo-700 bg-indigo-50' : 'text-left text-slate-700 bg-slate-100'} p-2.5 rounded-lg space-y-1">
                     <b class="text-[10px] block">${m.sender === 'admin' ? 'Você (Proprietário)' : 'Professor'}:</b> 
                     <p class="text-xs">${m.text}</p>
-                    ${m.file ? `<a href="${m.file.data}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-white border px-2 py-1 rounded-md text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-file-arrow-down"></i> Ver Comprovativo (${m.file.name})</a>` : ''}
+                    ${m.link ? `<a href="${m.link}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-white border px-2 py-1 rounded-md text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-external-link-alt"></i> Ver Comprovativo (${m.link})</a>` : ''}
                 </div>
             `).join('');
             box.scrollTop = box.scrollHeight;
