@@ -335,7 +335,10 @@
                     <button onclick="sendProfAdminSupportMsg()" class="bg-indigo-600 text-white text-xs px-4 py-2 rounded-lg font-semibold">Enviar</button>
                 </div>
             </div>
-            <button onclick="closeProfessorAdminSupportModal()" class="w-full bg-slate-200 text-slate-700 py-2 rounded-xl text-xs font-semibold">Fechar</button>
+            <div class="flex justify-between items-center">
+                <button onclick="apagarHistoricoSuporteProfessor()" class="text-xs text-rose-600 hover:underline flex items-center gap-1"><i class="fa-solid fa-trash-can"></i> Apagar Histórico</button>
+                <button onclick="closeProfessorAdminSupportModal()" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-semibold">Fechar</button>
+            </div>
         </div>
     </div>
 
@@ -380,7 +383,7 @@
         </div>
     </div>
 
-    <!-- PAINEL MASTER DO PROPRIETÁRIO (COM SININHO DE NOTIFICAÇÕES GLOBAIS) -->
+    <!-- PAINEL MASTER DO PROPRIETÁRIO -->
     <div id="masterAdminModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl border border-rose-100 relative">
             <div class="flex justify-between items-center mb-3">
@@ -416,7 +419,10 @@
     <!-- MODAL DE CHAT DO ADMIN COM O PROFESSOR -->
     <div id="adminChatModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl relative">
-            <h3 class="font-bold text-indigo-700 text-base mb-1" id="adminChatTitle">Suporte com Professor</h3>
+            <div class="flex justify-between items-center mb-1">
+                <h3 class="font-bold text-indigo-700 text-base" id="adminChatTitle">Suporte com Professor</h3>
+                <button onclick="apagarHistoricoAdmin()" class="text-xs text-rose-600 hover:underline flex items-center gap-1"><i class="fa-solid fa-trash-can"></i> Apagar Conversa</button>
+            </div>
             <p class="text-xs text-slate-500 mb-3">Analise o comprovativo e responda ou gerencie o acesso.</p>
             <div class="bg-slate-50 border rounded-xl p-3 h-48 overflow-y-auto text-xs space-y-2 mb-3" id="adminChatBox"></div>
             <div class="flex gap-2 mb-3">
@@ -628,36 +634,46 @@
             }
         }
 
-        // MONITOR GLOBAL DE NOTIFICAÇÕES PARA O ADMINISTRADOR
+        // MONITOR GLOBAL DE NOTIFICAÇÕES PARA O ADMINISTRADOR (CORRIGIDO PARA APAGAR AO VER)
         async function iniciarOuvinteGlobalAdmin() {
             adminUnsubscribes.forEach(unsub => unsub());
             adminUnsubscribes = [];
 
             const snapUsers = await getDocs(collection(db, "users"));
-            let totalNotificacoes = 0;
-            let notificacoesHtml = '';
-
+            
             snapUsers.forEach(userDoc => {
                 const u = userDoc.data();
                 if (u.role === 'professor') {
                     const unsub = onSnapshot(collection(db, "users", userDoc.id, "supportMessages"), (msgSnap) => {
-                        // Filtra mensagens enviadas pelo professor que ainda não foram respondidas pelo admin
-                        let msgs = msgSnap.docs.map(d => d.data());
-                        let ultimaMsg = msgs.sort((a,b) => b.timestamp - a.timestamp)[0];
+                        let msgs = msgSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        msgs.sort((a,b) => b.timestamp - a.timestamp);
+                        let ultimaMsg = msgs[0];
                         
+                        // Só notifica se a última mensagem foi enviada pelo professor (não respondida ainda)
+                        const badge = document.getElementById('adminNotifBadge');
+                        const list = document.getElementById('adminNotifList');
+
                         if (ultimaMsg && ultimaMsg.sender === 'professor') {
-                            const badge = document.getElementById('adminNotifBadge');
-                            const list = document.getElementById('adminNotifList');
-                            
                             badge.classList.remove('hidden');
                             badge.innerText = "!";
                             
-                            list.innerHTML += `
-                                <div onclick="abrirChatAdmin('${userDoc.id}', '${u.username}')" class="p-2 bg-rose-50 hover:bg-rose-100 rounded-lg cursor-pointer transition mb-1">
-                                    <b>Prof. ${u.username}</b>
-                                    <span class="block text-[10px] text-slate-500 truncate">${ultimaMsg.text}</span>
-                                </div>
-                            `;
+                            // Evita duplicar na lista dropdown
+                            if (!document.getElementById(`notif-prof-${userDoc.id}`)) {
+                                list.innerHTML += `
+                                    <div id="notif-prof-${userDoc.id}" onclick="abrirChatAdmin('${userDoc.id}', '${u.username}')" class="p-2 bg-rose-50 hover:bg-rose-100 rounded-lg cursor-pointer transition mb-1">
+                                        <b>Prof. ${u.username}</b>
+                                        <span class="block text-[10px] text-slate-500 truncate">${ultimaMsg.text}</span>
+                                    </div>
+                                `;
+                            }
+                        } else {
+                            // Se a última mensagem foi do admin, remove o alerta visual
+                            const itemNotif = document.getElementById(`notif-prof-${userDoc.id}`);
+                            if (itemNotif) itemNotif.remove();
+                            
+                            if (list.children.length === 0 || (list.children.length === 1 && list.children[0].tagName === 'P')) {
+                                badge.classList.add('hidden');
+                            }
                         }
                     });
                     adminUnsubscribes.push(unsub);
@@ -758,6 +774,17 @@
             linkInput.value = '';
             showCustomAlert("Sucesso", "Mensagem enviada com sucesso!", "success");
             carregarChatProfAdmin();
+        };
+
+        window.apagarHistoricoSuporteProfessor = async function() {
+            if (confirm("Tem certeza que deseja apagar todo o histórico de mensagens?")) {
+                const snap = await getDocs(collection(db, "users", currentUserData.uid, "supportMessages"));
+                for (let d of snap.docs) {
+                    await deleteDoc(doc(db, "users", currentUserData.uid, "supportMessages", d.id));
+                }
+                carregarChatProfAdmin();
+                showCustomAlert("Sucesso", "Histórico de mensagens apagado.", "success");
+            }
         };
 
         window.openStudentsModal = async function() {
@@ -1094,8 +1121,19 @@
                 timestamp: Date.now()
             });
             input.value = '';
-            showCustomAlert("Sucesso", "Mensagem enviada ao professor!", "success");
             carregarMensagensAdminChat();
+        };
+
+        window.apagarHistoricoAdmin = async function() {
+            if (!activeChatProfUid) return;
+            if (confirm("Tem certeza que deseja apagar toda a conversa com este professor?")) {
+                const snap = await getDocs(collection(db, "users", activeChatProfUid, "supportMessages"));
+                for (let d of snap.docs) {
+                    await deleteDoc(doc(db, "users", activeChatProfUid, "supportMessages", d.id));
+                }
+                carregarMensagensAdminChat();
+                showCustomAlert("Sucesso", "Conversa apagada com sucesso.", "success");
+            }
         };
 
         window.closeAdminChat = function() {
