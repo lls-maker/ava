@@ -226,7 +226,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE AUTENTICAÇÃO (CAMPOS EM BRANCO) -->
+    <!-- MODAL DE AUTENTICAÇÃO -->
     <div id="authModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-slate-100 relative">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -320,7 +320,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE SUPORTE DO PROFESSOR COM O ADMINISTRATIVO -->
+    <!-- MODAL DE SUPORTE DO PROFESSOR -->
     <div id="professorAdminSupportModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
             <h3 class="font-bold text-indigo-700 text-base mb-1"><i class="fa-solid fa-headset"></i> Suporte com o Administrativo</h3>
@@ -380,7 +380,7 @@
         </div>
     </div>
 
-    <!-- PAINEL MASTER COM BOTÃO INTELIGENTE ÚNICO E LIXEIRA -->
+    <!-- PAINEL MASTER DO PROPRIETÁRIO -->
     <div id="masterAdminModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl border border-rose-100 relative">
             <h3 class="font-bold text-rose-600 text-lg mb-1"><i class="fa-solid fa-shield-halved"></i> Painel Master do Proprietário</h3>
@@ -488,7 +488,6 @@
         window.openAuthModal = function(view) {
             document.getElementById('authModal').classList.remove('hidden');
             switchAuthView(view);
-            // Mantém os campos sempre limpos ao abrir o modal
             if (view === 'login') {
                 document.getElementById('loginUser').value = '';
                 document.getElementById('loginPass').value = '';
@@ -529,7 +528,11 @@
             if (user) {
                 closeAuthModal();
                 const userDoc = await getDoc(doc(db, "users", user.uid));
-                currentUserData = userDoc.exists() ? userDoc.data() : { username: user.email, role: 'aluno' };
+                if (!userDoc.exists()) {
+                    await signOut(auth);
+                    return;
+                }
+                currentUserData = userDoc.data();
                 currentUserData.uid = user.uid;
 
                 headerArea.innerHTML = `
@@ -549,7 +552,6 @@
                     const seteDias = 7 * 24 * 60 * 60 * 1000;
                     const expiradoPorTempo = (agora - criacao) > seteDias;
                     
-                    // Verificação rigorosa do status bloqueado ou expirado
                     const estaBloqueado = currentUserData.status === 'bloqueado' || (expiradoPorTempo && currentUserData.status !== 'pago');
 
                     if (estaBloqueado) {
@@ -594,7 +596,7 @@
         function iniciarOuvinteNotificacoes(uid, role) {
             if (role === 'professor') {
                 onSnapshot(collection(db, "users", uid, "supportMessages"), (snap) => {
-                    atualizarSininho(snap, "Nova mensagem do Administrador / Suporte", () => openProfessorAdminSupportModal());
+                    atualizarSininho(snap, "Nova mensagem do Administrador", () => openProfessorAdminSupportModal());
                 });
             } else if (role === 'aluno') {
                 onSnapshot(collection(db, "users", uid, "directChat"), (snap) => {
@@ -688,7 +690,7 @@
 
             input.value = '';
             linkInput.value = '';
-            showCustomAlert("Sucesso", "Link do comprovativo anexado e enviado com sucesso!", "success");
+            showCustomAlert("Sucesso", "Mensagem enviada com sucesso!", "success");
             carregarChatProfAdmin();
         };
 
@@ -914,7 +916,7 @@
             await signOut(auth);
         };
 
-        // PAINEL MASTER COM BOTÃO ÚNICO INTELIGENTE E LIXEIRA
+        // PAINEL MASTER (CORRIGIDO PARA COMUNICAÇÃO TOTAL COM O PROFESSOR)
         window.carregarPainelMaster = async function() {
             const listContainer = document.getElementById('masterAdminList');
             const snap = await getDocs(collection(db, "users"));
@@ -969,7 +971,7 @@
         window.alternarStatusProfessor = async function(uid, novoStatus) {
             const updates = { status: novoStatus };
             if (novoStatus === 'pago') {
-                updates.createdAt = Date.now(); // Renova o período de contagem
+                updates.createdAt = Date.now();
             }
             await updateDoc(doc(db, "users", uid), updates);
             showCustomAlert("Sucesso", `Status alterado para: ${novoStatus.toUpperCase()}`, "success");
@@ -1027,6 +1029,7 @@
                 timestamp: Date.now()
             });
             input.value = '';
+            showCustomAlert("Sucesso", "Mensagem enviada ao professor!", "success");
             carregarMensagensAdminChat();
         };
 
