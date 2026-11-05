@@ -58,7 +58,6 @@
 
     <!-- TELA DE APRESENTAÇÃO / LANDING PAGE -->
     <div id="welcomeView" class="flex-grow flex items-center justify-center p-6 bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white relative">
-        <!-- BOTÃO DO SETOR ADMINISTRATIVO -->
         <button onclick="acessarPainelAdminMaster()" class="absolute bottom-4 right-4 text-indigo-300 hover:text-white text-xs bg-slate-800/60 hover:bg-slate-800 px-3.5 py-2 rounded-xl border border-indigo-500/30 transition flex items-center gap-2 backdrop-blur-md shadow-lg">
             <i class="fa-solid fa-shield-halved"></i> Setor Administrativo
         </button>
@@ -77,13 +76,13 @@
         </div>
     </div>
 
-    <!-- TELA DE ESPERA / BLOQUEIO TRIAL (PARA PROFESSORES EXPIRADOS) -->
+    <!-- TELA DE ESPERA / BLOQUEIO TRIAL -->
     <div id="pendingView" class="flex-grow flex items-center justify-center p-6 hidden">
         <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl text-center space-y-4 border border-slate-100">
             <div class="inline-flex p-4 bg-amber-50 text-amber-600 rounded-full text-3xl">
                 <i class="fa-solid fa-clock-rotate-left"></i>
             </div>
-            <h3 class="text-xl font-bold text-slate-800">Acesso Restrito / Expirado</h3>
+            <h3 class="text-xl font-bold text-slate-800">Acesso Restrito / Bloqueado</h3>
             <p class="text-xs text-slate-500">
                 O seu acesso encontra-se expirado ou bloqueado pela administração. Envie o link do comprovativo do plano (R$ 29,90/mês) pelo chat de suporte abaixo para reativar.
             </p>
@@ -93,9 +92,9 @@
             </div>
             
             <div class="space-y-2 text-left">
-                <input type="text" id="supportMsgInput" placeholder="Escreva sua mensagem..." class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="text" id="supportMsgInput" placeholder="Escreva sua mensagem..." autocomplete="off" class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <div class="flex gap-2">
-                    <input type="url" id="supportLinkInput" placeholder="Cole o link do comprovativo (Drive, etc)..." class="flex-1 text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="url" id="supportLinkInput" placeholder="Cole o link do comprovativo..." autocomplete="off" class="flex-1 text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <button onclick="sendSupportMessage()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg font-semibold transition">Enviar</button>
                 </div>
             </div>
@@ -128,7 +127,7 @@
                 </div>
             </div>
             
-            <!-- GERENCIAR TURMA (PARA O PROFESSOR) -->
+            <!-- GERENCIAR TURMA (PROFESSOR) -->
             <div id="professorStudentManage" class="pt-4 border-t border-slate-100 hidden space-y-2">
                 <h3 class="text-xs font-bold text-indigo-700 mb-1 flex items-center justify-between">
                     <span>Gerenciar Turma</span>
@@ -145,7 +144,7 @@
                 </button>
             </div>
 
-            <!-- BOTÃO DE CHAT COM O PROFESSOR (APENAS PARA ALUNOS) -->
+            <!-- CHAT DO ALUNO -->
             <div id="studentChatContainer" class="pt-4 border-t border-slate-100 hidden">
                 <h3 class="text-xs font-bold text-indigo-700 mb-2 flex items-center justify-between">
                     <span>Suporte / Professor</span>
@@ -185,7 +184,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border text-xs">
                         <div>
                             <label class="block font-bold text-slate-600 mb-1">Link Externo (URL)</label>
-                            <input type="url" id="materialLink" required placeholder="https://drive.google.com/..." class="w-full px-3 py-2 border rounded-lg bg-white">
+                            <input type="url" id="materialLink" required placeholder="https://drive.google.com/..." autocomplete="off" class="w-full px-3 py-2 border rounded-lg bg-white">
                         </div>
                         <div>
                             <label class="block font-bold text-slate-600 mb-1">Nome Personalizado do Link</label>
@@ -227,7 +226,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE AUTENTICAÇÃO -->
+    <!-- MODAL DE AUTENTICAÇÃO (CAMPOS EM BRANCO) -->
     <div id="authModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-slate-100 relative">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -245,7 +244,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
-                        <input type="password" id="loginPass" required placeholder="••••••••" autocomplete="current-password"
+                        <input type="password" id="loginPass" required placeholder="••••••••" autocomplete="new-password"
                             class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
@@ -306,11 +305,11 @@
                 <form id="formForgot" onsubmit="handleForgotSubmit(event)" class="space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
-                        <input type="text" id="forgotUser" required class="w-full text-sm px-3.5 py-2.5 border rounded-xl">
+                        <input type="text" id="forgotUser" required autocomplete="off" class="w-full text-sm px-3.5 py-2.5 border rounded-xl">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Palavra Secreta</label>
-                        <input type="text" id="forgotSecret" required class="w-full text-sm px-3.5 py-2.5 border rounded-xl">
+                        <input type="text" id="forgotSecret" required autocomplete="off" class="w-full text-sm px-3.5 py-2.5 border rounded-xl">
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-semibold">Validar</button>
                 </form>
@@ -330,9 +329,9 @@
                 <p class="text-slate-400 text-center py-10">A carregar mensagens...</p>
             </div>
             <div class="space-y-2 text-left mb-3">
-                <input type="text" id="profAdminMsgInput" placeholder="Escreva sua mensagem..." class="w-full text-xs px-3 py-2 border rounded-lg">
+                <input type="text" id="profAdminMsgInput" placeholder="Escreva sua mensagem..." autocomplete="off" class="w-full text-xs px-3 py-2 border rounded-lg">
                 <div class="flex gap-2">
-                    <input type="url" id="profAdminLinkInput" placeholder="Link do comprovativo (opcional)..." class="flex-1 text-xs px-3 py-2 border rounded-lg">
+                    <input type="url" id="profAdminLinkInput" placeholder="Link do comprovativo (opcional)..." autocomplete="off" class="flex-1 text-xs px-3 py-2 border rounded-lg">
                     <button onclick="sendProfAdminSupportMsg()" class="bg-indigo-600 text-white text-xs px-4 py-2 rounded-lg font-semibold">Enviar</button>
                 </div>
             </div>
@@ -356,7 +355,7 @@
                         <p class="text-slate-400 text-center py-6">Nenhuma conversa selecionada.</p>
                     </div>
                     <div class="flex gap-2 pt-2 border-t">
-                        <input type="text" id="professorStudentInput" placeholder="Escrever mensagem..." class="flex-1 text-xs px-2.5 py-1.5 border rounded-lg">
+                        <input type="text" id="professorStudentInput" placeholder="Escrever mensagem..." autocomplete="off" class="flex-1 text-xs px-2.5 py-1.5 border rounded-lg">
                         <button onclick="sendProfessorStudentMsg()" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">Enviar</button>
                     </div>
                 </div>
@@ -374,18 +373,18 @@
                 <p class="text-slate-400 text-center py-10">A carregar mensagens...</p>
             </div>
             <div class="flex gap-2 mb-3">
-                <input type="text" id="studentDirectInput" placeholder="Escreva a sua dúvida..." class="flex-1 text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="text" id="studentDirectInput" placeholder="Escreva a sua dúvida..." autocomplete="off" class="flex-1 text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <button onclick="sendStudentDirectMsg()" class="bg-indigo-600 text-white text-xs px-4 py-2 rounded-lg font-semibold">Enviar</button>
             </div>
             <button onclick="closeStudentChatModal()" class="w-full bg-slate-200 text-slate-700 py-2 rounded-xl text-xs font-semibold">Fechar</button>
         </div>
     </div>
 
-    <!-- PAINEL MASTER DO PROPRIETÁRIO COM CONTROLO MANUAL TOTAL -->
+    <!-- PAINEL MASTER COM BOTÃO INTELIGENTE ÚNICO E LIXEIRA -->
     <div id="masterAdminModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl border border-rose-100 relative">
             <h3 class="font-bold text-rose-600 text-lg mb-1"><i class="fa-solid fa-shield-halved"></i> Painel Master do Proprietário</h3>
-            <p class="text-xs text-slate-500 mb-4">Gestão manual e automática de acessos e assinaturas de professores (R$ 29,90/mês)</p>
+            <p class="text-xs text-slate-500 mb-4">Gestão de acessos, assinaturas e exclusão de professores (R$ 29,90/mês)</p>
             <div class="space-y-3 max-h-96 overflow-y-auto" id="masterAdminList">
                 <p class="text-xs text-slate-400">A carregar professores...</p>
             </div>
@@ -400,7 +399,7 @@
             <p class="text-xs text-slate-500 mb-3">Analise o comprovativo e responda ou gerencie o acesso.</p>
             <div class="bg-slate-50 border rounded-xl p-3 h-48 overflow-y-auto text-xs space-y-2 mb-3" id="adminChatBox"></div>
             <div class="flex gap-2 mb-3">
-                <input type="text" id="adminChatInput" placeholder="Responder ao professor..." class="flex-1 text-xs px-3 py-2 border rounded-lg">
+                <input type="text" id="adminChatInput" placeholder="Responder ao professor..." autocomplete="off" class="flex-1 text-xs px-3 py-2 border rounded-lg">
                 <button onclick="sendAdminMessage()" class="bg-indigo-600 text-white text-xs px-4 py-2 rounded-lg font-semibold">Enviar</button>
             </div>
             <button onclick="closeAdminChat()" class="w-full bg-slate-200 text-slate-700 py-2 rounded-xl text-xs font-semibold">Fechar Chat</button>
@@ -411,7 +410,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCTNab5Tf_7q69r-JLzyK2u-bDF_4YRQxU",
@@ -489,6 +488,18 @@
         window.openAuthModal = function(view) {
             document.getElementById('authModal').classList.remove('hidden');
             switchAuthView(view);
+            // Mantém os campos sempre limpos ao abrir o modal
+            if (view === 'login') {
+                document.getElementById('loginUser').value = '';
+                document.getElementById('loginPass').value = '';
+            } else if (view === 'register') {
+                if (!urlTurmaCode) {
+                    document.getElementById('regName').value = '';
+                }
+                document.getElementById('regPass').value = '';
+                document.getElementById('regPassConfirm').value = '';
+                document.getElementById('regSecret').value = '';
+            }
         };
 
         window.closeAuthModal = function() {
@@ -538,6 +549,7 @@
                     const seteDias = 7 * 24 * 60 * 60 * 1000;
                     const expiradoPorTempo = (agora - criacao) > seteDias;
                     
+                    // Verificação rigorosa do status bloqueado ou expirado
                     const estaBloqueado = currentUserData.status === 'bloqueado' || (expiradoPorTempo && currentUserData.status !== 'pago');
 
                     if (estaBloqueado) {
@@ -860,7 +872,6 @@
             const passConfirm = document.getElementById('regPassConfirm').value;
             const secretWord = document.getElementById('regSecret').value.trim().toLowerCase();
 
-            // Validação customizada para impedir senhas curtas sem mostrar erros em inglês do Firebase
             if (pass.length < 6) {
                 showCustomAlert("Senha Curta", "A senha precisa de ter pelo menos 6 caracteres por motivos de segurança.", "error");
                 return;
@@ -903,7 +914,7 @@
             await signOut(auth);
         };
 
-        // PAINEL MASTER COM CONTROLO MANUAL COMPLETO (LIBERAR E BLOQUEAR)
+        // PAINEL MASTER COM BOTÃO ÚNICO INTELIGENTE E LIXEIRA
         window.carregarPainelMaster = async function() {
             const listContainer = document.getElementById('masterAdminList');
             const snap = await getDocs(collection(db, "users"));
@@ -921,12 +932,17 @@
                     const estaBloqueado = u.status === 'bloqueado' || expiradoPorTempo;
 
                     let statusBadge = '';
+                    let botaoStatusHTML = '';
+
                     if (u.status === 'pago') {
                         statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-bold">🟢 LIBERADO (Pago)</span>';
+                        botaoStatusHTML = `<button onclick="alternarStatusProfessor('${d.id}', 'bloqueado')" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg font-semibold transition">Bloquear</button>`;
                     } else if (estaBloqueado) {
                         statusBadge = '<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-bold">🔴 BLOQUEADO</span>';
+                        botaoStatusHTML = `<button onclick="alternarStatusProfessor('${d.id}', 'pago')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-semibold transition">Liberar</button>`;
                     } else {
                         statusBadge = `<span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full font-bold">🟡 TRIAL (${diasRestantes} dias)</span>`;
+                        botaoStatusHTML = `<button onclick="alternarStatusProfessor('${d.id}', 'bloqueado')" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg font-semibold transition">Bloquear</button>`;
                     }
 
                     listContainer.innerHTML += `
@@ -936,9 +952,9 @@
                                 <div class="mt-1 flex items-center gap-2">Status: ${statusBadge}</div>
                             </div>
                             <div class="flex flex-wrap gap-1.5">
-                                <button onclick="abrirChatAdmin('${d.id}', '${u.username}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg font-semibold transition">Chat</button>
-                                <button onclick="alterarStatusProfessor('${d.id}', 'pago')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg font-semibold transition">Liberar</button>
-                                <button onclick="alterarStatusProfessor('${d.id}', 'bloqueado')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-lg font-semibold transition">Bloquear</button>
+                                <button onclick="abrirChatAdmin('${d.id}', '${u.username}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg font-semibold transition" title="Chat"><i class="fa-solid fa-comments"></i></button>
+                                ${botaoStatusHTML}
+                                <button onclick="excluirProfessor('${d.id}', '${u.username}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-lg font-semibold transition" title="Excluir Professor"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
                         </div>
                     `;
@@ -950,14 +966,26 @@
             }
         };
 
-        window.alterarStatusProfessor = async function(uid, novoStatus) {
+        window.alternarStatusProfessor = async function(uid, novoStatus) {
             const updates = { status: novoStatus };
             if (novoStatus === 'pago') {
-                updates.createdAt = Date.now();
+                updates.createdAt = Date.now(); // Renova o período de contagem
             }
             await updateDoc(doc(db, "users", uid), updates);
-            showCustomAlert("Sucesso", `Status do professor atualizado para: ${novoStatus.toUpperCase()}`, "success");
+            showCustomAlert("Sucesso", `Status alterado para: ${novoStatus.toUpperCase()}`, "success");
             carregarPainelMaster();
+        };
+
+        window.excluirProfessor = async function(uid, username) {
+            if (confirm(`Tem certeza que deseja excluir o professor ${username}? Esta ação não pode ser desfeita.`)) {
+                try {
+                    await deleteDoc(doc(db, "users", uid));
+                    showCustomAlert("Sucesso", "Professor excluído com sucesso do painel administrativo.", "success");
+                    carregarPainelMaster();
+                } catch (err) {
+                    showCustomAlert("Erro", "Não foi possível excluir o professor.", "error");
+                }
+            }
         };
 
         window.abrirChatAdmin = async function(profUid, profName) {
