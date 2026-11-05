@@ -262,7 +262,7 @@
         </div>
     </div>
 
-    <!-- POP-UP CUSTOMIZADO COM OPÇÃO DE IR PARA REGISTO -->
+    <!-- POP-UP CUSTOMIZADO PARA AVISOS GERAIS -->
     <div id="customAlertModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-4 border border-slate-100">
             <div id="customAlertIcon" class="inline-flex p-4 rounded-full text-3xl"></div>
@@ -1194,15 +1194,13 @@
             try {
                 await signInWithEmailAndPassword(auth, internalEmail, pass);
             } catch (err) {
-                const botoesAcao = `
-                    <button onclick="closeCustomAlert(); openAuthModal('register'); document.getElementById('regName').value='${rawInput}';" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-semibold transition mb-2">
-                        Criar Conta com este Nome
-                    </button>
-                    <button onclick="closeCustomAlert();" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 py-2 rounded-xl text-xs font-semibold transition">
-                        Tentar Novamente
-                    </button>
-                `;
-                showCustomAlert("Conta não encontrada ou Senha incorreta", `Não encontramos nenhum cadastro com o nome "${rawInput}" ou a senha está incorreta. Deseja criar uma conta nova agora?`, "error", botoesAcao);
+                // TRANSIÇÃO AUTOMÁTICA INTELIGENTE: Se a conta não existir, abre direto o registo preenchido
+                closeAuthModal();
+                openAuthModal('register');
+                document.getElementById('regName').value = rawInput;
+                document.getElementById('regPass').value = '';
+                document.getElementById('regPassConfirm').value = '';
+                document.getElementById('registerSubtitle').innerText = `Conta não encontrada para "${rawInput}". Crie a sua conta agora!`;
             }
         };
 
