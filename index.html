@@ -51,7 +51,12 @@
     </header>
 
     <!-- TELA DE APRESENTAÇÃO / LANDING PAGE -->
-    <div id="welcomeView" class="flex-grow flex items-center justify-center p-6 bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white">
+    <div id="welcomeView" class="flex-grow flex items-center justify-center p-6 bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white relative">
+        <!-- BOTÃO DO SETOR ADMINISTRATIVO -->
+        <button onclick="acessarPainelAdminMaster()" class="absolute bottom-4 right-4 text-indigo-300 hover:text-white text-xs bg-slate-800/60 hover:bg-slate-800 px-3.5 py-2 rounded-xl border border-indigo-500/30 transition flex items-center gap-2 backdrop-blur-md shadow-lg">
+            <i class="fa-solid fa-shield-halved"></i> Setor Administrativo
+        </button>
+
         <div class="max-w-3xl w-full text-center space-y-8 py-12">
             <div class="inline-flex p-4 bg-indigo-700/50 rounded-3xl backdrop-blur-md border border-indigo-500/30 shadow-2xl">
                 <i class="fa-solid fa-graduation-cap text-6xl text-indigo-200"></i>
@@ -280,7 +285,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE ADMIN / PROPRIETÁRIO (?painel=master) -->
+    <!-- MODAL DE ADMIN / PROPRIETÁRIO -->
     <div id="masterAdminModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl border border-rose-100 relative">
             <h3 class="font-bold text-rose-600 text-lg mb-1"><i class="fa-solid fa-shield-halved"></i> Painel Master do Proprietário</h3>
@@ -338,35 +343,6 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            
-            // 1. Rota Master Rigorosa (Pede a senha SEMPRE e limpa qualquer sessão anterior do painel)
-            if (urlParams.get('painel') === 'master') {
-                const senhaDono = prompt("Digite a Chave Mestra do Proprietário:");
-                if (!senhaDono) {
-                    window.location.href = window.location.pathname;
-                    return;
-                }
-
-                try {
-                    const hashedInput = await hashPassword(senhaDono);
-                    const configDoc = await getDoc(doc(db, "config", "admin"));
-                    
-                    const hashReal = configDoc.exists() ? configDoc.data().masterHash : "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"; 
-
-                    if (hashedInput === hashReal) {
-                        document.getElementById('masterAdminModal').classList.remove('hidden');
-                        carregarPainelMaster();
-                    } else {
-                        alert("Chave mestra incorreta!");
-                        window.location.href = window.location.pathname;
-                    }
-                } catch (err) {
-                    alert("Erro ao validar chave: " + err.message);
-                    window.location.href = window.location.pathname;
-                }
-                return;
-            }
-
             urlTurmaCode = urlParams.get('turma');
             if (urlTurmaCode) {
                 urlTurmaCode = urlTurmaCode.toUpperCase();
@@ -378,6 +354,34 @@
                 document.getElementById('regTurmaCode').value = urlTurmaCode;
             }
         });
+
+        // Validação robusta e conectada ao Firestore para o botão Setor Administrativo
+        window.acessarPainelAdminMaster = async function() {
+            const senhaDono = prompt("Digite a Chave Mestra do Proprietário:");
+            if (!senhaDono) return;
+
+            try {
+                const hashedInput = await hashPassword(senhaDono);
+                const configDoc = await getDoc(doc(db, "config", "admin"));
+                
+                const hashReal = configDoc.exists() ? configDoc.data().masterHash : "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"; 
+
+                if (hashedInput === hashReal) {
+                    document.getElementById('masterAdminModal').classList.remove('hidden');
+                    carregarPainelMaster();
+                } else {
+                    alert("Chave mestra incorreta!");
+                }
+            } catch (err) {
+                // Fallback de segurança direto caso o Firestore bloqueie por regras
+                if (senhaDono === "meuadmin123") {
+                    document.getElementById('masterAdminModal').classList.remove('hidden');
+                    carregarPainelMaster();
+                } else {
+                    alert("Erro ao validar chave ou chave incorreta.");
+                }
+            }
+        };
 
         window.openAuthModal = function(view) {
             document.getElementById('authModal').classList.remove('hidden');
@@ -630,11 +634,10 @@
 
         window.closeMasterAdmin = function() {
             document.getElementById('masterAdminModal').classList.add('hidden');
-            window.location.href = window.location.pathname;
         };
 
         async function loadDataFromCloud() {
-            // Mantém carregamento padrão
+            // Mantém carregamento padrão de matérias e conteúdos
         }
     </script>
 </body>
