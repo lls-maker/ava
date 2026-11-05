@@ -334,13 +334,6 @@
         let urlTurmaCode = '';
         let activeChatProfUid = null;
 
-        async function hashPassword(string) {
-            const utf8 = new TextEncoder().encode(string);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             urlTurmaCode = urlParams.get('turma');
@@ -355,31 +348,16 @@
             }
         });
 
-        // Validação robusta e conectada ao Firestore para o botão Setor Administrativo
-        window.acessarPainelAdminMaster = async function() {
+        // Validação direta configurada com a nova senha "adminfacil!"
+        window.acessarPainelAdminMaster = function() {
             const senhaDono = prompt("Digite a Chave Mestra do Proprietário:");
             if (!senhaDono) return;
 
-            try {
-                const hashedInput = await hashPassword(senhaDono);
-                const configDoc = await getDoc(doc(db, "config", "admin"));
-                
-                const hashReal = configDoc.exists() ? configDoc.data().masterHash : "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"; 
-
-                if (hashedInput === hashReal) {
-                    document.getElementById('masterAdminModal').classList.remove('hidden');
-                    carregarPainelMaster();
-                } else {
-                    alert("Chave mestra incorreta!");
-                }
-            } catch (err) {
-                // Fallback de segurança direto caso o Firestore bloqueie por regras
-                if (senhaDono === "meuadmin123") {
-                    document.getElementById('masterAdminModal').classList.remove('hidden');
-                    carregarPainelMaster();
-                } else {
-                    alert("Erro ao validar chave ou chave incorreta.");
-                }
+            if (senhaDono === "adminfacil!") {
+                document.getElementById('masterAdminModal').classList.remove('hidden');
+                carregarPainelMaster();
+            } else {
+                alert("Chave mestra incorreta!");
             }
         };
 
@@ -637,7 +615,7 @@
         };
 
         async function loadDataFromCloud() {
-            // Mantém carregamento padrão de matérias e conteúdos
+            // Mantém carregamento padrão
         }
     </script>
 </body>
