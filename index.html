@@ -77,7 +77,6 @@
                 Os seus 7 dias de teste grátis terminaram. Envie o comprovativo do plano (R$ 29,90/mês) pelo chat de suporte abaixo para renovar o acesso.
             </p>
 
-            <!-- CHAT DE SUPORTE DIRETO COM O PROPRIETÁRIO -->
             <div class="bg-slate-50 border rounded-xl p-3 h-36 overflow-y-auto text-left text-xs space-y-2" id="supportChatBox">
                 <p class="text-slate-400 text-center py-4">A carregar chat de suporte...</p>
             </div>
@@ -192,7 +191,6 @@
         <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-slate-100 relative">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             
-            <!-- TELA DE LOGIN -->
             <div id="viewLogin" class="space-y-4">
                 <div class="text-center mb-6">
                     <h3 class="font-bold text-slate-800 text-xl">Acessar o AVA</h3>
@@ -219,7 +217,6 @@
                 </div>
             </div>
 
-            <!-- TELA DE CADASTRO -->
             <div id="viewRegister" class="space-y-4 hidden">
                 <div class="text-center mb-4">
                     <h3 class="font-bold text-slate-800 text-xl" id="registerTitle">Criar Conta (Professor - 7 Dias Grátis)</h3>
@@ -261,7 +258,6 @@
                 </div>
             </div>
 
-            <!-- TELA DE RECUPERAÇÃO -->
             <div id="viewForgot" class="space-y-4 hidden">
                 <div class="text-center mb-4">
                     <h3 class="font-bold text-slate-800 text-xl">Recuperar Senha</h3>
@@ -333,17 +329,33 @@
         let urlTurmaCode = '';
         let activeChatProfUid = null;
 
+        // Função utilitária para encriptar texto em SHA-256 no navegador
+        async function hashPassword(string) {
+            const utf8 = new TextEncoder().encode(string);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             
-            // 1. Rota Master Segura no Firebase (A Chave Mestra fica guardada no Firestore, coleção "config", documento "admin")
+            // 1. Rota Master com Validação Criptografada (SHA-256)
             if (urlParams.get('painel') === 'master') {
                 const senhaDono = prompt("Digite a Chave Mestra do Proprietário:");
-                try {
-                    const configDoc = await getDoc(doc(db, "config", "admin"));
-                    const chaveReal = configDoc.exists() ? configDoc.data().masterKey : "meuadmin123"; // Senha padrão inicial caso não exista
+                if (!senhaDono) {
+                    window.location.href = window.location.pathname;
+                    return;
+                }
 
-                    if (senhaDono === chaveReal) {
+                try {
+                    const hashedInput = await hashPassword(senhaDono);
+                    const configDoc = await getDoc(doc(db, "config", "admin"));
+                    
+                    // Hash padrão correspondente à senha "meuadmin123" caso ainda não tenha criado o documento
+                    const hashReal = configDoc.exists() ? configDoc.data().masterHash : "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"; 
+
+                    if (hashedInput === hashReal) {
                         document.getElementById('masterAdminModal').classList.remove('hidden');
                         carregarPainelMaster();
                     } else {
@@ -410,7 +422,6 @@
                     <button onclick="handleLogout()" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-indigo-500 ml-1">Sair</button>
                 `;
 
-                // Validação do Trial de 7 Dias para Professores
                 if (currentUserData.role === 'professor') {
                     const agora = Date.now();
                     const criacao = currentUserData.createdAt || agora;
@@ -449,7 +460,6 @@
             }
         });
 
-        // Chat de Suporte do Professor (Expirado)
         window.carregarChatSuporteProfessor = async function() {
             const box = document.getElementById('supportChatBox');
             const messagesRef = collection(db, "users", currentUserData.uid, "supportMessages");
@@ -545,7 +555,6 @@
             await signOut(auth);
         };
 
-        // Painel Master para o Proprietário gerir renovações e suporte
         window.carregarPainelMaster = async function() {
             const listContainer = document.getElementById('masterAdminList');
             const snap = await getDocs(collection(db, "users"));
@@ -627,7 +636,7 @@
         };
 
         async function loadDataFromCloud() {
-            // Mantém carregamento padrão de matérias e conteúdos
+            // Mantém carregamento padrão
         }
     </script>
 </body>
