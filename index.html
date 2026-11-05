@@ -109,9 +109,25 @@
     <main id="mainAppView" class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6 hidden">
         <aside class="lg:col-span-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 h-fit space-y-4">
             <div>
+                <!-- SELETOR / GERENCIADOR DE TURMAS DO PROFESSOR -->
+                <div id="professorTurmasContainer" class="mb-4 hidden space-y-2">
+                    <label class="block text-[10px] font-bold text-indigo-700 uppercase">Sua Turma Ativa</label>
+                    <div class="flex gap-2">
+                        <select id="professorTurmaSelect" onchange="mudarTurmaProfessor(this.value)" class="flex-1 text-xs px-3 py-2 border rounded-xl bg-indigo-50 font-bold text-indigo-800 focus:outline-none"></select>
+                        <button onclick="openNewTurmaModal()" class="bg-indigo-600 text-white px-3 py-2 rounded-xl text-xs font-semibold" title="Criar Nova Turma"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <!-- SELETOR DE TURMA ATIVA (PARA ALUNOS) -->
+                <div id="studentTurmaSelectorContainer" class="mb-4 hidden">
+                    <label class="block text-[10px] font-bold text-indigo-700 uppercase mb-1">Turma / Professor Ativo</label>
+                    <select id="activeTurmaSelect" onchange="mudarTurmaAtiva(this.value)" class="w-full text-xs px-3 py-2 border rounded-xl bg-indigo-50 font-bold text-indigo-800 focus:outline-none"></select>
+                </div>
+
                 <button id="desktopRefreshBtn" onclick="loadDataFromCloud()" class="hidden lg:flex w-full items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 mb-4">
                     <i class="fa-solid fa-rotate-right"></i> Atualizar Conteúdos
                 </button>
+                
                 <h2 class="text-base font-bold text-slate-700 mb-3 flex items-center justify-between">
                     <span>Matérias</span>
                     <i class="fa-solid fa-book-open text-indigo-600 text-sm"></i>
@@ -130,17 +146,29 @@
             <!-- GERENCIAR TURMA (PROFESSOR) -->
             <div id="professorStudentManage" class="pt-4 border-t border-slate-100 hidden space-y-2">
                 <h3 class="text-xs font-bold text-indigo-700 mb-1 flex items-center justify-between">
-                    <span>Gerenciar Turma</span>
+                    <span>Gerenciar Turma Atual</span>
                     <i class="fa-solid fa-users"></i>
                 </h3>
                 <button onclick="openStudentsModal()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-user-gear"></i> Gerenciar Alunos & Chat
+                    <i class="fa-solid fa-user-gear"></i> Aprovar Alunos & Chat
                 </button>
                 <button onclick="copyInviteLink()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2 rounded-xl transition border border-slate-200 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-copy"></i> Copiar Link de Convite
+                    <i class="fa-solid fa-copy"></i> Copiar Link desta Turma
                 </button>
                 <button onclick="openProfessorAdminSupportModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2 rounded-xl transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-headset"></i> Suporte Administrativo
+                </button>
+            </div>
+
+            <!-- ADICIONAR NOVA TURMA / PROFESSOR (ALUNO) -->
+            <div id="studentJoinTurmaContainer" class="pt-4 border-t border-slate-100 hidden space-y-2">
+                <h3 class="text-xs font-bold text-indigo-700 mb-1 flex items-center justify-between">
+                    <span>Adicionar Professor</span>
+                    <i class="fa-solid fa-user-plus"></i>
+                </h3>
+                <input type="text" id="newTurmaCodeInput" placeholder="Código (Ex: MAT-A)" autocomplete="off" class="w-full text-xs px-3 py-2 border rounded-lg uppercase">
+                <button onclick="entrarEmNovaTurma()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 rounded-xl transition shadow-sm">
+                    Vincular Turma
                 </button>
             </div>
 
@@ -213,6 +241,19 @@
             </div>
         </section>
     </main>
+
+    <!-- MODAL DE CRIAR NOVA TURMA -->
+    <div id="newTurmaModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl space-y-4">
+            <h3 class="font-bold text-indigo-700 text-base"><i class="fa-solid fa-folder-plus"></i> Criar Nova Turma</h3>
+            <p class="text-xs text-slate-500">Dê um nome para a turma (Ex: Matemática A, Física 2º Ano).</p>
+            <input type="text" id="newTurmaNameInput" placeholder="Nome da Turma..." autocomplete="off" class="w-full text-xs px-3 py-2 border rounded-xl">
+            <div class="flex gap-2">
+                <button onclick="criarNovaTurmaProfessor()" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl text-xs font-semibold">Criar</button>
+                <button onclick="closeNewTurmaModal()" class="flex-1 bg-slate-200 text-slate-700 py-2 rounded-xl text-xs font-semibold">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- POP-UP CUSTOMIZADO -->
     <div id="customAlertModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
@@ -342,11 +383,11 @@
         </div>
     </div>
 
-    <!-- MODAL DE GERENCIAR ALUNOS E CHAT -->
+    <!-- MODAL DE GERENCIAR ALUNOS E APROVAÇÃO -->
     <div id="studentsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl relative">
-            <h3 class="font-bold text-indigo-700 text-lg mb-1"><i class="fa-solid fa-users-gear"></i> Gerenciamento de Alunos e Mensagens</h3>
-            <p class="text-xs text-slate-500 mb-4">Veja os alunos inscritos na sua turma e responda a dúvidas individuais.</p>
+            <h3 class="font-bold text-indigo-700 text-lg mb-1"><i class="fa-solid fa-users-gear"></i> Aprovação e Gestão de Alunos</h3>
+            <p class="text-xs text-slate-500 mb-4">Aprove novos alunos que solicitaram entrada na turma selecionada.</p>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="border rounded-xl p-3 bg-slate-50 max-h-72 overflow-y-auto" id="studentsListContainer">
@@ -454,6 +495,7 @@
 
         let currentUserData = null;
         let urlTurmaCode = '';
+        let activeTurmaCode = '';
         let activeChatProfUid = null;
         let selectedStudentUid = null;
         let subjectsData = [];
@@ -552,6 +594,9 @@
             const addSubContainer = document.getElementById('addSubjectContainer');
             const profStudentManage = document.getElementById('professorStudentManage');
             const studentChatContainer = document.getElementById('studentChatContainer');
+            const studentJoinTurmaContainer = document.getElementById('studentJoinTurmaContainer');
+            const studentTurmaSelectorContainer = document.getElementById('studentTurmaSelectorContainer');
+            const professorTurmasContainer = document.getElementById('professorTurmasContainer');
             const notificationArea = document.getElementById('notificationArea');
 
             if (user) {
@@ -601,12 +646,33 @@
                     addSubContainer.classList.remove('hidden');
                     profStudentManage.classList.remove('hidden');
                     studentChatContainer.classList.add('hidden');
-                    document.getElementById('professorTurmaBadge').innerText = `Turma: ${currentUserData.turmaCode || 'N/A'}`;
+                    studentJoinTurmaContainer.classList.add('hidden');
+                    studentTurmaSelectorContainer.classList.add('hidden');
+                    professorTurmasContainer.classList.remove('hidden');
+
+                    if (!currentUserData.turmasCriadas) {
+                        currentUserData.turmasCriadas = currentUserData.turmaCode ? [{ code: currentUserData.turmaCode, name: 'Turma Principal' }] : [];
+                    }
+                    if (currentUserData.turmasCriadas.length > 0 && !activeTurmaCode) {
+                        activeTurmaCode = currentUserData.turmasCriadas[0].code;
+                    }
+                    atualizarSeletorTurmasProfessor();
                 } else {
                     profPanel.classList.add('hidden');
                     addSubContainer.classList.add('hidden');
                     profStudentManage.classList.add('hidden');
+                    professorTurmasContainer.classList.add('hidden');
                     studentChatContainer.classList.remove('hidden');
+                    studentJoinTurmaContainer.classList.remove('hidden');
+                    studentTurmaSelectorContainer.classList.remove('hidden');
+
+                    if (!currentUserData.turmasInscritas) {
+                        currentUserData.turmasInscritas = currentUserData.turmaCode ? [currentUserData.turmaCode] : [];
+                    }
+                    if (currentUserData.turmasInscritas.length > 0 && !activeTurmaCode) {
+                        activeTurmaCode = currentUserData.turmasInscritas[0];
+                    }
+                    atualizarSeletorTurmasAluno();
                 }
                 loadDataFromCloud();
             } else {
@@ -615,6 +681,7 @@
                 mainAppView.classList.add('hidden');
                 notificationArea.classList.add('hidden');
                 currentUserData = null;
+                activeTurmaCode = '';
                 headerArea.innerHTML = `
                     <button onclick="openAuthModal('login')" class="bg-indigo-600 text-white text-xs px-3.5 py-2 rounded-xl">Entrar</button>
                     <button onclick="openAuthModal('register')" class="bg-white text-indigo-700 text-xs px-3.5 py-2 rounded-xl shadow-sm">Criar Conta</button>
@@ -634,7 +701,6 @@
             }
         }
 
-        // MONITOR GLOBAL DE NOTIFICAÇÕES PARA O ADMINISTRADOR COM ATUALIZAÇÃO DE LEITURA
         async function iniciarOuvinteGlobalAdmin() {
             adminUnsubscribes.forEach(unsub => unsub());
             adminUnsubscribes = [];
@@ -644,7 +710,6 @@
             const badge = document.getElementById('adminNotifBadge');
             
             list.innerHTML = '';
-            let totalNaoLidas = 0;
 
             snapUsers.forEach(userDoc => {
                 const u = userDoc.data();
@@ -657,9 +722,7 @@
                         const itemExistente = document.getElementById(`notif-prof-${userDoc.id}`);
                         if (itemExistente) itemExistente.remove();
 
-                        // Verifica se a última mensagem é do professor E não foi lida
                         if (ultimaMsg && ultimaMsg.sender === 'professor' && ultimaMsg.lidoAdmin !== true) {
-                            totalNaoLidas++;
                             badge.classList.remove('hidden');
                             badge.innerText = "!";
                             
@@ -718,10 +781,10 @@
         };
 
         window.copyInviteLink = function() {
-            if (!currentUserData || !currentUserData.turmaCode) return;
-            const link = `${window.location.origin}${window.location.pathname}?turma=${currentUserData.turmaCode}`;
+            if (!activeTurmaCode) return;
+            const link = `${window.location.origin}${window.location.pathname}?turma=${activeTurmaCode}`;
             navigator.clipboard.writeText(link).then(() => {
-                showCustomAlert("Sucesso", "Link de convite copiado para a área de transferência!", "success");
+                showCustomAlert("Sucesso", `Link da turma ${activeTurmaCode} copiado para a área de transferência!`, "success");
             });
         };
 
@@ -787,32 +850,125 @@
             }
         };
 
+        // GESTÃO DE MÚLTIPLAS TURMAS PELO PROFESSOR
+        window.openNewTurmaModal = function() {
+            document.getElementById('newTurmaModal').classList.remove('hidden');
+            document.getElementById('newTurmaNameInput').value = '';
+        };
+
+        window.closeNewTurmaModal = function() {
+            document.getElementById('newTurmaModal').classList.add('hidden');
+        };
+
+        window.criarNovaTurmaProfessor = async function() {
+            const nomeTurma = document.getElementById('newTurmaNameInput').value.trim();
+            if (!nomeTurma) return;
+
+            const codigoTurma = `${currentUserData.lookupKey.toUpperCase()}-${nomeTurma.toUpperCase().replace(/[^A-Z0-9]/g, '')}`;
+            
+            let turmas = currentUserData.turmasCriadas || [];
+            if (turmas.some(t => t.code === codigoTurma)) {
+                showCustomAlert("Erro", "Você já possui uma turma com este nome/código.", "error");
+                return;
+            }
+
+            turmas.push({ code: codigoTurma, name: nomeTurma });
+            await updateDoc(doc(db, "users", currentUserData.uid), { turmasCriadas: turmas });
+            currentUserData.turmasCriadas = turmas;
+            activeTurmaCode = codigoTurma;
+
+            closeNewTurmaModal();
+            showCustomAlert("Sucesso", `Turma ${nomeTurma} criada com sucesso!`, "success");
+            atualizarSeletorTurmasProfessor();
+            loadDataFromCloud();
+        };
+
+        function atualizarSeletorTurmasProfessor() {
+            const select = document.getElementById('professorTurmaSelect');
+            if (!select || !currentUserData.turmasCriadas) return;
+
+            select.innerHTML = currentUserData.turmasCriadas.map(t => `
+                <option value="${t.code}" ${t.code === activeTurmaCode ? 'selected' : ''}>${t.name} (${t.code})</option>
+            `).join('');
+
+            document.getElementById('professorTurmaBadge').innerText = `Turma: ${activeTurmaCode}`;
+        }
+
+        window.mudarTurmaProfessor = function(novaTurmaCode) {
+            activeTurmaCode = novaTurmaCode;
+            document.getElementById('professorTurmaBadge').innerText = `Turma: ${activeTurmaCode}`;
+            loadDataFromCloud();
+        };
+
+        // APROVAÇÃO DE ALUNOS NA TURMA ATIVA
         window.openStudentsModal = async function() {
             document.getElementById('studentsModal').classList.remove('hidden');
             const container = document.getElementById('studentsListContainer');
             container.innerHTML = '<p class="text-xs text-slate-400">A carregar alunos...</p>';
 
-            const q = query(collection(db, "users"), where("turmaCode", "==", currentUserData.turmaCode), where("role", "==", "aluno"));
+            const q = query(collection(db, "users"), where("role", "==", "aluno"));
             const snap = await getDocs(q);
 
-            if (snap.empty) {
-                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Nenhum aluno cadastrado nesta turma.</p>';
-                return;
-            }
-
             container.innerHTML = '';
+            let temAlunos = false;
+
             snap.forEach(d => {
                 const aluno = d.data();
-                container.innerHTML += `
-                    <div onclick="selecionarAlunoChat('${d.id}', '${aluno.username}')" class="p-2.5 mb-2 bg-white rounded-xl border hover:border-indigo-500 cursor-pointer transition flex items-center justify-between text-xs">
-                        <div>
-                            <span class="font-bold text-slate-800">${aluno.username}</span>
-                            <span class="block text-[10px] text-slate-400">Aluno</span>
+                const turmas = aluno.turmasInscritas || [aluno.turmaCode];
+                if (turmas.includes(activeTurmaCode)) {
+                    temAlunos = true;
+                    const aprovado = aluno.aprovadoTurmas && aluno.aprovadoTurmas[activeTurmaCode] === true;
+
+                    container.innerHTML += `
+                        <div class="p-2.5 mb-2 bg-white rounded-xl border flex flex-col gap-2 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-slate-800">${aluno.username}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${aprovado ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                                    ${aprovado ? 'Aprovado' : 'Pendente'}
+                                </span>
+                            </div>
+                            <div class="flex gap-2">
+                                ${!aprovado ? `<button onclick="aprovarAluno('${d.id}', '${activeTurmaCode}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded font-semibold">Aprovar</button>` : ''}
+                                <button onclick="removerAlunoTurma('${d.id}', '${activeTurmaCode}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded font-semibold">Remover</button>
+                                <button onclick="selecionarAlunoChat('${d.id}', '${aluno.username}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded font-semibold"><i class="fa-solid fa-comment"></i> Chat</button>
+                            </div>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-400 text-[10px]"></i>
-                    </div>
-                `;
+                    `;
+                }
             });
+
+            if (!temAlunos) {
+                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Nenhum aluno vinculado a esta turma.</p>';
+            }
+        };
+
+        window.aprovarAluno = async function(alunoUid, turmaCode) {
+            const alunoRef = doc(db, "users", alunoUid);
+            const snap = await getDoc(alunoRef);
+            if (snap.exists()) {
+                let data = snap.data();
+                if (!data.aprovadoTurmas) data.aprovadoTurmas = {};
+                data.aprovadoTurmas[turmaCode] = true;
+                await updateDoc(alunoRef, { aprovadoTurmas: data.aprovadoTurmas });
+                showCustomAlert("Sucesso", "Aluno aprovado na turma!", "success");
+                openStudentsModal();
+            }
+        };
+
+        window.removerAlunoTurma = async function(alunoUid, turmaCode) {
+            if (confirm("Remover este aluno da turma?")) {
+                const alunoRef = doc(db, "users", alunoUid);
+                const snap = await getDoc(alunoRef);
+                if (snap.exists()) {
+                    let data = snap.data();
+                    let turmas = data.turmasInscritas || [data.turmaCode];
+                    turmas = turmas.filter(t => t !== turmaCode);
+                    if (data.aprovadoTurmas) delete data.aprovadoTurmas[turmaCode];
+                    await updateDoc(alunoRef, { turmasInscritas: turmas, aprovadoTurmas: data.aprovadoTurmas });
+                    showCustomAlert("Sucesso", "Aluno removido da turma.", "success");
+                    openStudentsModal();
+                }
+            }
         };
 
         window.closeStudentsModal = function() {
@@ -898,6 +1054,63 @@
             });
             input.value = '';
             carregarMensagensAlunoDireto();
+        };
+
+        window.entrarEmNovaTurma = async function() {
+            const codeInput = document.getElementById('newTurmaCodeInput');
+            const code = codeInput.value.trim().toUpperCase();
+            if (!code) return;
+
+            const q = query(collection(db, "users"), where("role", "==", "professor"));
+            const snap = await getDocs(q);
+
+            let turmaEncontrada = false;
+            snap.forEach(d => {
+                let prof = d.data();
+                let turmasProf = prof.turmasCriadas || [{ code: prof.turmaCode }];
+                if (turmasProf.some(t => t.code === code)) {
+                    turmaEncontrada = true;
+                }
+            });
+
+            if (!turmaEncontrada) {
+                showCustomAlert("Erro", "Código de turma/professor inválido.", "error");
+                return;
+            }
+
+            let turmas = currentUserData.turmasInscritas || [];
+            if (turmas.includes(code)) {
+                showCustomAlert("Aviso", "Você já está vinculado a esta turma.", "info");
+                return;
+            }
+
+            turmas.push(code);
+            let aprovados = currentUserData.aprovadoTurmas || {};
+            aprovados[code] = false;
+
+            await updateDoc(doc(db, "users", currentUserData.uid), { turmasInscritas: turmas, aprovadoTurmas: aprovados });
+            currentUserData.turmasInscritas = turmas;
+            currentUserData.aprovadoTurmas = aprovados;
+            activeTurmaCode = code;
+
+            codeInput.value = '';
+            showCustomAlert("Sucesso", "Turma vinculada com sucesso! Aguarde aprovação do professor.", "success");
+            atualizarSeletorTurmasAluno();
+            loadDataFromCloud();
+        };
+
+        function atualizarSeletorTurmasAluno() {
+            const select = document.getElementById('activeTurmaSelect');
+            if (!select || !currentUserData.turmasInscritas) return;
+
+            select.innerHTML = currentUserData.turmasInscritas.map(t => `
+                <option value="${t}" ${t === activeTurmaCode ? 'selected' : ''}>Turma: ${t}</option>
+            `).join('');
+        }
+
+        window.mudarTurmaAtiva = function(novaTurma) {
+            activeTurmaCode = novaTurma;
+            loadDataFromCloud();
         };
 
         window.carregarChatSuporteProfessor = async function() {
@@ -994,13 +1207,17 @@
                 };
 
                 if (role === 'professor') {
-                    userData.turmaCode = `PROF-${lookupKey.toUpperCase()}`;
+                    const codigoPrincipal = `PROF-${lookupKey.toUpperCase()}`;
+                    userData.turmaCode = codigoPrincipal;
+                    userData.turmasCriadas = [{ code: codigoPrincipal, name: 'Turma Principal' }];
                 } else {
                     userData.turmaCode = urlTurmaCode;
+                    userData.turmasInscritas = urlTurmaCode ? [urlTurmaCode] : [];
+                    userData.aprovadoTurmas = urlTurmaCode ? { [urlTurmaCode]: false } : {};
                 }
 
                 await setDoc(doc(db, "users", cred.user.uid), userData);
-                showCustomAlert("Sucesso", role === 'professor' ? 'Conta criada! Tem 7 dias grátis de período de teste.' : 'Cadastro realizado com sucesso!', "success");
+                showCustomAlert("Sucesso", role === 'professor' ? 'Conta criada! Tem 7 dias grátis de período de teste.' : 'Cadastro realizado! Aguarde a aprovação do professor.', "success");
             } catch (err) {
                 showCustomAlert("Erro no Cadastro", "Este nome de usuário já está em uso ou ocorreu um erro.", "error");
             }
@@ -1043,7 +1260,7 @@
                     listContainer.innerHTML += `
                         <div class="bg-slate-50 p-3 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
                             <div>
-                                <span class="font-bold text-slate-800 text-sm">${u.username}</span> (Turma: ${u.turmaCode})<br>
+                                <span class="font-bold text-slate-800 text-sm">${u.username}</span> (Turmas: ${(u.turmasCriadas || []).map(t => t.code).join(', ')})<br>
                                 <div class="mt-1 flex items-center gap-2">Status: ${statusBadge}</div>
                             </div>
                             <div class="flex flex-wrap gap-1.5">
@@ -1083,20 +1300,17 @@
             }
         };
 
-        // ABRE O CHAT E MARCA AS MENSAGENS COMO LIDAS PARA APAGAR O SININHO
         window.abrirChatAdmin = async function(profUid, profName) {
             activeChatProfUid = profUid;
             document.getElementById('adminChatTitle').innerText = `Suporte com: ${profName}`;
             document.getElementById('adminChatModal').classList.remove('hidden');
             
-            // Marca as mensagens do professor como lidas no banco
             const snap = await getDocs(collection(db, "users", profUid, "supportMessages"));
             for (let d of snap.docs) {
                 if (d.data().sender === 'professor' && d.data().lidoAdmin !== true) {
                     await updateDoc(doc(db, "users", profUid, "supportMessages", d.id), { lidoAdmin: true });
                 }
             }
-            
             carregarMensagensAdminChat();
         };
 
@@ -1112,7 +1326,7 @@
             let msgs = snap.docs.map(d => d.data());
             msgs.sort((a, b) => a.timestamp - b.timestamp);
             box.innerHTML = msgs.map(m => `
-                <div class="${m.sender === 'admin' ? 'text-right text-indigo-700 bg-indigo-50' : 'text-left text-slate-700 bg-slate-100'} p-2.5 rounded-lg space-y-1">
+                <div class="${m.sender === 'admin' ? 'text-left text-indigo-700 bg-indigo-50' : 'text-left text-slate-700 bg-slate-100'} p-2.5 rounded-lg space-y-1">
                     <b class="text-[10px] block">${m.sender === 'admin' ? 'Você (Administrativo)' : 'Professor'}:</b> 
                     <p class="text-xs">${m.text}</p>
                     ${m.link ? `<a href="${m.link}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-white border px-2 py-1 rounded-md text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-external-link-alt"></i> Ver Comprovativo</a>` : ''}
@@ -1161,8 +1375,17 @@
 
         window.loadDataFromCloud = async function() {
             if (!currentUserData) return;
-            const turma = currentUserData.turmaCode;
+            const turma = activeTurmaCode;
             if (!turma) return;
+
+            if (currentUserData.role === 'aluno') {
+                const aprovado = currentUserData.aprovadoTurmas && currentUserData.aprovadoTurmas[turma] === true;
+                if (!aprovado) {
+                    document.getElementById('sidebarSubjects').innerHTML = '<p class="text-xs text-amber-600 p-2 font-bold">Aguardando aprovação do professor desta turma.</p>';
+                    document.getElementById('materialsGrid').innerHTML = '<p class="text-xs text-slate-400 col-span-full text-center py-6">Conteúdos indisponíveis até ser aprovado pelo professor.</p>';
+                    return;
+                }
+            }
 
             const subjectsSnap = await getDocs(collection(db, "turmas", turma, "subjects"));
             subjectsData = subjectsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -1178,10 +1401,9 @@
         window.handleAddSubject = async function(e) {
             e.preventDefault();
             const name = document.getElementById('newSubjectName').value.trim();
-            if (!name || !currentUserData || currentUserData.role !== 'professor') return;
+            if (!name || !activeTurmaCode) return;
 
-            const turma = currentUserData.turmaCode;
-            await addDoc(collection(db, "turmas", turma, "subjects"), { name, createdAt: Date.now() });
+            await addDoc(collection(db, "turmas", activeTurmaCode, "subjects"), { name, createdAt: Date.now() });
             document.getElementById('newSubjectName').value = '';
             showCustomAlert("Sucesso", "Matéria criada com sucesso!", "success");
             loadDataFromCloud();
@@ -1195,10 +1417,9 @@
             const link = document.getElementById('materialLink').value.trim();
             const linkName = document.getElementById('materialLinkName').value.trim();
 
-            if (!title || !subjectId || !link || !linkName) return;
+            if (!title || !subjectId || !link || !linkName || !activeTurmaCode) return;
 
-            const turma = currentUserData.turmaCode;
-            await addDoc(collection(db, "turmas", turma, "materials"), {
+            await addDoc(collection(db, "turmas", activeTurmaCode, "materials"), {
                 title,
                 subjectId,
                 desc,
