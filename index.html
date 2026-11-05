@@ -27,6 +27,11 @@
             </div>
             
             <div class="flex items-center gap-3">
+                <!-- BOTÃO DE ATUALIZAR GERAL NO TOPO -->
+                <button onclick="recarregarPaginaCompleta()" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 border border-indigo-500" title="Atualizar Página">
+                    <i class="fa-solid fa-rotate"></i> <span class="hidden sm:inline">Atualizar</span>
+                </button>
+
                 <!-- SININHO DE NOTIFICAÇÕES DINÂMICAS -->
                 <div id="notificationArea" class="relative hidden">
                     <button onclick="toggleNotifications(event)" class="relative p-2 text-indigo-200 hover:text-white transition">
@@ -126,8 +131,8 @@
                     <select id="activeTurmaSelect" onchange="mudarTurmaAtiva(this.value)" class="w-full text-xs px-3 py-2 border rounded-xl bg-indigo-50 font-bold text-indigo-800 focus:outline-none"></select>
                 </div>
 
-                <button id="desktopRefreshBtn" onclick="loadDataFromCloud()" class="hidden lg:flex w-full items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 mb-4">
-                    <i class="fa-solid fa-rotate-right"></i> Atualizar Conteúdos
+                <button onclick="loadDataFromCloud()" class="w-full items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 mb-4 flex">
+                    <i class="fa-solid fa-rotate-right"></i> Atualizar Dados da Turma
                 </button>
                 
                 <h2 class="text-base font-bold text-slate-700 mb-3 flex items-center justify-between">
@@ -257,15 +262,17 @@
         </div>
     </div>
 
-    <!-- POP-UP CUSTOMIZADO -->
+    <!-- POP-UP CUSTOMIZADO COM OPÇÃO DE IR PARA REGISTO -->
     <div id="customAlertModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-4 border border-slate-100">
             <div id="customAlertIcon" class="inline-flex p-4 rounded-full text-3xl"></div>
             <h3 class="text-lg font-bold text-slate-800" id="customAlertTitle">Aviso</h3>
             <p class="text-xs text-slate-500" id="customAlertDesc"></p>
-            <button onclick="closeCustomAlert()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-semibold transition">
-                Entendido
-            </button>
+            <div id="customAlertButtons" class="space-y-2">
+                <button onclick="closeCustomAlert()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-semibold transition">
+                    Entendido
+                </button>
+            </div>
         </div>
     </div>
 
@@ -504,11 +511,12 @@
         let materialsData = [];
         let adminUnsubscribes = [];
 
-        window.showCustomAlert = function(title, desc, type = 'success') {
+        window.showCustomAlert = function(title, desc, type = 'success', actionHtml = null) {
             const modal = document.getElementById('customAlertModal');
             const titleEl = document.getElementById('customAlertTitle');
             const descEl = document.getElementById('customAlertDesc');
             const iconEl = document.getElementById('customAlertIcon');
+            const buttonsContainer = document.getElementById('customAlertButtons');
 
             titleEl.innerText = title;
             descEl.innerText = desc;
@@ -524,11 +532,25 @@
                 iconEl.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
             }
 
+            if (actionHtml) {
+                buttonsContainer.innerHTML = actionHtml;
+            } else {
+                buttonsContainer.innerHTML = `
+                    <button onclick="closeCustomAlert()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-semibold transition">
+                        Entendido
+                    </button>
+                `;
+            }
+
             modal.classList.remove('hidden');
         };
 
         window.closeCustomAlert = function() {
             document.getElementById('customAlertModal').classList.add('hidden');
+        };
+
+        window.recarregarPaginaCompleta = function() {
+            window.location.reload();
         };
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -1171,7 +1193,16 @@
             try {
                 await signInWithEmailAndPassword(auth, internalEmail, pass);
             } catch (err) {
-                showCustomAlert("Erro de Acesso", "Utilizador ou senha incorretos.", "error");
+                // Mensagem inteligente sugerindo criar conta se o utilizador não existir/errar
+                const botoesAcao = `
+                    <button onclick="closeCustomAlert(); openAuthModal('register'); document.getElementById('regName').value='${rawInput}';" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-semibold transition mb-2">
+                        Criar Conta com este Nome
+                    </button>
+                    <button onclick="closeCustomAlert();" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 py-2 rounded-xl text-xs font-semibold transition">
+                        Tentar Novamente
+                    </button>
+                `;
+                showCustomAlert("Conta não encontrada ou Senha incorreta", `Não encontramos nenhum cadastro com o nome "${rawInput}" ou a senha está incorreta. Deseja criar uma conta nova agora?`, "error", botoesAcao);
             }
         };
 
