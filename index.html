@@ -110,7 +110,7 @@
         </div>
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
+    <!-- CONTEÚDO PRINCIPAL (COM SCROLL HORIZONTAL EM CARDS NO MOBILE) -->
     <main id="mainAppView" class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6 hidden">
         <aside class="lg:col-span-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 h-fit space-y-4">
             <div>
@@ -135,7 +135,9 @@
                     <span>Matérias</span>
                     <i class="fa-solid fa-book-open text-indigo-600 text-sm"></i>
                 </h2>
-                <div id="sidebarSubjects" class="space-y-1.5"></div>
+                <!-- MOBILE EM CARDS COM SCROLL HORIZONTAL / DESKTOP NORMAL -->
+                <div id="sidebarSubjects" class="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 scrollbar-none"></div>
+                
                 <div id="addSubjectContainer" class="mt-4 pt-3 border-t border-slate-100 hidden">
                     <h3 class="text-xs font-bold text-slate-600 mb-2">Adicionar Matéria</h3>
                     <form id="subjectForm" onsubmit="handleAddSubject(event)" class="space-y-2">
@@ -1411,7 +1413,7 @@
                 const aprovado = currentUserData.aprovadoTurmas && currentUserData.aprovadoTurmas[turma] === true;
                 if (!aprovado) {
                     document.getElementById('sidebarSubjects').innerHTML = '<p class="text-xs text-amber-600 p-2 font-bold">Aguardando aprovação do professor desta turma.</p>';
-                    document.getElementById('materialsGrid').innerHTML = '<p class="text-xs text-slate-400 col-span-full text-center py-6">Conteúdro indisponível até ser aprovado pelo professor.</p>';
+                    document.getElementById('materialsGrid').innerHTML = '<p class="text-xs text-slate-400 col-span-full text-center py-6">Conteúdos indisponíveis até ser aprovado pelo professor.</p>';
                     return;
                 }
             }
@@ -1469,8 +1471,8 @@
                 return;
             }
             container.innerHTML = subjectsData.map(s => `
-                <button onclick="filterBySubject('${s.id}', '${s.name}')" class="w-full text-left text-xs px-3 py-2 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-semibold transition border border-slate-100 flex items-center justify-between">
-                    <span>${s.name}</span>
+                <button onclick="filterBySubject('${s.id}', '${s.name}')" class="min-w-[140px] lg:min-w-0 lg:w-full text-left text-xs px-3 py-2 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-semibold transition border border-slate-100 flex items-center justify-between flex-shrink-0">
+                    <span class="truncate">${s.name}</span>
                     <i class="fa-solid fa-chevron-right text-[10px]"></i>
                 </button>
             `).join('');
