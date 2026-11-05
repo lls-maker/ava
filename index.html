@@ -66,14 +66,27 @@
         </div>
     </div>
 
-    <!-- TELA DE ESPERA -->
+    <!-- TELA DE ESPERA / BLOQUEIO TRIAL (PARA PROFESSORES) -->
     <div id="pendingView" class="flex-grow flex items-center justify-center p-6 hidden">
         <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl text-center space-y-4 border border-slate-100">
             <div class="inline-flex p-4 bg-amber-50 text-amber-600 rounded-full text-3xl" id="pendingIcon">
                 <i class="fa-solid fa-clock-rotate-left"></i>
             </div>
-            <h3 class="text-xl font-bold text-slate-800" id="pendingTitle">Aguardando Aprovação</h3>
-            <p class="text-xs text-slate-500" id="pendingDesc">Sua conta aguarda aprovação ou o período de teste expirou.</p>
+            <h3 class="text-xl font-bold text-slate-800" id="pendingTitle">Período de Teste Expirado</h3>
+            <p class="text-xs text-slate-500" id="pendingDesc">
+                Os seus 7 dias de teste grátis terminaram. Envie o comprovativo do plano (R$ 29,90/mês) pelo chat de suporte abaixo para renovar o acesso.
+            </p>
+
+            <!-- CHAT DE SUPORTE DIRETO COM O PROPRIETÁRIO -->
+            <div class="bg-slate-50 border rounded-xl p-3 h-36 overflow-y-auto text-left text-xs space-y-2" id="supportChatBox">
+                <p class="text-slate-400 text-center py-4">A carregar chat de suporte...</p>
+            </div>
+            
+            <div class="flex gap-2">
+                <input type="text" id="supportMsgInput" placeholder="Escreva a mensagem ou comprovativo..." class="flex-1 text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button onclick="sendSupportMessage()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg font-semibold transition">Enviar</button>
+            </div>
+
             <button onclick="handleLogout()" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-2.5 rounded-xl text-xs font-semibold transition">
                 Sair / Voltar
             </button>
@@ -206,7 +219,7 @@
                 </div>
             </div>
 
-            <!-- TELA DE CADASTRO (EXCLUSIVA PARA PROFESSOR OU ALUNO VIA LINK) -->
+            <!-- TELA DE CADASTRO -->
             <div id="viewRegister" class="space-y-4 hidden">
                 <div class="text-center mb-4">
                     <h3 class="font-bold text-slate-800 text-xl" id="registerTitle">Criar Conta (Professor - 7 Dias Grátis)</h3>
@@ -218,7 +231,6 @@
                         <input type="text" id="regName" required placeholder="Ex: ProfCarlos" autocomplete="off"
                             class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
-                    <!-- Campo oculto para definir o perfil automaticamente -->
                     <input type="hidden" id="regRole" value="professor">
                     <div id="turmaCodeGroup" class="hidden">
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Código da Turma</label>
@@ -269,17 +281,6 @@
                     <button onclick="switchAuthView('login')" class="text-xs text-indigo-600 hover:underline">Voltar</button>
                 </div>
             </div>
-
-            <!-- TELA DE SUPORTE / PAGAMENTO (CASO OS 7 DIAS EXPIRAM) -->
-            <div id="viewSupport" class="space-y-4 hidden text-center">
-                <h3 class="font-bold text-amber-600 text-xl">Período de Teste Expirado</h3>
-                <p class="text-xs text-slate-600">Seus 7 dias grátis terminaram. Para renovar o acesso completo e manter sua turma ativa (R$ 29,90/mês), envie o comprovativo ao proprietário.</p>
-                <div id="supportChatBox" class="bg-slate-50 border rounded-xl p-3 h-32 overflow-y-auto text-left text-xs space-y-2"></div>
-                <div class="flex gap-2">
-                    <input type="text" id="supportMsgInput" placeholder="Mensagem / Comprovativo..." class="flex-1 text-xs px-3 py-2 border rounded-lg">
-                    <button onclick="sendSupportMessage()" class="bg-indigo-600 text-white text-xs px-4 py-2 rounded-lg">Enviar</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -287,11 +288,25 @@
     <div id="masterAdminModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl border border-rose-100 relative">
             <h3 class="font-bold text-rose-600 text-lg mb-1"><i class="fa-solid fa-shield-halved"></i> Painel Master do Proprietário</h3>
-            <p class="text-xs text-slate-500 mb-4">Controle de assinaturas e liberação de professores (R$ 29,90/mês)</p>
+            <p class="text-xs text-slate-500 mb-4">Controle de assinaturas, mensagens de suporte e liberação de professores (R$ 29,90/mês)</p>
             <div class="space-y-3 max-h-96 overflow-y-auto" id="masterAdminList">
-                <p class="text-xs text-slate-400">Carregando professores...</p>
+                <p class="text-xs text-slate-400">A carregar professores...</p>
             </div>
             <button onclick="closeMasterAdmin()" class="mt-4 w-full bg-slate-800 text-white py-2 rounded-xl text-xs font-semibold">Fechar Painel</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE CHAT DO ADMIN COM O PROFESSOR -->
+    <div id="adminChatModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl relative">
+            <h3 class="font-bold text-indigo-700 text-base mb-1" id="adminChatTitle">Suporte com Professor</h3>
+            <p class="text-xs text-slate-500 mb-3">Analise o comprovativo e responda ou renove o acesso.</p>
+            <div class="bg-slate-50 border rounded-xl p-3 h-48 overflow-y-auto text-xs space-y-2 mb-3" id="adminChatBox"></div>
+            <div class="flex gap-2 mb-3">
+                <input type="text" id="adminChatInput" placeholder="Responder ao professor..." class="flex-1 text-xs px-3 py-2 border rounded-lg">
+                <button onclick="sendAdminMessage()" class="bg-indigo-600 text-white text-xs px-4 py-2 rounded-lg font-semibold">Enviar</button>
+            </div>
+            <button onclick="closeAdminChat()" class="w-full bg-slate-200 text-slate-700 py-2 rounded-xl text-xs font-semibold">Fechar Chat</button>
         </div>
     </div>
 
@@ -316,19 +331,27 @@
 
         let currentUserData = null;
         let urlTurmaCode = '';
-        const CHAVE_MESTRA = "meuadmin123"; // Chave fixa ou gerida no banco
+        let activeChatProfUid = null;
 
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             
-            // Verifica se é o painel master do proprietário
+            // 1. Rota Master Segura no Firebase (A Chave Mestra fica guardada no Firestore, coleção "config", documento "admin")
             if (urlParams.get('painel') === 'master') {
                 const senhaDono = prompt("Digite a Chave Mestra do Proprietário:");
-                if (senhaDono === CHAVE_MESTRA) {
-                    document.getElementById('masterAdminModal').classList.remove('hidden');
-                    carregarPainelMaster();
-                } else {
-                    alert("Chave incorreta!");
+                try {
+                    const configDoc = await getDoc(doc(db, "config", "admin"));
+                    const chaveReal = configDoc.exists() ? configDoc.data().masterKey : "meuadmin123"; // Senha padrão inicial caso não exista
+
+                    if (senhaDono === chaveReal) {
+                        document.getElementById('masterAdminModal').classList.remove('hidden');
+                        carregarPainelMaster();
+                    } else {
+                        alert("Chave mestra incorreta!");
+                        window.location.href = window.location.pathname;
+                    }
+                } catch (err) {
+                    alert("Erro ao validar chave: " + err.message);
                     window.location.href = window.location.pathname;
                 }
                 return;
@@ -359,11 +382,9 @@
             document.getElementById('viewLogin').classList.add('hidden');
             document.getElementById('viewRegister').classList.add('hidden');
             document.getElementById('viewForgot').classList.add('hidden');
-            document.getElementById('viewSupport').classList.add('hidden');
             if (view === 'login') document.getElementById('viewLogin').classList.remove('hidden');
             if (view === 'register') document.getElementById('viewRegister').classList.remove('hidden');
             if (view === 'forgot') document.getElementById('viewForgot').classList.remove('hidden');
-            if (view === 'support') document.getElementById('viewSupport').classList.remove('hidden');
         };
 
         onAuthStateChanged(auth, async (user) => {
@@ -389,7 +410,7 @@
                     <button onclick="handleLogout()" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-indigo-500 ml-1">Sair</button>
                 `;
 
-                // Validação de Trial de 7 Dias para o Professor
+                // Validação do Trial de 7 Dias para Professores
                 if (currentUserData.role === 'professor') {
                     const agora = Date.now();
                     const criacao = currentUserData.createdAt || agora;
@@ -400,10 +421,7 @@
                         welcomeView.classList.add('hidden');
                         mainAppView.classList.add('hidden');
                         pendingView.classList.remove('hidden');
-                        document.getElementById('pendingTitle').innerText = "Período de Teste Expirado";
-                        document.getElementById('pendingDesc').innerText = "Seus 7 dias grátis terminaram. Entre em contato com o suporte para renovar por R$ 29,90/mês.";
-                        switchAuthView('support');
-                        openAuthModal('support');
+                        carregarChatSuporteProfessor();
                         return;
                     }
                 }
@@ -431,6 +449,43 @@
             }
         });
 
+        // Chat de Suporte do Professor (Expirado)
+        window.carregarChatSuporteProfessor = async function() {
+            const box = document.getElementById('supportChatBox');
+            const messagesRef = collection(db, "users", currentUserData.uid, "supportMessages");
+            const snap = await getDocs(messagesRef);
+            
+            box.innerHTML = '';
+            if (snap.empty) {
+                box.innerHTML = `<p class="text-slate-400 text-center py-2">Envie uma mensagem com o comprovativo (R$ 29,90).</p>`;
+                return;
+            }
+
+            let msgs = snap.docs.map(d => d.data());
+            msgs.sort((a, b) => a.timestamp - b.timestamp);
+
+            box.innerHTML = msgs.map(m => `
+                <div class="${m.sender === 'admin' ? 'text-left text-indigo-700 bg-indigo-50' : 'text-right text-slate-700 bg-slate-100'} p-2 rounded-lg">
+                    <b class="text-[10px]">${m.sender === 'admin' ? 'Proprietário' : 'Você'}:</b> ${m.text}
+                </div>
+            `).join('');
+            box.scrollTop = box.scrollHeight;
+        };
+
+        window.sendSupportMessage = async function() {
+            const input = document.getElementById('supportMsgInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            await addDoc(collection(db, "users", currentUserData.uid, "supportMessages"), {
+                sender: 'professor',
+                text,
+                timestamp: Date.now()
+            });
+            input.value = '';
+            carregarChatSuporteProfessor();
+        };
+
         window.handleLoginSubmit = async function(e) {
             e.preventDefault();
             const rawInput = document.getElementById('loginUser').value.trim();
@@ -441,7 +496,7 @@
             try {
                 await signInWithEmailAndPassword(auth, internalEmail, pass);
             } catch (err) {
-                alert('Erro ao entrar: Usuário ou senha incorretos.');
+                alert('Erro ao entrar: Utilizador ou senha incorretos.');
             }
         };
 
@@ -480,7 +535,7 @@
                 }
 
                 await setDoc(doc(db, "users", cred.user.uid), userData);
-                alert(role === 'professor' ? 'Conta criada! Você tem 7 dias grátis.' : 'Cadastro realizado com sucesso!');
+                alert(role === 'professor' ? 'Conta criada! Tem 7 dias grátis de período de teste.' : 'Cadastro realizado com sucesso!');
             } catch (err) {
                 alert('Erro no cadastro: ' + err.message);
             }
@@ -490,6 +545,7 @@
             await signOut(auth);
         };
 
+        // Painel Master para o Proprietário gerir renovações e suporte
         window.carregarPainelMaster = async function() {
             const listContainer = document.getElementById('masterAdminList');
             const snap = await getDocs(collection(db, "users"));
@@ -497,13 +553,17 @@
             snap.forEach(d => {
                 const u = d.data();
                 if (u.role === 'professor') {
+                    const diasRestantes = Math.max(0, 7 - Math.floor((Date.now() - (u.createdAt || Date.now())) / (1000 * 60 * 60 * 24)));
                     listContainer.innerHTML += `
-                        <div class="bg-slate-50 p-3 rounded-xl border flex justify-between items-center text-xs">
+                        <div class="bg-slate-50 p-3 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
                             <div>
-                                <span class="font-bold">${u.username}</span> (Turma: ${u.turmaCode})<br>
-                                <span class="text-slate-500">Status: ${u.status || 'trial'}</span>
+                                <span class="font-bold text-slate-800">${u.username}</span> (Turma: ${u.turmaCode})<br>
+                                <span class="text-slate-500">Status: <b>${u.status || 'trial'}</b> | Restam ${diasRestantes} dias de teste</span>
                             </div>
-                            <button onclick="liberarProfessor('${d.id}')" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-semibold">Liberar / Renovar (R$ 29,90)</button>
+                            <div class="flex gap-2">
+                                <button onclick="abrirChatAdmin('${d.id}', '${u.username}')" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg font-semibold">Ver Suporte / Chat</button>
+                                <button onclick="liberarProfessor('${d.id}')" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-semibold">Liberar / Renovar (R$ 29,90)</button>
+                            </div>
                         </div>
                     `;
                 }
@@ -516,13 +576,58 @@
             carregarPainelMaster();
         };
 
+        window.abrirChatAdmin = async function(profUid, profName) {
+            activeChatProfUid = profUid;
+            document.getElementById('adminChatTitle').innerText = `Suporte com: ${profName}`;
+            document.getElementById('adminChatModal').classList.remove('hidden');
+            carregarMensagensAdminChat();
+        };
+
+        window.carregarMensagensAdminChat = async function() {
+            if (!activeChatProfUid) return;
+            const box = document.getElementById('adminChatBox');
+            const snap = await getDocs(collection(db, "users", activeChatProfUid, "supportMessages"));
+            box.innerHTML = '';
+            if (snap.empty) {
+                box.innerHTML = `<p class="text-slate-400 text-center py-2">Sem mensagens de suporte.</p>`;
+                return;
+            }
+            let msgs = snap.docs.map(d => d.data());
+            msgs.sort((a, b) => a.timestamp - b.timestamp);
+            box.innerHTML = msgs.map(m => `
+                <div class="${m.sender === 'admin' ? 'text-right text-indigo-700 bg-indigo-50' : 'text-left text-slate-700 bg-slate-100'} p-2 rounded-lg">
+                    <b class="text-[10px]">${m.sender === 'admin' ? 'Você (Proprietário)' : 'Professor'}:</b> ${m.text}
+                </div>
+            `).join('');
+            box.scrollTop = box.scrollHeight;
+        };
+
+        window.sendAdminMessage = async function() {
+            const input = document.getElementById('adminChatInput');
+            const text = input.value.trim();
+            if (!text || !activeChatProfUid) return;
+
+            await addDoc(collection(db, "users", activeChatProfUid, "supportMessages"), {
+                sender: 'admin',
+                text,
+                timestamp: Date.now()
+            });
+            input.value = '';
+            carregarMensagensAdminChat();
+        };
+
+        window.closeAdminChat = function() {
+            document.getElementById('adminChatModal').classList.add('hidden');
+            activeChatProfUid = null;
+        };
+
         window.closeMasterAdmin = function() {
             document.getElementById('masterAdminModal').classList.add('hidden');
             window.location.href = window.location.pathname;
         };
 
         async function loadDataFromCloud() {
-            // Lógica padrão de carregamento de conteúdos mantida
+            // Mantém carregamento padrão de matérias e conteúdos
         }
     </script>
 </body>
