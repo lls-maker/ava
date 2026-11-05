@@ -1,1189 +1,343 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="h-full bg-slate-900">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AVA - Ambiente Virtual de Aprendizagem</title>
-    
-    <!-- CONFIGURAÇÃO DO PWA -->
-    <link rel="manifest" href="./manifest.json">
-
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- ÍCONE DO NAVEGADOR -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234338ca'/><path d='M50 25 L80 40 L50 55 L20 40 Z' fill='%23ffffff'/><path d='M25 50.5 L25 70 C25 70 35 77 50 77 C65 77 75 70 75 70 L75 50.5 L50 63 Z' fill='%23818cf8'/></svg>">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+<body class="h-full flex flex-col text-slate-100 font-sans">
 
-    <!-- CABEÇALHO -->
-    <header class="bg-indigo-700 text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-graduation-cap text-xl"></i>
-                <h1 class="text-lg font-bold tracking-wide">AVA - Ambiente Virtual</h1>
-            </div>
-            
-            <div class="flex items-center gap-3">
-                <!-- Sino de Notificações (Alunos) -->
-                <div id="notificationArea" class="relative hidden">
-                    <button onclick="toggleNotifications(event)" class="relative p-2 text-indigo-200 hover:text-white transition">
-                        <i class="fa-solid fa-bell text-xl"></i>
-                        <span id="notifBadge" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
-                    </button>
-                    <div id="notifDropdown" class="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 hidden p-3 z-50 text-slate-800">
-                        <h4 class="text-xs font-bold uppercase text-slate-400 mb-2 border-b pb-1">Novidades para você</h4>
-                        <div id="notifList" class="space-y-2 max-h-60 overflow-y-auto text-xs"></div>
-                    </div>
+    <!-- TELA DE LOGIN / CADASTRO -->
+    <div id="authScreen" class="flex-1 flex items-center justify-center p-4">
+        <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700">
+            <h1 class="text-3xl font-bold text-center mb-6 text-indigo-400">AVA</h1>
+            <p class="text-center text-slate-400 mb-6 text-sm">Ambiente Virtual de Aprendizagem</p>
+
+            <div id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Nome de Utilizador</label>
+                    <input type="text" id="loginUser" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500" placeholder="Digite o seu utilizador">
                 </div>
-
-                <!-- Área de Usuário / Botões no Topo (Deslogado) -->
-                <div id="headerUserArea" class="flex items-center gap-3">
-                    <button onclick="openAuthModal('login')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition border border-indigo-500">
-                        Entrar
-                    </button>
-                    <button onclick="openAuthModal('register')" class="bg-white text-indigo-700 hover:bg-indigo-50 text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition shadow-sm">
-                        Criar Conta
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- TELA DE APRESENTAÇÃO / LANDING PAGE -->
-    <div id="welcomeView" class="flex-grow flex items-center justify-center p-6 bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white">
-        <div class="max-w-3xl w-full text-center space-y-8 py-12">
-            <div class="inline-flex p-4 bg-indigo-700/50 rounded-3xl backdrop-blur-md border border-indigo-500/30 shadow-2xl">
-                <i class="fa-solid fa-graduation-cap text-6xl text-indigo-200"></i>
-            </div>
-            
-            <div class="space-y-3">
-                <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight">Ambiente Virtual de Aprendizagem</h2>
-                <p class="text-indigo-200 text-base md:text-lg max-w-xl mx-auto">
-                    A plataforma inteligente para professores compartilharem links de materiais e alunos acompanharem conteúdos em tempo real.
+                <button onclick="fazerLogin()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg transition-colors">Entrar</button>
+                <p class="text-center text-sm text-slate-400 mt-4">
+                    Ainda não tem conta? <button onclick="alternarTelaCadastro()" class="text-indigo-400 hover:underline font-medium">Cadastre-se</button>
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-2xl mx-auto pt-4">
-                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                    <i class="fa-solid fa-link text-indigo-300 text-xl mb-2"></i>
-                    <h3 class="font-bold text-sm">Links Dinâmicos</h3>
-                    <p class="text-xs text-indigo-200 mt-1">Apostilas e conteúdos do Drive acessíveis instantaneamente.</p>
+            <div id="registerForm" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Nome de Utilizador</label>
+                    <input type="text" id="regUser" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500" placeholder="Escolha um utilizador">
                 </div>
-                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                    <i class="fa-solid fa-bell text-indigo-300 text-xl mb-2"></i>
-                    <h3 class="font-bold text-sm">Notificações</h3>
-                    <p class="text-xs text-indigo-200 mt-1">Fique sabendo imediatamente quando um novo link for postado.</p>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Tipo de Perfil</label>
+                    <select id="regRole" onchange="mudarTipoPerfil()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500">
+                        <option value="aluno">Aluno</option>
+                        <option value="professor">Professor (R$ 29,90/mês)</option>
+                    </select>
                 </div>
-                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                    <i class="fa-solid fa-chart-line text-indigo-300 text-xl mb-2"></i>
-                    <h3 class="font-bold text-sm">Controle Pedagógico</h3>
-                    <p class="text-xs text-indigo-200 mt-1">Professores acompanham quem acessou os materiais.</p>
+                <div id="codigoTurmaDiv">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Código da Turma do Professor</label>
+                    <input type="text" id="regCodigoTurma" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500" placeholder="Ex: PROF-JOAO">
                 </div>
+                <button onclick="fazerCadastro()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg transition-colors">Criar Conta</button>
+                <p class="text-center text-sm text-slate-400 mt-4">
+                    Já tem conta? <button onclick="alternarTelaCadastro()" class="text-indigo-400 hover:underline font-medium">Faça Login</button>
+                </p>
             </div>
         </div>
     </div>
 
-    <!-- TELA DE ESPERA PARA ALUNOS NÃO APROVADOS OU BLOQUEADOS -->
-    <div id="pendingView" class="flex-grow flex items-center justify-center p-6 hidden">
-        <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl text-center space-y-4 border border-slate-100">
-            <div class="inline-flex p-4 bg-amber-50 text-amber-600 rounded-full text-3xl" id="pendingIcon">
-                <i class="fa-solid fa-clock-rotate-left"></i>
+    <!-- AVISO DE CONTA PENDENTE (COM CHAT INTERNO) -->
+    <div id="pendingScreen" class="flex-1 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-slate-700">
+            <h2 class="text-2xl font-bold text-amber-400 mb-2 text-center">Ativação Pendente</h2>
+            <p class="text-slate-300 mb-4 text-sm text-center">O seu cadastro de professor foi efetuado. Envie uma mensagem com o comprovativo de pagamento (R$ 29,90) para o administrador através do chat abaixo:</p>
+            
+            <!-- Caixa de Chat Interna do Utilizador Pendente -->
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 h-48 overflow-y-auto flex flex-col space-y-3 mb-4" id="chatMensagensPendente">
+                <!-- Mensagens aparecem aqui -->
             </div>
-            <h3 class="text-xl font-bold text-slate-800" id="pendingTitle">Aguardando Aprovação</h3>
-            <p class="text-xs text-slate-500" id="pendingDesc">
-                Sua conta foi criada com sucesso, mas o professor responsável pela turma ainda precisa aprovar o seu acesso. Tente fazer login novamente mais tarde.
-            </p>
-            <button onclick="handleLogout()" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-2.5 rounded-xl text-xs font-semibold transition">
-                Sair / Voltar
-            </button>
+
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="inputMensagemChat" placeholder="Digite sua mensagem ou informe o pagamento..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                <button onclick="enviarMensagemSuporte()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Enviar</button>
+            </div>
+
+            <button onclick="fazerLogout()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg transition-colors text-sm">Terminar Sessão</button>
         </div>
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL (Exibido apenas para usuários aprovados) -->
-    <main id="mainAppView" class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6 hidden">
-        
-        <!-- BARRA LATERAL (Matérias) -->
-        <aside class="lg:col-span-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 h-fit space-y-4">
+    <!-- APLICAÇÃO PRINCIPAL (DASHBOARD) -->
+    <div id="appScreen" class="h-full flex hidden">
+        <!-- BARRA LATERAL -->
+        <aside class="w-64 bg-slate-800 border-r border-slate-700 flex flex-col justify-between p-4">
             <div>
-                <!-- Botão de Atualizar (Exibido APENAS no Desktop na Barra Lateral) -->
-                <button id="desktopRefreshBtn" onclick="refreshAppData()" class="hidden lg:flex w-full items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 mb-4" title="Atualizar dados">
-                    <i class="fa-solid fa-rotate-right"></i> Atualizar Conteúdos
-                </button>
-
-                <h2 class="text-base font-bold text-slate-700 mb-3 flex items-center justify-between">
-                    <span>Matérias</span>
-                    <i class="fa-solid fa-book-open text-indigo-600 text-sm"></i>
-                </h2>
-                <div id="sidebarSubjects" class="space-y-1.5"></div>
-
-                <div id="addSubjectContainer" class="mt-4 pt-3 border-t border-slate-100 hidden">
-                    <h3 class="text-xs font-bold text-slate-600 mb-2">Adicionar Matéria</h3>
-                    <form id="subjectForm" onsubmit="handleAddSubject(event)" class="space-y-2">
-                        <input type="text" id="newSubjectName" placeholder="Nome da Matéria..." required autocomplete="off"
-                            class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs py-2 rounded-lg transition">
-                            Criar Matéria
-                        </button>
-                    </form>
+                <div class="flex items-center justify-between mb-8 px-2">
+                    <h2 class="text-xl font-bold text-indigo-400">AVA Painel</h2>
+                    <!-- Botão de Atualização na Barra Lateral -->
+                    <button onclick="refreshAppData()" title="Atualizar Dados" class="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 transition-colors">
+                        🔄
+                    </button>
                 </div>
+                <nav class="space-y-2">
+                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 bg-indigo-600 text-white rounded-lg font-medium">🏠 Início</a>
+                    <a href="#" id="navAdmin" onclick="mudarAba('admin')" class="flex items-center gap-3 px-4 py-2.5 text-slate-300 hover:bg-slate-700 rounded-lg font-medium hidden">⚙️ Super Admin</a>
+                </nav>
             </div>
-
-            <!-- PAINEL DE GERENCIAMENTO DE ALUNOS (PROFESSOR COM NOTIFICAÇÃO) -->
-            <div id="professorStudentManage" class="pt-4 border-t border-slate-100 hidden">
-                <h3 class="text-xs font-bold text-indigo-700 mb-2 flex items-center justify-between">
-                    <span>Gerenciar Turma</span>
-                    <i class="fa-solid fa-users"></i>
-                </h3>
-                
-                <button onclick="openStudentsModal()" class="relative w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 mb-2 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-user-gear"></i> Gerenciar Alunos
-                    <span id="pendingStudentsBadge" class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
-                </button>
-
-                <button onclick="copyInviteLink()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2 rounded-xl transition border border-slate-200 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-copy"></i> Copiar Link de Convite
-                </button>
+            <div class="border-t border-slate-700 pt-4">
+                <div class="flex items-center justify-between mb-3 px-2">
+                    <span id="userNameDisplay" class="font-medium text-sm text-slate-200">Utilizador</span>
+                </div>
+                <button onclick="fazerLogout()" class="w-full bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white font-medium py-2 rounded-lg transition-colors text-sm">Terminar Sessão</button>
             </div>
         </aside>
 
-        <!-- ÁREA CENTRAL -->
-        <section class="lg:col-span-3 space-y-5">
-
-            <!-- PAINEL DE UPLOAD DO PROFESSOR (APENAS LINKS) -->
-            <div id="professorPanel" class="bg-white p-4 rounded-2xl shadow-sm border border-indigo-100 hidden">
-                <div class="flex items-center justify-between mb-3 pb-2 border-b border-indigo-50">
-                    <h2 class="text-sm font-bold text-indigo-700 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-plus"></i> Painel de Publicação do Professor
-                    </h2>
-                    <span id="professorTurmaBadge" class="text-[10px] bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full font-bold">Turma: ...</span>
-                </div>
-
-                <form id="uploadForm" onsubmit="handleUploadMaterial(event)" class="space-y-3">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Título do Tópico</label>
-                            <input type="text" id="materialTitle" required placeholder="Ex: Unidade 1" autocomplete="off"
-                                class="w-full text-xs px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Matéria</label>
-                            <select id="materialSubjectSelect" required
-                                class="w-full text-xs px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Descrição Curta</label>
-                            <input type="text" id="materialDesc" placeholder="Resumo..." autocomplete="off"
-                                class="w-full text-xs px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border text-xs">
-                        <div>
-                            <label class="block font-bold text-slate-600 mb-1">Link Externo (URL)</label>
-                            <input type="url" id="materialLink" required placeholder="https://drive.google.com/..." class="w-full px-3 py-2 border rounded-lg bg-white">
-                        </div>
-                        <div>
-                            <label class="block font-bold text-slate-600 mb-1">Nome Personalizado do Link</label>
-                            <input type="text" id="materialLinkName" required placeholder="Ex: Apostila Teórica em PDF" autocomplete="off" class="w-full px-3 py-2 border rounded-lg bg-white">
-                        </div>
-                    </div>
-
-                    <button type="submit" id="uploadBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2.5 rounded-xl transition shadow-sm">
-                        Publicar Link no Tópico
-                    </button>
-                </form>
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="flex-1 flex flex-col overflow-y-auto bg-slate-900 p-8">
+            <div id="viewInicio">
+                <h1 id="welcomeTitle" class="text-3xl font-bold mb-4">Bem-vindo ao AVA</h1>
+                <p class="text-slate-400">Ambiente carregado e sincronizado com o Firebase.</p>
             </div>
 
-            <!-- LISTAGEM DE TÓPICOS -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                    <div>
-                        <h2 id="currentCategoryTitle" class="text-base font-bold text-slate-800">Selecione uma Matéria</h2>
-                        <p class="text-xs text-slate-500">Clique em um tópico para abrir os links</p>
-                    </div>
-                    <div class="relative w-full sm:w-56">
-                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-                        <input type="text" id="searchInput" oninput="renderMaterials()" placeholder="Pesquisar tópico..." autocomplete="off"
-                            class="w-full text-xs pl-8 pr-3 py-1.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
-                    </div>
+            <!-- ABA EXCLUSIVA DO SUPER ADMIN (CONTROLE DE PAGAMENTOS E CHATS) -->
+            <div id="viewAdmin" class="hidden">
+                <h1 class="text-3xl font-bold mb-2 text-indigo-400">Painel do Super Administrador</h1>
+                <p class="text-slate-400 mb-6">Gerencie os professores pendentes e visualize as mensagens enviadas.</p>
+                
+                <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-700/50 text-slate-300 text-sm">
+                                <th class="p-4">Utilizador</th>
+                                <th class="p-4">Última Mensagem / Comprovativo</th>
+                                <th class="p-4 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaProfessoresPendentes">
+                            <!-- Inserido via JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
-
-                <div id="materialsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[480px] overflow-y-auto pr-1"></div>
             </div>
-
-        </section>
-    </main>
-
-    <!-- MODAL DE GERENCIAMENTO DE ALUNOS (PROFESSOR) -->
-    <div id="studentsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-xl shadow-xl border border-slate-100 relative">
-            <button onclick="closeStudentsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="font-bold text-slate-800 text-base mb-1">Gerenciamento de Alunos</h3>
-            <p class="text-xs text-slate-500 mb-4">Aprove novos cadastros, bloqueie ou remova alunos da turma</p>
-            
-            <div id="pendingStudentsList" class="space-y-2 max-h-80 overflow-y-auto pr-1"></div>
-        </div>
+        </main>
     </div>
 
-    <!-- MODAL PARA EXIBIR OS LINKS DO TÓPICO -->
-    <div id="topicModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl border border-slate-100 relative">
-            <button onclick="closeTopicModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <div class="mb-4 pb-2 border-b">
-                <span id="modalTopicSubject" class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Matéria</span>
-                <h3 id="modalTopicTitle" class="font-bold text-slate-800 text-base mt-1">Título do Tópico</h3>
-                <p id="modalTopicDesc" class="text-xs text-slate-500 mt-0.5">Descrição do tópico</p>
-            </div>
-            
-            <div id="modalTopicFilesList" class="space-y-2 max-h-72 overflow-y-auto pr-1 mb-4"></div>
-            <div id="modalTopicProfessorAction" class="pt-3 border-t flex justify-end"></div>
-        </div>
-    </div>
-
-    <!-- MODAL DE AUTENTICAÇÃO -->
-    <div id="authModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-slate-100 relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            
-            <!-- TELA DE LOGIN -->
-            <div id="viewLogin" class="space-y-4">
-                <div class="text-center mb-6">
-                    <h3 class="font-bold text-slate-800 text-xl">Acessar o AVA</h3>
-                    <p class="text-xs text-slate-500 mt-1">Entre com seu usuário e senha</p>
-                </div>
-                <form id="formLogin" onsubmit="handleLoginSubmit(event)" class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
-                        <input type="text" id="loginUser" required placeholder="Ex: JoaoSilva" autocomplete="off"
-                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
-                        <input type="password" id="loginPass" required placeholder="••••••••" autocomplete="new-password"
-                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
-                        Entrar
-                    </button>
-                </form>
-                <div class="flex justify-between items-center text-xs pt-2">
-                    <button onclick="switchAuthView('forgot')" class="text-indigo-600 hover:underline">Esqueci a senha</button>
-                    <button onclick="switchAuthView('register')" class="text-slate-600 font-semibold hover:underline">Criar conta nova</button>
-                </div>
-            </div>
-
-            <!-- TELA DE CADASTRO -->
-            <div id="viewRegister" class="space-y-4 hidden">
-                <div class="text-center mb-4">
-                    <h3 class="font-bold text-slate-800 text-xl" id="registerTitle">Criar Nova Conta</h3>
-                    <p class="text-xs text-slate-500" id="registerSubtitle">Preencha os dados abaixo</p>
-                </div>
-                <form id="formRegister" onsubmit="handleRegisterSubmit(event)" class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
-                        <input type="text" id="regName" required placeholder="Ex: JoaoSilva" autocomplete="off"
-                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div id="regRoleGroup">
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tipo de Perfil</label>
-                        <select id="regRole" onchange="toggleTurmaInput()" class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                            <option value="aluno">Aluno</option>
-                            <option value="professor">Professor</option>
-                        </select>
-                    </div>
-                    <div id="turmaCodeGroup" class="hidden">
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Código da Turma</label>
-                        <input type="text" id="regTurmaCode" placeholder="Ex: PROF-JOAO" autocomplete="off" readonly
-                            class="w-full text-sm px-3.5 py-2 border rounded-xl bg-slate-100 text-slate-600 uppercase font-bold cursor-not-allowed">
-                        <p id="turmaCodeHint" class="text-[10px] text-emerald-600 mt-1 hidden"><i class="fa-solid fa-check-circle"></i> Turma vinculada automaticamente pelo link do professor!</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha (Mínimo 6 caracteres)</label>
-                        <input type="password" id="regPass" required placeholder="••••••••" autocomplete="new-password"
-                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Confirmar Senha</label>
-                        <input type="password" id="regPassConfirm" required placeholder="••••••••" autocomplete="new-password"
-                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Palavra Secreta (Recuperação)</label>
-                        <input type="text" id="regSecret" required placeholder="Ex: pet" autocomplete="off"
-                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
-                        Cadastrar
-                    </button>
-                </form>
-                <div class="text-center pt-2">
-                    <button onclick="switchAuthView('login')" class="text-xs text-indigo-600 hover:underline">Já tem conta? Faça login</button>
-                </div>
-            </div>
-
-            <!-- TELA DE RECUPERAÇÃO DE SENHA -->
-            <div id="viewForgot" class="space-y-4 hidden">
-                <div class="text-center mb-4">
-                    <h3 class="font-bold text-slate-800 text-xl">Recuperar Senha</h3>
-                    <p class="text-xs text-slate-500">Informe seu usuário e sua palavra secreta</p>
-                </div>
-                <form id="formForgot" onsubmit="handleForgotSubmit(event)" class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
-                        <input type="text" id="forgotUser" required placeholder="Ex: JoaoSilva" autocomplete="off"
-                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Palavra Secreta Cadastrada</label>
-                        <input type="text" id="forgotSecret" required placeholder="Sua palavra secreta..." autocomplete="off"
-                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nova Senha</label>
-                        <input type="password" id="forgotNewPass" required placeholder="••••••••" autocomplete="new-password"
-                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
-                        Redefinir Senha
-                    </button>
-                </form>
-                <div class="text-center pt-2">
-                    <button onclick="switchAuthView('login')" class="text-xs text-indigo-600 hover:underline">Voltar para o Login</button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- MODAL DE RELATÓRIO DO PROFESSOR -->
-    <div id="reportModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-slate-100">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b">
-                <h3 id="modalReportTitle" class="font-bold text-slate-800 text-base">Relatório de Atividade</h3>
-                <button onclick="closeReportModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div id="reportListContainer" class="space-y-2 max-h-60 overflow-y-auto text-sm"></div>
-        </div>
-    </div>
-
-    <!-- SCRIPT DA APLICAÇÃO -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW:', err));
-            });
-        }
-
+    <!-- SCRIPTS DE LÓGICA E FIREBASE -->
+    <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyCTNab5Tf_7q69r-JLzyK2u-bDF_4YRQxU",
-            authDomain: "ava-joao-victor.firebaseapp.com",
-            projectId: "ava-joao-victor",
-            storageBucket: "ava-joao-victor.firebasestorage.app",
-            messagingSenderId: "518053036575",
-            appId: "1:518053036575:web:0ea03eecba67599f13cb2a"
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_AUTH_DOMAIN",
+            databaseURL: "SUA_DATABASE_URL",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_STORAGE_BUCKET",
+            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+            appId: "SEU_APP_ID"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        let subjects = [];
-        let materials = [];
-        let currentUserData = null;
-        let currentFilter = '';
-        let groupedMaterials = {};
-        let urlTurmaCode = '';
+        const MEU_USER_ADMIN = "admin"; // Altere para o seu nome de utilizador mestre
+        let currentUser = null;
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            urlTurmaCode = urlParams.get('turma');
-            if (urlTurmaCode) {
-                urlTurmaCode = urlTurmaCode.toUpperCase();
-                openAuthModal('register');
-                
-                document.getElementById('regRole').value = 'aluno';
-                document.getElementById('regRoleGroup').classList.add('hidden');
-                document.getElementById('registerTitle').innerText = 'Cadastro de Aluno';
-                document.getElementById('registerSubtitle').innerText = `Entrando na turma: ${urlTurmaCode}`;
-                
-                toggleTurmaInput();
-            }
-        });
+        function alternarTelaCadastro() {
+            document.getElementById('loginForm').classList.toggle('hidden');
+            document.getElementById('registerForm').classList.toggle('hidden');
+        }
 
-        window.addEventListener('click', function(e) {
-            const notifArea = document.getElementById('notificationArea');
-            const dropdown = document.getElementById('notifDropdown');
-            if (notifArea && dropdown && !notifArea.contains(e.target)) {
-                dropdown.classList.add('hidden');
-            }
-        });
-
-        window.openAuthModal = function(view) {
-            document.getElementById('authModal').classList.remove('hidden');
-            switchAuthView(view);
-            if (!urlTurmaCode) {
-                toggleTurmaInput();
-            }
-        };
-
-        window.closeAuthModal = function() {
-            document.getElementById('authModal').classList.add('hidden');
-        };
-
-        window.toggleTurmaInput = function() {
+        function mudarTipoPerfil() {
             const role = document.getElementById('regRole').value;
-            const turmaGroup = document.getElementById('turmaCodeGroup');
-            const turmaInput = document.getElementById('regTurmaCode');
-            const turmaHint = document.getElementById('turmaCodeHint');
-
+            const turmaDiv = document.getElementById('codigoTurmaDiv');
             if (role === 'aluno') {
-                turmaGroup.classList.remove('hidden');
-                turmaInput.required = true;
-
-                if (urlTurmaCode) {
-                    turmaInput.value = urlTurmaCode;
-                    turmaInput.readOnly = true;
-                    turmaInput.classList.add('bg-slate-100', 'cursor-not-allowed');
-                    turmaHint.classList.remove('hidden');
-                } else {
-                    turmaInput.value = '';
-                    turmaInput.readOnly = false;
-                    turmaInput.classList.remove('bg-slate-100', 'cursor-not-allowed');
-                    turmaHint.classList.add('hidden');
-                }
+                turmaDiv.style.display = 'block';
             } else {
-                turmaGroup.classList.add('hidden');
-                turmaInput.required = false;
+                turmaDiv.style.display = 'none';
             }
-        };
+        }
 
-        window.switchAuthView = function(view) {
-            document.getElementById('viewLogin').classList.add('hidden');
-            document.getElementById('viewRegister').classList.add('hidden');
-            document.getElementById('viewForgot').classList.add('hidden');
-            if (view === 'login') document.getElementById('viewLogin').classList.remove('hidden');
-            if (view === 'register') document.getElementById('viewRegister').classList.remove('hidden');
-            if (view === 'forgot') document.getElementById('viewForgot').classList.remove('hidden');
-        };
+        function fazerLogin() {
+            const username = document.getElementById('loginUser').value.trim().toLowerCase();
+            if (!username) return alert('Digite o nome de utilizador!');
 
-        window.copyInviteLink = function() {
-            if (!currentUserData || !currentUserData.turmaCode) return;
-            const baseUrl = window.location.origin + window.location.pathname;
-            const inviteLink = `${baseUrl}?turma=${currentUserData.turmaCode}`;
-            
-            navigator.clipboard.writeText(inviteLink).then(() => {
-                alert(`Link de convite copiado com sucesso!\n\n${inviteLink}\n\nEnvie este link para os seus alunos.`);
-            }).catch(err => {
-                alert('Erro ao copiar link: ' + err);
+            db.ref('users/' + username).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    currentUser = snapshot.val();
+                    currentUser.username = username;
+                    localStorage.setItem('ava_user', username);
+                    verificarEstadoSessao();
+                } else {
+                    alert('Utilizador não encontrado!');
+                }
             });
-        };
-
-        // Função de Atualizar dados sem deslogar
-        window.refreshAppData = async function() {
-            const btn = document.getElementById('desktopRefreshBtn');
-            if (btn) {
-                btn.innerHTML = `<i class="fa-solid fa-rotate-right fa-spin"></i> Atualizando...`;
-                btn.disabled = true;
-            }
-
-            await loadDataFromCloud();
-
-            if (btn) {
-                setTimeout(() => {
-                    btn.innerHTML = `<i class="fa-solid fa-rotate-right"></i> Atualizar Conteúdos`;
-                    btn.disabled = false;
-                }, 500);
-            }
-        };
-
-        onAuthStateChanged(auth, async (user) => {
-            const welcomeView = document.getElementById('welcomeView');
-            const pendingView = document.getElementById('pendingView');
-            const mainAppView = document.getElementById('mainAppView');
-            const headerArea = document.getElementById('headerUserArea');
-            const profPanel = document.getElementById('professorPanel');
-            const addSubContainer = document.getElementById('addSubjectContainer');
-            const notifArea = document.getElementById('notificationArea');
-            const profStudentManage = document.getElementById('professorStudentManage');
-
-            if (user) {
-                closeAuthModal();
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                currentUserData = userDoc.exists() ? userDoc.data() : { username: user.email, role: 'aluno' };
-                currentUserData.uid = user.uid;
-
-                headerArea.innerHTML = `
-                    <div class="text-right">
-                        <span class="block text-[10px] font-semibold text-indigo-200">${currentUserData.role.toUpperCase()}</span>
-                        <span class="text-xs md:text-sm font-bold">${currentUserData.username}</span>
-                    </div>
-                    <button onclick="handleLogout()" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-indigo-500 ml-1">
-                        Sair
-                    </button>
-                `;
-
-                if (currentUserData.role === 'aluno') {
-                    if (currentUserData.status === 'bloqueado') {
-                        welcomeView.classList.add('hidden');
-                        mainAppView.classList.add('hidden');
-                        pendingView.classList.remove('hidden');
-                        document.getElementById('pendingIcon').className = "inline-flex p-4 bg-red-50 text-red-600 rounded-full text-3xl";
-                        document.getElementById('pendingTitle').innerText = "Acesso Bloqueado";
-                        document.getElementById('pendingDesc').innerText = "O acesso da sua conta a esta turma foi bloqueado pelo professor.";
-                        return;
-                    }
-                    if (currentUserData.status !== 'aprovado') {
-                        welcomeView.classList.add('hidden');
-                        mainAppView.classList.add('hidden');
-                        pendingView.classList.remove('hidden');
-                        document.getElementById('pendingIcon').className = "inline-flex p-4 bg-amber-50 text-amber-600 rounded-full text-3xl";
-                        document.getElementById('pendingTitle').innerText = "Aguardando Aprovação";
-                        document.getElementById('pendingDesc').innerText = "Sua conta foi criada com sucesso, mas o professor responsável pela turma ainda precisa aprovar o seu acesso. Tente fazer login novamente mais tarde.";
-                        return;
-                    }
-                }
-
-                pendingView.classList.add('hidden');
-                welcomeView.classList.add('hidden');
-                mainAppView.classList.remove('hidden');
-
-                if (currentUserData.role === 'professor') {
-                    profPanel.classList.remove('hidden');
-                    addSubContainer.classList.remove('hidden');
-                    profStudentManage.classList.remove('hidden');
-                    notifArea.classList.add('hidden');
-                    document.getElementById('professorTurmaBadge').innerText = `Turma: ${currentUserData.turmaCode || 'N/A'}`;
-                    checkPendingStudentsCount();
-                } else {
-                    profPanel.classList.add('hidden');
-                    addSubContainer.classList.add('hidden');
-                    profStudentManage.classList.add('hidden');
-                    notifArea.classList.remove('hidden');
-                }
-                loadDataFromCloud();
-            } else {
-                welcomeView.classList.remove('hidden');
-                pendingView.classList.add('hidden');
-                mainAppView.classList.add('hidden');
-                currentUserData = null;
-                
-                document.getElementById('formLogin').reset();
-                document.getElementById('formRegister').reset();
-                document.getElementById('formForgot').reset();
-
-                headerArea.innerHTML = `
-                    <button onclick="openAuthModal('login')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition border border-indigo-500">
-                        Entrar
-                    </button>
-                    <button onclick="openAuthModal('register')" class="bg-white text-indigo-700 hover:bg-indigo-50 text-xs md:text-sm font-semibold px-3.5 py-2 rounded-xl transition shadow-sm">
-                        Criar Conta
-                    </button>
-                `;
-            }
-        });
-
-        window.handleLoginSubmit = async function(e) {
-            e.preventDefault();
-            const rawInput = document.getElementById('loginUser').value.trim();
-            const pass = document.getElementById('loginPass').value;
-            const lookupKey = rawInput.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const internalEmail = `${lookupKey}@ava.internal`;
-
-            try {
-                await signInWithEmailAndPassword(auth, internalEmail, pass);
-            } catch (err) {
-                alert('Erro ao entrar: Usuário ou senha incorretos.');
-            }
-        };
-
-        window.handleRegisterSubmit = async function(e) {
-            e.preventDefault();
-            const rawUsername = document.getElementById('regName').value.trim();
-            const role = urlTurmaCode ? 'aluno' : document.getElementById('regRole').value;
-            const pass = document.getElementById('regPass').value;
-            const passConfirm = document.getElementById('regPassConfirm').value;
-            const secretWord = document.getElementById('regSecret').value.trim().toLowerCase();
-
-            if (pass !== passConfirm) {
-                alert('Erro: As senhas não coincidem.');
-                return;
-            }
-
-            const lookupKey = rawUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
-            if (!lookupKey) {
-                alert('Por favor, insira um nome de usuário válido.');
-                return;
-            }
-
-            const internalEmail = `${lookupKey}@ava.internal`;
-
-            try {
-                const cred = await createUserWithEmailAndPassword(auth, internalEmail, pass);
-                let userData = {
-                    username: rawUsername,
-                    lookupKey,
-                    role,
-                    email: internalEmail,
-                    secretWord
-                };
-
-                if (role === 'professor') {
-                    const turmaCode = `PROF-${lookupKey.toUpperCase()}`;
-                    userData.turmaCode = turmaCode;
-                    userData.status = 'aprovado';
-                } else {
-                    const turmaCodeInput = (urlTurmaCode || document.getElementById('regTurmaCode').value).trim().toUpperCase();
-                    const profQuery = await getDocs(query(collection(db, "users"), where("turmaCode", "==", turmaCodeInput), where("role", "==", "professor")));
-                    if (profQuery.empty) {
-                        alert('Código da turma do professor não encontrado! Verifique o link ou o código correto.');
-                        return;
-                    }
-                    let profUid = '';
-                    profQuery.forEach(d => { profUid = d.id; });
-
-                    userData.turmaCode = turmaCodeInput;
-                    userData.professorUid = profUid;
-                    userData.status = 'pendente';
-                }
-
-                await setDoc(doc(db, "users", cred.user.uid), userData);
-                if (role === 'professor') {
-                    alert(`Conta de Professor criada com sucesso!\nO código da sua turma é: ${userData.turmaCode}`);
-                } else {
-                    alert('Cadastro realizado com sucesso! Aguarde o professor aprovar o seu acesso para entrar na turma.');
-                    handleLogout();
-                }
-            } catch (err) {
-                if (err.code === 'auth/email-already-in-use') {
-                    alert('Erro no cadastro: Este nome de usuário já está em uso.');
-                } else {
-                    alert('Erro no cadastro: ' + err.message);
-                }
-            }
-        };
-
-        window.handleForgotSubmit = async function(e) {
-            e.preventDefault();
-            const rawInput = document.getElementById('forgotUser').value.trim();
-            const lookupKey = rawInput.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const secretInput = document.getElementById('forgotSecret').value.trim().toLowerCase();
-
-            try {
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, where("lookupKey", "==", lookupKey));
-                const querySnapshot = await getDocs(q);
-
-                if (querySnapshot.empty) {
-                    alert('Usuário não encontrado.');
-                    return;
-                }
-
-                let userData = null;
-                querySnapshot.forEach((d) => { userData = d.data(); });
-
-                if (userData.secretWord !== secretInput) {
-                    alert('Palavra secreta incorreta.');
-                    return;
-                }
-
-                alert('Palavra secreta confirmada! Faça login com sua conta.');
-                switchAuthView('login');
-            } catch (err) {
-                alert('Erro na recuperação: ' + err.message);
-            }
-        };
-
-        window.handleLogout = async function() {
-            await signOut(auth);
-        };
-
-        async function loadDataFromCloud() {
-            try {
-                let profIdToFilter = currentUserData.role === 'professor' ? currentUserData.uid : currentUserData.professorUid;
-
-                const matSnap = await getDocs(query(collection(db, "materials"), where("professorUid", "==", profIdToFilter)));
-                materials = matSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-                materials.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-                const subSnap = await getDocs(query(collection(db, "subjects"), where("professorUid", "==", profIdToFilter)));
-                let cloudSubjects = subSnap.docs.map(d => d.data().name);
-
-                materials.forEach(m => {
-                    if (m.subject && !cloudSubjects.includes(m.subject)) {
-                        cloudSubjects.push(m.subject);
-                    }
-                });
-
-                subjects = cloudSubjects;
-
-                if (subjects.length > 0 && (!currentFilter || !subjects.includes(currentFilter))) {
-                    currentFilter = subjects[0];
-                }
-
-                renderSubjects();
-                renderMaterials();
-
-                if (currentUserData && currentUserData.role === 'aluno') {
-                    updateStudentNotifications();
-                }
-            } catch (err) {
-                console.error("Erro ao carregar:", err);
-            }
         }
 
-        async function checkPendingStudentsCount() {
-            if (!currentUserData || currentUserData.role !== 'professor') return;
-            try {
-                const q = query(collection(db, "users"), where("turmaCode", "==", currentUserData.turmaCode), where("role", "==", "aluno"), where("status", "==", "pendente"));
-                const snap = await getDocs(q);
-                const badge = document.getElementById('pendingStudentsBadge');
-                
-                if (!snap.empty) {
-                    badge.innerText = snap.size;
-                    badge.classList.remove('hidden');
+        function fazerCadastro() {
+            const username = document.getElementById('regUser').value.trim().toLowerCase();
+            const role = document.getElementById('regRole').value;
+
+            if (!username) return alert('Preencha o nome de utilizador!');
+
+            db.ref('users/' + username).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    alert('Este nome de utilizador já existe!');
                 } else {
-                    badge.classList.add('hidden');
-                }
-            } catch (err) {
-                console.error("Erro ao verificar pendentes:", err);
-            }
-        }
+                    let userData = {
+                        role: role,
+                        status: role === 'professor' ? 'pendente_pagamento' : 'aprovado'
+                    };
 
-        window.openStudentsModal = async function() {
-            const container = document.getElementById('pendingStudentsList');
-            container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">A carregar alunos...</p>`;
-            document.getElementById('studentsModal').classList.remove('hidden');
-
-            try {
-                const q = query(collection(db, "users"), where("turmaCode", "==", currentUserData.turmaCode), where("role", "==", "aluno"));
-                const snap = await getDocs(q);
-
-                if (snap.empty) {
-                    container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhum aluno cadastrado nesta turma.</p>`;
-                    checkPendingStudentsCount();
-                    return;
-                }
-
-                container.innerHTML = '';
-                snap.forEach(d => {
-                    const student = d.data();
-                    const studentId = d.id;
-                    const status = student.status || 'pendente';
-
-                    let statusBadge = '';
-                    let actionButtons = '';
-
-                    if (status === 'pendente') {
-                        statusBadge = `<span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">Pendente</span>`;
-                        actionButtons = `
-                            <button onclick="updateStudentStatus('${studentId}', 'aprovado')" class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Aprovar</button>
-                            <button onclick="updateStudentStatus('${studentId}', 'bloqueado')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Bloquear</button>
-                            <button onclick="deleteStudent('${studentId}')" class="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Excluir</button>
-                        `;
-                    } else if (status === 'aprovado') {
-                        statusBadge = `<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Aprovado</span>`;
-                        actionButtons = `
-                            <button onclick="updateStudentStatus('${studentId}', 'bloqueado')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Bloquear</button>
-                            <button onclick="deleteStudent('${studentId}')" class="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Excluir</button>
-                        `;
-                    } else {
-                        statusBadge = `<span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">Bloqueado</span>`;
-                        actionButtons = `
-                            <button onclick="updateStudentStatus('${studentId}', 'aprovado')" class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Desbloquear</button>
-                            <button onclick="deleteStudent('${studentId}')" class="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold">Excluir</button>
-                        `;
+                    if (role === 'aluno') {
+                        userData.codigoTurma = document.getElementById('regCodigoTurma').value.trim();
                     }
 
-                    container.innerHTML += `
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50 p-3 rounded-xl border gap-2">
-                            <div>
-                                <span class="font-bold text-slate-700 text-xs block"><i class="fa-solid fa-user text-indigo-600 mr-2"></i>${student.username}</span>
-                                <div class="mt-1">${statusBadge}</div>
+                    db.ref('users/' + username).set(userData).then(() => {
+                        alert('Cadastro efetuado com sucesso!');
+                        document.getElementById('loginUser').value = username;
+                        alternarTelaCadastro();
+                    });
+                }
+            });
+        }
+
+        function verificarEstadoSessao() {
+            const savedUser = localStorage.getItem('ava_user');
+            if (!savedUser) return;
+
+            db.ref('users/' + savedUser).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    currentUser = snapshot.val();
+                    currentUser.username = savedUser;
+
+                    document.getElementById('authScreen').classList.add('hidden');
+
+                    // Se for professor pendente de pagamento
+                    if (currentUser.role === 'professor' && currentUser.status === 'pendente_pagamento' && currentUser.username !== MEU_USER_ADMIN) {
+                        document.getElementById('pendingScreen').classList.remove('hidden');
+                        escutarMensagensChat(currentUser.username);
+                        return;
+                    }
+
+                    // Libera app principal
+                    document.getElementById('appScreen').classList.remove('hidden');
+                    document.getElementById('userNameDisplay').textContent = currentUser.username;
+
+                    // Se for o Super Admin
+                    if (currentUser.username === MEU_USER_ADMIN) {
+                        document.getElementById('navAdmin').classList.remove('hidden');
+                        carregarProfessoresPendentes();
+                    }
+                }
+            });
+        }
+
+        function enviarMensagemSuporte() {
+            const input = document.getElementById('inputMensagemChat');
+            const texto = input.value.trim();
+            if (!texto) return;
+
+            const msgData = {
+                remetente: currentUser.username,
+                texto: texto,
+                timestamp: Date.now()
+            };
+
+            db.ref('chats/' + currentUser.username).push(msgData).then(() => {
+                input.value = '';
+            });
+        }
+
+        function escutarMensagensChat(username) {
+            const chatBox = document.getElementById('chatMensagensPendente');
+            db.ref('chats/' + username).on('value', (snapshot) => {
+                chatBox.innerHTML = '';
+                if (!snapshot.exists()) {
+                    chatBox.innerHTML = `<p class="text-slate-500 text-xs text-center my-auto">Nenhuma mensagem enviada ainda. Digite abaixo para iniciar.</p>`;
+                    return;
+                }
+                snapshot.forEach((child) => {
+                    const msg = child.val();
+                    const ehAdmin = msg.remetente === MEU_USER_ADMIN;
+                    chatBox.innerHTML += `
+                        <div class="flex flex-col ${ehAdmin ? 'items-start' : 'items-end'}">
+                            <span class="text-[10px] text-slate-400 mb-0.5">${msg.remetente}</span>
+                            <div class="max-w-[80%] px-3 py-2 rounded-lg text-sm ${ehAdmin ? 'bg-slate-700 text-slate-200' : 'bg-indigo-600 text-white'}">
+                                ${msg.texto}
                             </div>
-                            <div class="flex flex-wrap gap-1.5">${actionButtons}</div>
                         </div>
                     `;
                 });
-            } catch (err) {
-                container.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao carregar alunos.</p>`;
-            }
-        };
-
-        window.closeStudentsModal = function() {
-            document.getElementById('studentsModal').classList.add('hidden');
-            checkPendingStudentsCount();
-        };
-
-        window.updateStudentStatus = async function(studentId, newStatus) {
-            try {
-                await updateDoc(doc(db, "users", studentId), { status: newStatus });
-                alert(`Status do aluno atualizado para: ${newStatus.toUpperCase()}`);
-                openStudentsModal();
-                checkPendingStudentsCount();
-            } catch (err) {
-                alert('Erro ao atualizar status: ' + err.message);
-            }
-        };
-
-        window.deleteStudent = async function(studentId) {
-            if (confirm('Tem certeza que deseja excluir permanentemente este aluno da turma?')) {
-                try {
-                    await deleteDoc(doc(db, "users", studentId));
-                    alert('Aluno removido com sucesso!');
-                    openStudentsModal();
-                    checkPendingStudentsCount();
-                } catch (err) {
-                    alert('Erro ao excluir aluno: ' + err.message);
-                }
-            }
-        };
-
-        window.toggleNotifications = function(e) {
-            if (e) e.stopPropagation();
-            const dropdown = document.getElementById('notifDropdown');
-            const notifBadge = document.getElementById('notifBadge');
-            
-            if (dropdown) {
-                dropdown.classList.toggle('hidden');
-                if (!dropdown.classList.contains('hidden')) {
-                    notifBadge.classList.add('hidden');
-                }
-            }
-        };
-
-        function updateStudentNotifications() {
-            const notifBadge = document.getElementById('notifBadge');
-            const notifList = document.getElementById('notifList');
-            if (!notifBadge || !notifList) return;
-
-            if (materials.length === 0) {
-                notifBadge.classList.add('hidden');
-                notifList.innerHTML = `<p class="text-slate-400 text-center py-2 text-xs">Nenhuma novidade.</p>`;
-                return;
-            }
-
-            notifBadge.innerText = materials.length;
-            notifBadge.classList.remove('hidden');
-
-            notifList.innerHTML = materials.slice(0, 5).map(m => `
-                <div onclick="filterBySubject('${m.subject}'); toggleNotifications();" class="p-2 hover:bg-slate-50 rounded-xl cursor-pointer transition border-b border-slate-100 last:border-0">
-                    <span class="font-bold text-indigo-600 block text-xs">${m.subject}</span>
-                    <span class="text-slate-700 font-medium block truncate text-xs">${m.title}</span>
-                    <span class="text-[10px] text-slate-400">${m.date || 'Recente'}</span>
-                </div>
-            `).join('');
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
         }
 
-        window.handleAddSubject = async function(e) {
-            e.preventDefault();
-            const name = document.getElementById('newSubjectName').value.trim();
-            if (name && !subjects.includes(name)) {
-                await addDoc(collection(db, "subjects"), { name, professorUid: currentUserData.uid });
-                subjects.push(name);
-                currentFilter = name;
-                document.getElementById('newSubjectName').value = '';
-                renderSubjects();
-                renderMaterials();
+        function refreshAppData() {
+            console.log("Recarregando dados do Firebase...");
+            verificarEstadoSessao();
+            alert('Dados atualizados com sucesso!');
+        }
+
+        function mudarAba(aba) {
+            if (aba === 'admin') {
+                document.getElementById('viewInicio').classList.add('hidden');
+                document.getElementById('viewAdmin').classList.remove('hidden');
             }
-        };
+        }
 
-        window.deleteSubject = async function(subName) {
-            if (confirm(`Deseja excluir a matéria "${subName}"?`)) {
-                try {
-                    const q = query(collection(db, "subjects"), where("name", "==", subName), where("professorUid", "==", currentUserData.uid));
-                    const subQuery = await getDocs(q);
-                    subQuery.forEach(async (d) => { await deleteDoc(doc(db, "subjects", d.id)); });
-                    
-                    subjects = subjects.filter(s => s !== subName);
-                    currentFilter = subjects.length > 0 ? subjects[0] : '';
-                    renderSubjects();
-                    renderMaterials();
-                    alert('Matéria excluída!');
-                } catch (err) {
-                    alert('Erro ao excluir: ' + err.message);
-                }
-            }
-        };
+        function carregarProfessoresPendentes() {
+            db.ref('users').once('value', (snapshot) => {
+                const tbody = document.getElementById('listaProfessoresPendentes');
+                tbody.innerHTML = '';
 
-        window.handleUploadMaterial = async function(e) {
-            e.preventDefault();
-            const title = document.getElementById('materialTitle').value.trim();
-            const subject = document.getElementById('materialSubjectSelect').value;
-            const desc = document.getElementById('materialDesc').value;
-            const linkInput = document.getElementById('materialLink').value.trim();
-            const linkNameInput = document.getElementById('materialLinkName').value.trim();
+                snapshot.forEach((child) => {
+                    const user = child.val();
+                    const username = child.key;
 
-            if (!linkInput) {
-                alert('Insira o link externo.');
-                return;
-            }
+                    if (user.role === 'professor' && user.status === 'pendente_pagamento') {
+                        // Buscar última mensagem do chat deste professor
+                        db.ref('chats/' + username).limitToLast(1).once('value', (chatSnap) => {
+                            let ultimaMsg = "Nenhuma mensagem enviada";
+                            if (chatSnap.exists()) {
+                                chatSnap.forEach((m) => {
+                                    ultimaMsg = `${m.val().remetente}: ${m.val().texto}`;
+                                });
+                            }
 
-            const btn = document.getElementById('uploadBtn');
-            btn.innerText = "A publicar...";
-            btn.disabled = true;
-
-            try {
-                const newMaterial = {
-                    title,
-                    subject,
-                    desc,
-                    fileName: linkNameInput || "Aceder ao Link",
-                    fileSize: "Link",
-                    fileUrl: linkInput,
-                    professorUid: currentUserData.uid,
-                    date: new Date().toLocaleDateString('pt-BR'),
-                    timestamp: Date.now(),
-                    views: [],
-                    downloads: []
-                };
-
-                const docRef = await addDoc(collection(db, "materials"), newMaterial);
-                newMaterial.id = docRef.id;
-                materials.unshift(newMaterial);
-
-                if (!subjects.includes(subject)) {
-                    await addDoc(collection(db, "subjects"), { name: subject, professorUid: currentUserData.uid });
-                    subjects.push(subject);
-                }
-
-                document.getElementById('uploadForm').reset();
-                currentFilter = subject;
-                renderSubjects();
-                renderMaterials();
-                alert('Link publicado com sucesso!');
-                btn.innerText = "Publicar Link no Tópico";
-                btn.disabled = false;
-            } catch (err) {
-                alert('Erro ao publicar: ' + err.message);
-                btn.innerText = "Publicar Link no Tópico";
-                btn.disabled = false;
-            }
-        };
-
-        window.deleteMaterial = async function(id, topicTitle) {
-            if (confirm('Deseja excluir este link?')) {
-                try {
-                    await deleteDoc(doc(db, "materials", id));
-                    materials = materials.filter(m => m.id !== id);
-                    renderMaterials();
-                    if (groupedMaterials[topicTitle] && groupedMaterials[topicTitle].items.length > 0) {
-                        openTopicModal(topicTitle);
-                    } else {
-                        closeTopicModal();
+                            tbody.innerHTML += `
+                                <tr class="border-b border-slate-700/50">
+                                    <td class="p-4 font-medium">${username}</td>
+                                    <td class="p-4 text-sm text-slate-300 truncate max-w-xs">${ultimaMsg}</td>
+                                    <td class="p-4 text-right space-x-2">
+                                        <button onclick="aprovarProfessor('${username}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">Aprovar / Liberar</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
                     }
-                    alert('Link excluído!');
-                } catch (err) {
-                    alert('Erro ao excluir: ' + err.message);
-                }
-            }
-        };
-
-        window.recordView = async function(materialId) {
-            if (!currentUserData || currentUserData.role !== 'aluno') return;
-            const mat = materials.find(m => m.id === materialId);
-            if (!mat) return;
-            if (!mat.views) mat.views = [];
-            if (!mat.views.some(v => v.username === currentUserData.username)) {
-                const viewEntry = { username: currentUserData.username, date: new Date().toLocaleString('pt-BR') };
-                mat.views.push(viewEntry);
-                await updateDoc(doc(db, "materials", materialId), { views: arrayUnion(viewEntry) });
-            }
-        };
-
-        window.recordDownload = async function(materialId) {
-            if (!currentUserData || currentUserData.role !== 'aluno') return;
-            const mat = materials.find(m => m.id === materialId);
-            if (!mat) return;
-            if (!mat.downloads) mat.downloads = [];
-            if (!mat.downloads.some(v => v.username === currentUserData.username)) {
-                const dlEntry = { username: currentUserData.username, date: new Date().toLocaleString('pt-BR') };
-                mat.downloads.push(dlEntry);
-                await updateDoc(doc(db, "materials", materialId), { downloads: arrayUnion(dlEntry) });
-            }
-        };
-
-        window.openReportModal = function(materialId, title, type) {
-            const mat = materials.find(m => m.id === materialId);
-            if (!mat) return;
-            const isDl = type === 'download';
-            document.getElementById('modalReportTitle').innerText = `${isDl ? 'Acessados' : 'Visualizados'}: ${title}`;
-            const container = document.getElementById('reportListContainer');
-            const list = isDl ? (mat.downloads || []) : (mat.views || []);
-
-            container.innerHTML = list.length === 0 ? `<p class="text-slate-400 text-center py-4">Nenhum registro.</p>` : list.map(v => `
-                <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border">
-                    <span class="font-bold text-slate-700">${v.username}</span>
-                    <span class="text-xs text-slate-400">${v.date}</span>
-                </div>
-            `).join('');
-            document.getElementById('reportModal').classList.remove('hidden');
-        };
-
-        window.closeReportModal = function() {
-            document.getElementById('reportModal').classList.add('hidden');
-        };
-
-        window.openTopicModal = function(topicTitle) {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            let filtered = materials.filter(m => m.subject === currentFilter && (m.title.toLowerCase().includes(search) || m.fileName.toLowerCase().includes(search)));
-            
-            groupedMaterials = {};
-            filtered.forEach(m => {
-                if (!groupedMaterials[m.title]) groupedMaterials[m.title] = { desc: m.desc || '', items: [] };
-                groupedMaterials[m.title].items.push(m);
-            });
-
-            const topicData = groupedMaterials[topicTitle];
-            if (!topicData) return;
-
-            document.getElementById('modalTopicSubject').innerText = currentFilter;
-            document.getElementById('modalTopicTitle').innerText = topicTitle;
-            document.getElementById('modalTopicDesc').innerText = topicData.desc || 'Sem descrição.';
-
-            const filesListContainer = document.getElementById('modalTopicFilesList');
-            filesListContainer.innerHTML = topicData.items.map(m => {
-                if (currentUserData && currentUserData.role === 'aluno') recordView(m.id);
-                let actionButtons = '';
-
-                if (currentUserData && currentUserData.role === 'professor') {
-                    actionButtons = `
-                        <div class="flex items-center gap-1">
-                            <a href="${m.fileUrl}" target="_blank" onclick="recordDownload('${m.id}')" class="bg-indigo-600 text-white px-2 py-1 rounded-lg text-[10px] font-semibold">Abrir</a>
-                            <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'view')" class="text-green-700 bg-green-50 px-2 py-1 rounded-lg text-[10px] font-semibold">Vistos (${(m.views||[]).length})</button>
-                            <button onclick="openReportModal('${m.id}', '${m.title.replace(/'/g, "\\'")}', 'download')" class="text-blue-700 bg-blue-50 px-2 py-1 rounded-lg text-[10px] font-semibold">Acessos (${(m.downloads||[]).length})</button>
-                            <button onclick="deleteMaterial('${m.id}', '${topicTitle.replace(/'/g, "\\'")}')" class="text-red-500 p-1"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    `;
-                } else {
-                    actionButtons = `
-                        <a href="${m.fileUrl}" target="_blank" onclick="recordDownload('${m.id}')" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Aceder ao Link
-                        </a>
-                    `;
-                }
-
-                return `
-                    <div class="bg-slate-50 border p-3 rounded-xl flex items-center justify-between gap-3">
-                        <div class="truncate">
-                            <p class="text-xs font-bold text-slate-800 truncate">${m.fileName}</p>
-                            <span class="text-[10px] text-slate-400">Link Externo • ${m.date}</span>
-                        </div>
-                        <div>${actionButtons}</div>
-                    </div>
-                `;
-            }).join('');
-
-            const actionContainer = document.getElementById('modalTopicProfessorAction');
-            if (currentUserData && currentUserData.role === 'professor') {
-                actionContainer.innerHTML = `
-                    <button onclick="preencherTopicoDoModal('${topicTitle.replace(/'/g, "\\'")}')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 rounded-xl">
-                        Adicionar novo link a este tópico
-                    </button>
-                `;
-            } else {
-                actionContainer.innerHTML = '';
-            }
-            document.getElementById('topicModal').classList.remove('hidden');
-        };
-
-        window.closeTopicModal = function() {
-            document.getElementById('topicModal').classList.add('hidden');
-        };
-
-        window.preencherTopicoDoModal = function(topicTitle) {
-            closeTopicModal();
-            document.getElementById('materialTitle').value = topicTitle;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            document.getElementById('materialLink').focus();
-        };
-
-        window.filterBySubject = function(sub) {
-            currentFilter = sub;
-            renderSubjects();
-            renderMaterials();
-        };
-
-        function renderSubjects() {
-            const container = document.getElementById('sidebarSubjects');
-            const select = document.getElementById('materialSubjectSelect');
-            container.innerHTML = '';
-            select.innerHTML = '';
-
-            if (subjects.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 py-2">Nenhuma matéria cadastrada.</p>`;
-                document.getElementById('currentCategoryTitle').innerText = "Nenhuma Matéria";
-                return;
-            }
-
-            subjects.forEach(sub => {
-                const isSelected = currentFilter === sub;
-                let deleteSubBtn = (currentUserData && currentUserData.role === 'professor') ? `<button onclick="event.stopPropagation(); deleteSubject('${sub}')" class="text-slate-400 hover:text-red-500 p-1 text-xs"><i class="fa-solid fa-trash"></i></button>` : '';
-
-                container.innerHTML += `
-                    <div onclick="filterBySubject('${sub}')" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition ${isSelected ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}">
-                        <span class="truncate"><i class="fa-solid fa-book mr-2 text-slate-400"></i> ${sub}</span>
-                        ${deleteSubBtn}
-                    </div>
-                `;
-                select.innerHTML += `<option value="${sub}">${sub}</option>`;
-            });
-
-            if (currentFilter) {
-                document.getElementById('currentCategoryTitle').innerText = `${currentFilter} (Tópicos)`;
-            }
-        }
-
-        function renderMaterials() {
-            const grid = document.getElementById('materialsGrid');
-            const search = document.getElementById('searchInput').value.toLowerCase();
-
-            let filtered = materials.filter(m => m.subject === currentFilter && (m.title.toLowerCase().includes(search) || m.fileName.toLowerCase().includes(search)));
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full py-10 text-center text-slate-400">
-                        <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
-                        <p class="text-xs">Nenhum tópico encontrado em "${currentFilter}".</p>
-                    </div>
-                `;
-                return;
-            }
-
-            groupedMaterials = {};
-            filtered.forEach(m => {
-                if (!groupedMaterials[m.title]) groupedMaterials[m.title] = { desc: m.desc || '', items: [] };
-                groupedMaterials[m.title].items.push(m);
-            });
-
-            grid.innerHTML = '';
-            Object.keys(groupedMaterials).forEach(topicTitle => {
-                const topicData = groupedMaterials[topicTitle];
-                grid.innerHTML += `
-                    <div onclick="openTopicModal('${topicTitle.replace(/'/g, "\\'")}')" class="bg-white border p-4 rounded-2xl flex flex-col justify-between hover:shadow-md cursor-pointer transition group">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">Tópico</span>
-                                <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">${topicData.items.length} link(s)</span>
-                            </div>
-                            <h3 class="font-bold text-slate-800 text-sm mb-1 group-hover:text-indigo-600 truncate">${topicTitle}</h3>
-                            <p class="text-[11px] text-slate-500 line-clamp-2">${topicData.desc || 'Clique para ver...'}</p>
-                        </div>
-                        <div class="pt-2 mt-2 border-t flex items-center justify-between text-[11px] text-indigo-600 font-semibold">
-                            <span>Ver conteúdos</span>
-                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
-                        </div>
-                    </div>
-                `;
+                });
             });
         }
+
+        function aprovarProfessor(username) {
+            db.ref('users/' + username).update({ status: 'aprovado' }).then(() => {
+                alert(`Professor ${username} aprovado com sucesso!`);
+                carregarProfessoresPendentes();
+            });
+        }
+
+        function fazerLogout() {
+            localStorage.removeItem('ava_user');
+            location.reload();
+        }
+
+        window.onload = function() {
+            verificarEstadoSessao();
+        };
     </script>
 </body>
 </html>
