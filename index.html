@@ -329,7 +329,6 @@
         let urlTurmaCode = '';
         let activeChatProfUid = null;
 
-        // Função utilitária para encriptar texto em SHA-256 no navegador
         async function hashPassword(string) {
             const utf8 = new TextEncoder().encode(string);
             const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
@@ -340,7 +339,7 @@
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             
-            // 1. Rota Master com Validação Criptografada (SHA-256)
+            // 1. Rota Master Rigorosa (Pede a senha SEMPRE e limpa qualquer sessão anterior do painel)
             if (urlParams.get('painel') === 'master') {
                 const senhaDono = prompt("Digite a Chave Mestra do Proprietário:");
                 if (!senhaDono) {
@@ -352,7 +351,6 @@
                     const hashedInput = await hashPassword(senhaDono);
                     const configDoc = await getDoc(doc(db, "config", "admin"));
                     
-                    // Hash padrão correspondente à senha "meuadmin123" caso ainda não tenha criado o documento
                     const hashReal = configDoc.exists() ? configDoc.data().masterHash : "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"; 
 
                     if (hashedInput === hashReal) {
