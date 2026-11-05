@@ -12,79 +12,115 @@
 </head>
 <body class="h-full flex flex-col text-slate-100 font-sans">
 
-    <!-- TELA DE AUTENTICAÇÃO (LOGIN / ESCOLHA) -->
+    <!-- TELA DE AUTENTICAÇÃO (LOGIN / CADASTRO) -->
     <div id="authScreen" class="flex-1 flex items-center justify-center p-4">
         <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700">
             <h1 class="text-3xl font-bold text-center mb-2 text-indigo-400">AVA</h1>
             <p id="subtituloTopo" class="text-center text-slate-400 mb-6 text-sm">Ambiente Virtual de Aprendizagem</p>
 
-            <!-- SELEÇÃO DE TIPO DE LOGIN (Proprietário, Professor ou Aluno via link) -->
+            <!-- SELEÇÃO INICIAL (ALUNO OU PROFESSOR) -->
             <div id="tipoLoginDiv" class="space-y-3">
-                <button onclick="mostrarFormulario('aluno')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
-                    🎓 Sou Aluno (Entrar por Turma)
+                <button onclick="mudarModo('aluno')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                    🎓 Entrar como Aluno (Via Turma)
                 </button>
-                <button onclick="mostrarFormulario('professor')" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
-                    👨‍🏫 Sou Professor (Criar / Entrar)
-                </button>
-                <button onclick="mostrarFormulario('admin')" class="w-full bg-slate-900 border border-slate-700 hover:bg-slate-900/80 text-slate-400 hover:text-slate-200 text-xs py-2 rounded-lg transition-colors mt-4">
-                    🔒 Acesso Restrito (Proprietário)
+                <button onclick="mudarModo('professor')" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                    👨‍🏫 Sou Professor (7 Dias Grátis / Entrar)
                 </button>
             </div>
 
-            <!-- FORMULÁRIO DO ALUNO -->
-            <div id="formAluno" class="space-y-4 hidden">
+            <!-- FORMULÁRIO DE ALUNO -->
+            <div id="formAluno" class="space-y-3 hidden">
+                <div class="flex border-b border-slate-700 mb-4 pb-2">
+                    <button onclick="alternarSubModoAluno('login')" id="btnTabAlunoLogin" class="flex-1 text-center font-semibold text-indigo-400 border-b-2 border-indigo-500 pb-1">Entrar</button>
+                    <button onclick="alternarSubModoAluno('cadastro')" id="btnTabAlunoCad" class="flex-1 text-center font-semibold text-slate-400 pb-1">Criar Conta</button>
+                </div>
+
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Nome de Utilizador</label>
-                    <input type="text" id="alunoUser" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500" placeholder="Seu utilizador">
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Utilizador</label>
+                    <input type="text" id="alunoUser" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" placeholder="Seu utilizador">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Código da Turma (Ex: PROF-JOAO)</label>
-                    <input type="text" id="alunoTurma" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 uppercase focus:outline-none focus:border-indigo-500" placeholder="Código fornecido pelo professor">
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Palavra-passe</label>
+                    <input type="password" id="alunoSenha" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" placeholder="••••••••">
                 </div>
-                <button onclick="entrarOuCadastrarAluno()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg transition-colors">Entrar na Turma</button>
-                <button onclick="voltarSelecao()" class="w-full text-slate-400 text-sm hover:underline mt-2">← Voltar</button>
+                
+                <div id="camposExtraAluno" class="space-y-3 hidden">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Confirmar Palavra-passe</label>
+                        <input type="password" id="alunoConfSenha" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" placeholder="••••••••">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Código da Turma</label>
+                        <input type="text" id="alunoTurma" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm uppercase focus:outline-none focus:border-indigo-500" placeholder="PROF-NOME">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Palavra Secreta (Recuperação)</label>
+                        <input type="text" id="alunoRecup" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" placeholder="Ex: Nome do seu primeiro animal">
+                    </div>
+                </div>
+
+                <button id="btnAcaoAluno" onclick="acaoAluno()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors mt-2">Entrar</button>
+                <button onclick="voltarSelecao()" class="w-full text-slate-400 text-xs hover:underline mt-2 text-center">← Voltar</button>
             </div>
 
-            <!-- FORMULÁRIO DO PROFESSOR (COM PLANO DE R$ 29,90) -->
-            <div id="formProfessor" class="space-y-4 hidden">
-                <div class="bg-indigo-950/40 border border-indigo-900/50 p-3 rounded-lg mb-2">
-                    <p class="text-xs text-indigo-300 text-center">Plano Professor: R$ 29,90/mês. Faça login ou cadastre-se para solicitar ativação.</p>
+            <!-- FORMULÁRIO DE PROFESSOR -->
+            <div id="formProfessor" class="space-y-3 hidden">
+                <div class="flex border-b border-slate-700 mb-4 pb-2">
+                    <button onclick="alternarSubModoProf('login')" id="btnTabProfLogin" class="flex-1 text-center font-semibold text-indigo-400 border-b-2 border-indigo-500 pb-1">Entrar</button>
+                    <button onclick="alternarSubModoProf('cadastro')" id="btnTabProfCad" class="flex-1 text-center font-semibold text-slate-400 pb-1">Criar (7 Dias Grátis)</button>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Utilizador</label>
+                    <input type="text" id="profUser" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" placeholder="Seu utilizador">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Utilizador do Professor</label>
-                    <input type="text" id="profUser" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500" placeholder="Seu utilizador">
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Palavra-passe</label>
+                    <input type="password" id="profSenha" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" placeholder="••••••••">
                 </div>
-                <button onclick="loginOuCadastroProfessor()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg transition-colors">Aceder ao Painel / Ativação</button>
-                <button onclick="voltarSelecao()" class="w-full text-slate-400 text-sm hover:underline mt-2">← Voltar</button>
+
+                <div id="camposExtraProf" class="space-y-3 hidden">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Confirmar Palavra-passe</label>
+                        <input type="password" id="profConfSenha" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" placeholder="••••••••">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Palavra Secreta (Recuperação)</label>
+                        <input type="text" id="profRecup" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" placeholder="Ex: Nome da sua mãe">
+                    </div>
+                </div>
+
+                <button id="btnAcaoProf" onclick="acaoProfessor()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors mt-2">Aceder Painel</button>
+                <button onclick="voltarSelecao()" class="w-full text-slate-400 text-xs hover:underline mt-2 text-center">← Voltar</button>
             </div>
 
-            <!-- FORMULÁRIO EXCLUSIVO DO PROPRIETÁRIO (ADMIN) -->
-            <div id="formAdmin" class="space-y-4 hidden">
-                <div class="bg-rose-950/40 border border-rose-900/50 p-3 rounded-lg mb-2">
-                    <p class="text-xs text-rose-300 text-center">Área restrita do Proprietário do Sistema.</p>
+            <!-- FORMULÁRIO SECRETO DO PROPRIETÁRIO (ADMIN) -->
+            <div id="formAdmin" class="space-y-3 hidden">
+                <div class="bg-rose-950/40 border border-rose-900/50 p-2 rounded-lg mb-2">
+                    <p class="text-[11px] text-rose-300 text-center font-bold">⚠️ ÁREA RESTRITA DO PROPRIETÁRIO</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Palavra-passe / Chave Mestra</label>
-                    <input type="password" id="adminKey" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500" placeholder="Chave de acesso">
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Chave Mestra Admin</label>
+                    <input type="password" id="adminKey" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" placeholder="Palavra-passe mestra">
                 </div>
-                <button onclick="fazerLoginAdmin()" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2.5 rounded-lg transition-colors">Entrar como Proprietário</button>
-                <button onclick="voltarSelecao()" class="w-full text-slate-400 text-sm hover:underline mt-2">← Voltar</button>
+                <button onclick="fazerLoginAdmin()" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors">Entrar como Proprietário</button>
+                <button onclick="voltarSelecao()" class="w-full text-slate-400 text-xs hover:underline mt-2 text-center">← Voltar</button>
             </div>
         </div>
     </div>
 
-    <!-- TELA DE PENDENTE PARA O PROFESSOR (COM CHAT DE PAGAMENTO) -->
+    <!-- TELA DE SUPORTE / BLOQUEIO APÓS 7 DIAS (PARA PROFESSORES) -->
     <div id="pendingScreen" class="flex-1 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-slate-700">
-            <h2 class="text-2xl font-bold text-amber-400 mb-2 text-center">Ativação de Professor Pendente</h2>
-            <p class="text-slate-300 mb-4 text-sm text-center">Para liberar o seu acesso completo e gerar o link da sua turma (R$ 29,90/mês), envie a mensagem com o comprovativo para o proprietário abaixo:</p>
+            <h2 class="text-2xl font-bold text-amber-400 mb-2 text-center">Período de Teste Expirado</h2>
+            <p class="text-slate-300 mb-4 text-sm text-center">O seu período experimental de 7 dias terminou. Para renovar o acesso completo ao AVA e manter a sua turma ativa (R$ 29,90/mês), envie o comprovativo pelo suporte abaixo:</p>
             
             <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 h-48 overflow-y-auto flex flex-col space-y-3 mb-4" id="chatMensagensPendente">
-                <!-- Mensagens do chat interno -->
+                <!-- Chat interno de suporte -->
             </div>
 
             <div class="flex gap-2 mb-4">
-                <input type="text" id="inputMensagemChat" placeholder="Escreva sua mensagem ou informe o pagamento..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                <input type="text" id="inputMensagemChat" placeholder="Escreva a mensagem ou informe o pagamento..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
                 <button onclick="enviarMensagemSuporte()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Enviar</button>
             </div>
 
@@ -94,20 +130,15 @@
 
     <!-- APLICAÇÃO PRINCIPAL (DASHBOARD) -->
     <div id="appScreen" class="h-full flex hidden">
-        <!-- BARRA LATERAL -->
         <aside class="w-64 bg-slate-800 border-r border-slate-700 flex flex-col justify-between p-4">
             <div>
                 <div class="flex items-center justify-between mb-8 px-2">
                     <h2 class="text-xl font-bold text-indigo-400">AVA Painel</h2>
-                    <!-- Botão de Atualização na Barra Lateral (Desktop) -->
-                    <button onclick="refreshAppData()" title="Atualizar Dados" class="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 transition-colors">
-                        🔄
-                    </button>
+                    <button onclick="refreshAppData()" title="Atualizar Dados" class="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 transition-colors">🔄</button>
                 </div>
                 <nav class="space-y-2">
-                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 bg-indigo-600 text-white rounded-lg font-medium">🏠 Início</a>
-                    <!-- Link do Super Admin (Visível APENAS para o Proprietário) -->
-                    <a href="#" id="navAdmin" onclick="mudarAba('admin')" class="flex items-center gap-3 px-4 py-2.5 text-slate-300 hover:bg-slate-700 rounded-lg font-medium hidden">⚙️ Gestão de Professores</a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-2.5 bg-indigo-600 text-white rounded-lg font-medium text-sm">🏠 Início</a>
+                    <a href="#" id="navAdmin" onclick="mudarAba('admin')" class="flex items-center gap-3 px-4 py-2.5 text-slate-300 hover:bg-slate-700 rounded-lg font-medium text-sm hidden">⚙️ Gestão de Professores</a>
                 </nav>
             </div>
             <div class="border-t border-slate-700 pt-4">
@@ -118,80 +149,91 @@
             </div>
         </aside>
 
-        <!-- CONTEÚDO PRINCIPAL -->
         <main class="flex-1 flex flex-col overflow-y-auto bg-slate-900 p-8">
             <div id="viewInicio">
                 <h1 id="welcomeTitle" class="text-3xl font-bold mb-4">Bem-vindo ao AVA</h1>
-                <p id="userRoleInfo" class="text-slate-400">Ambiente carregado e sincronizado com o Firebase.</p>
+                <p id="userRoleInfo" class="text-slate-400 mb-2">Ambiente carregado e sincronizado com o Firebase.</p>
+                <div id="diasRestantesAviso" class="bg-indigo-950/40 border border-indigo-900/50 p-4 rounded-xl text-sm text-indigo-300 inline-block mb-4"></div>
             </div>
 
-            <!-- PAINEL EXCLUSIVO DO PROPRIETÁRIO (ADMIN) -->
+            <!-- PAINEL EXCLUSIVO DO PROPRIETÁRIO -->
             <div id="viewAdmin" class="hidden">
                 <h1 class="text-3xl font-bold mb-2 text-indigo-400">Painel do Proprietário</h1>
-                <p class="text-slate-400 mb-6">Aprove os pagamentos (R$ 29,90) e visualize as mensagens dos professores.</p>
+                <p class="text-slate-400 mb-6">Controle de assinaturas (R$ 29,90) e suporte aos professores.</p>
                 
                 <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-                    <div class="p-4 bg-slate-700/30 border-b border-slate-700 font-semibold text-slate-300 text-sm">Professores Cadastrados e Pendentes</div>
+                    <div class="p-4 bg-slate-700/30 border-b border-slate-700 font-semibold text-slate-300 text-sm">Professores Registados</div>
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-700/50 text-slate-300 text-sm">
                                 <th class="p-4">Utilizador / Turma</th>
-                                <th class="p-4">Status / Última Mensagem</th>
+                                <th class="p-4">Status / Chat de Suporte</th>
                                 <th class="p-4 text-right">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="listaProfessoresAdmin">
-                            <!-- Inserido via JavaScript -->
-                        </tbody>
+                        <tbody id="listaProfessoresAdmin"></tbody>
                     </table>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- SCRIPTS DE LÓGICA E FIREBASE -->
+    <!-- SCRIPT DE LÓGICA COMPLETA -->
     <script>
         const firebaseConfig = {
             apiKey: "SUA_API_KEY",
             authDomain: "SEU_AUTH_DOMAIN",
             databaseURL: "SUA_DATABASE_URL",
             projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_STORAGE_BUCKET",
-            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-            appId: "SEU_APP_ID"
+            storageBucket: "SUA_STORAGE_BUCKET",
+            messagingSenderId: "SUA_MESSAGING_SENDER_ID",
+            appId: "SUA_APP_ID"
         };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // CHAVE SECRETA DO PROPRIETÁRIO (Mude para a palavra-passe que quiser)
-        const CHAVE_MESTRA_ADMIN = "meuadmin123"; 
+        const CHAVE_MESTRA_ADMIN = "meuadmin123"; // Mude para sua palavra-passe secreta de proprietário
         let currentUser = null;
+        let subModoAluno = 'login';
+        let subModoProf = 'login';
 
-        // Verifica se o aluno entrou através de um link de turma personalizado (Ex: site.com/?turma=PROF-JOAO)
+        // Inicialização e verificação de rota secreta do proprietário
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
+            
+            // Rota secreta do dono: ex: seussite.com/?painel=master
+            if (urlParams.get('painel') === 'master') {
+                document.getElementById('tipoLoginDiv').classList.add('hidden');
+                document.getElementById('formAdmin').classList.remove('hidden');
+                document.getElementById('subtituloTopo').textContent = "Acesso Restrito ao Proprietário";
+                return;
+            }
+
+            // Link de convite do aluno: ex: seussite.com/?turma=PROF-JOAO
             const turmaLink = urlParams.get('turma');
             if (turmaLink) {
-                document.getElementById('tipoLoginDiv').classList.add('hidden');
-                document.getElementById('formAluno').classList.remove('hidden');
+                mudarModo('aluno');
+                alternarSubModoAluno('cadastro');
                 document.getElementById('alunoTurma').value = turmaLink.toUpperCase();
                 document.getElementById('alunoTurma').readOnly = true;
-                document.getElementById('subtituloTopo').textContent = `Entrando na Turma: ${turmaLink.toUpperCase()}`;
             } else {
                 verificarEstadoSessao();
             }
         };
 
-        function mostrarFormulario(tipo) {
+        function mudarModo(tipo) {
             document.getElementById('tipoLoginDiv').classList.add('hidden');
             document.getElementById('formAluno').classList.add('hidden');
             document.getElementById('formProfessor').classList.add('hidden');
-            document.getElementById('formAdmin').classList.add('hidden');
 
-            if (tipo === 'aluno') document.getElementById('formAluno').classList.remove('hidden');
-            if (tipo === 'professor') document.getElementById('formProfessor').classList.remove('hidden');
-            if (tipo === 'admin') document.getElementById('formAdmin').classList.remove('hidden');
+            if (tipo === 'aluno') {
+                document.getElementById('formAluno').classList.remove('hidden');
+                document.getElementById('subtituloTopo').textContent = "Área do Aluno";
+            } else if (tipo === 'professor') {
+                document.getElementById('formProfessor').classList.remove('hidden');
+                document.getElementById('subtituloTopo').textContent = "Área do Professor";
+            }
         }
 
         function voltarSelecao() {
@@ -199,24 +241,83 @@
             document.getElementById('formAluno').classList.add('hidden');
             document.getElementById('formProfessor').classList.add('hidden');
             document.getElementById('formAdmin').classList.add('hidden');
+            document.getElementById('subtituloTopo').textContent = "Ambiente Virtual de Aprendizagem";
         }
 
-        // Lógica de Aluno
-        function entrarOuCadastrarAluno() {
+        function alternarSubModoAluno(modo) {
+            subModoAluno = modo;
+            const extra = document.getElementById('camposExtraAluno');
+            const btn = document.getElementById('btnAcaoAluno');
+            const tabLog = document.getElementById('btnTabAlunoLogin');
+            const tabCad = document.getElementById('btnTabAlunoCad');
+
+            if (modo === 'login') {
+                extra.classList.add('hidden');
+                btn.textContent = "Entrar";
+                tabLog.className = "flex-1 text-center font-semibold text-indigo-400 border-b-2 border-indigo-500 pb-1";
+                tabCad.className = "flex-1 text-center font-semibold text-slate-400 pb-1";
+            } else {
+                extra.classList.remove('hidden');
+                btn.textContent = "Criar Conta de Aluno";
+                tabCad.className = "flex-1 text-center font-semibold text-indigo-400 border-b-2 border-indigo-500 pb-1";
+                tabLog.className = "flex-1 text-center font-semibold text-slate-400 pb-1";
+            }
+        }
+
+        function alternarSubModoProf(modo) {
+            subModoProf = modo;
+            const extra = document.getElementById('camposExtraProf');
+            const btn = document.getElementById('btnAcaoProf');
+            const tabLog = document.getElementById('btnTabProfLogin');
+            const tabCad = document.getElementById('btnTabProfCad');
+
+            if (modo === 'login') {
+                extra.classList.add('hidden');
+                btn.textContent = "Aceder Painel";
+                tabLog.className = "flex-1 text-center font-semibold text-indigo-400 border-b-2 border-indigo-500 pb-1";
+                tabCad.className = "flex-1 text-center font-semibold text-slate-400 pb-1";
+            } else {
+                extra.classList.remove('hidden');
+                btn.textContent = "Começar Teste de 7 Dias";
+                tabCad.className = "flex-1 text-center font-semibold text-indigo-400 border-b-2 border-indigo-500 pb-1";
+                tabLog.className = "flex-1 text-center font-semibold text-slate-400 pb-1";
+            }
+        }
+
+        // Ação de Aluno (Login ou Cadastro com senha e palavra secreta)
+        function acaoAluno() {
             const username = document.getElementById('alunoUser').value.trim().toLowerCase();
-            const turma = document.getElementById('alunoTurma').value.trim().toUpperCase();
+            const senha = document.getElementById('alunoSenha').value;
 
-            if (!username || !turma) return alert('Preencha todos os campos!');
+            if (!username || !senha) return alert('Preencha o utilizador e a palavra-passe!');
 
             db.ref('users/' + username).once('value', (snap) => {
-                if (snap.exists()) {
+                if (subModoAluno === 'login') {
+                    if (!snap.exists()) return alert('Utilizador não encontrado!');
                     let user = snap.val();
-                    if (user.role !== 'aluno') return alert('Este utilizador não é um aluno.');
+                    if (user.role !== 'aluno') return alert('Esta conta não é de aluno.');
+                    if (user.senha !== senha) return alert('Palavra-passe incorreta!');
+
                     localStorage.setItem('ava_user', username);
                     verificarEstadoSessao();
                 } else {
-                    let newAluno = { role: 'aluno', status: 'aprovado', codigoTurma: turma };
-                    db.ref('users/' + username).set(newAluno).then(() => {
+                    if (snap.exists()) return alert('Este nome de utilizador já existe!');
+                    const confSenha = document.getElementById('alunoConfSenha').value;
+                    const turma = document.getElementById('alunoTurma').value.trim().toUpperCase();
+                    const recup = document.getElementById('alunoRecup').value.trim();
+
+                    if (senha !== confSenha) return alert('As palavras-passe não coincidem!');
+                    if (!turma || !recup) return alert('Preencha todos os campos obrigatórios!');
+
+                    let novoAluno = {
+                        role: 'aluno',
+                        senha: senha,
+                        recup: recup,
+                        codigoTurma: turma,
+                        status: 'aprovado'
+                    };
+
+                    db.ref('users/' + username).set(novoAluno).then(() => {
                         localStorage.setItem('ava_user', username);
                         verificarEstadoSessao();
                     });
@@ -224,20 +325,43 @@
             });
         }
 
-        // Lógica de Professor (Cria pendente se não existir, ou loga)
-        function loginOuCadastroProfessor() {
+        // Ação de Professor (Login ou Cadastro com 7 dias de teste)
+        function acaoProfessor() {
             const username = document.getElementById('profUser').value.trim().toLowerCase();
-            if (!username) return alert('Digite o seu utilizador!');
+            const senha = document.getElementById('profSenha').value;
+
+            if (!username || !senha) return alert('Preencha o utilizador e a palavra-passe!');
 
             db.ref('users/' + username).once('value', (snap) => {
-                if (snap.exists()) {
+                if (subModoProf === 'login') {
+                    if (!snap.exists()) return alert('Utilizador não encontrado!');
                     let user = snap.val();
-                    if (user.role !== 'professor') return alert('Este utilizador já está registado como aluno.');
+                    if (user.role !== 'professor') return alert('Esta conta não é de professor.');
+                    if (user.senha !== senha) return alert('Palavra-passe incorreta!');
+
                     localStorage.setItem('ava_user', username);
                     verificarEstadoSessao();
                 } else {
-                    let newProf = { role: 'professor', status: 'pendente_pagamento', turmaCode: `PROF-${username.toUpperCase()}` };
-                    db.ref('users/' + username).set(newProf).then(() => {
+                    if (snap.exists()) return alert('Este nome de utilizador já existe!');
+                    const confSenha = document.getElementById('profConfSenha').value;
+                    const recup = document.getElementById('profRecup').value.trim();
+
+                    if (senha !== confSenha) return alert('As palavras-passe não coincidem!');
+                    if (!recup) return alert('Preencha a palavra secreta!');
+
+                    // Define data de expiração para daqui a 7 dias
+                    const dataExpiracao = Date.now() + (7 * 24 * 60 * 60 * 1000);
+
+                    let novoProf = {
+                        role: 'professor',
+                        senha: senha,
+                        recup: recup,
+                        status: 'ativo_trial',
+                        expiracao: dataExpiracao,
+                        turmaCode: `PROF-${username.toUpperCase()}`
+                    };
+
+                    db.ref('users/' + username).set(novoProf).then(() => {
                         localStorage.setItem('ava_user', username);
                         verificarEstadoSessao();
                     });
@@ -245,10 +369,10 @@
             });
         }
 
-        // Lógica do Proprietário (Admin)
+        // Login do Proprietário via Chave Mestra
         function fazerLoginAdmin() {
-            const senha = document.getElementById('adminKey').value;
-            if (senha === CHAVE_MESTRA_ADMIN) {
+            const chave = document.getElementById('adminKey').value;
+            if (chave === CHAVE_MESTRA_ADMIN) {
                 localStorage.setItem('ava_user', 'PROPRIETARIO_MASTER');
                 verificarEstadoSessao();
             } else {
@@ -277,22 +401,35 @@
 
                     document.getElementById('authScreen').classList.add('hidden');
 
-                    // Se for professor aguardando pagamento
-                    if (currentUser.role === 'professor' && currentUser.status === 'pendente_pagamento') {
-                        document.getElementById('pendingScreen').classList.remove('hidden');
-                        escutarChatProfessor(currentUser.username);
-                        return;
+                    // Verifica se for professor e se o teste de 7 dias expirou ou foi bloqueado
+                    if (currentUser.role === 'professor') {
+                        const agora = Date.now();
+                        const expirado = currentUser.expiracao && agora > currentUser.expiracao;
+                        
+                        if (expirado || currentUser.status === 'pendente_pagamento') {
+                            // Atualiza status no banco se expirou agora
+                            if (expirado && currentUser.status !== 'pendente_pagamento') {
+                                db.ref('users/' + savedUser).update({ status: 'pendente_pagamento' });
+                            }
+                            document.getElementById('pendingScreen').classList.remove('hidden');
+                            escutarChatProfessor(currentUser.username);
+                            return;
+                        }
                     }
 
-                    // App normal liberado
+                    // Libera painel principal
                     document.getElementById('appScreen').classList.remove('hidden');
                     document.getElementById('userNameDisplay').textContent = currentUser.username;
 
                     if (currentUser.role === 'aluno') {
-                        document.getElementById('userRoleInfo').textContent = `Aluno da Turma: ${currentUser.codigoTurma}`;
+                        document.getElementById('userRoleInfo').textContent = `Aluno vinculado à turma: ${currentUser.codigoTurma}`;
+                        document.getElementById('diasRestantesAviso').style.display = 'none';
                     } else if (currentUser.role === 'professor') {
+                        const diasRestantes = Math.ceil((currentUser.expiracao - Date.now()) / (1000 * 60 * 60 * 24));
                         let linkTurma = `${window.location.origin}${window.location.pathname}?turma=${currentUser.turmaCode || 'PROF-' + currentUser.username.toUpperCase()}`;
-                        document.getElementById('userRoleInfo').innerHTML = `Painel do Professor | O seu link de convite para os alunos é: <br><a href="${linkTurma}" target="_blank" class="text-indigo-400 underline font-mono text-sm">${linkTurma}</a>`;
+                        
+                        document.getElementById('userRoleInfo').innerHTML = `O seu link de convite para os alunos:<br><a href="${linkTurma}" target="_blank" class="text-indigo-400 underline font-mono text-sm">${linkTurma}</a>`;
+                        document.getElementById('diasRestantesAviso').textContent = `⏳ Período de Teste Ativo: Restam ${diasRestantes > 0 ? diasRestantes : 0} dias. (Plano Professor: R$ 29,90/mês)`;
                     }
                 } else {
                     fazerLogout();
@@ -314,7 +451,7 @@
             db.ref('chats/' + username).on('value', (snapshot) => {
                 chatBox.innerHTML = '';
                 if (!snapshot.exists()) {
-                    chatBox.innerHTML = `<p class="text-slate-500 text-xs text-center my-auto">Envie aqui a mensagem informando o pagamento da mensalidade (R$ 29,90).</p>`;
+                    chatBox.innerHTML = `<p class="text-slate-500 text-xs text-center my-auto">Envie aqui a mensagem com o comprovativo de pagamento (R$ 29,90) para renovar o acesso.</p>`;
                     return;
                 }
                 snapshot.forEach((child) => {
@@ -322,7 +459,7 @@
                     const ehAdmin = msg.remetente === 'Proprietário';
                     chatBox.innerHTML += `
                         <div class="flex flex-col ${ehAdmin ? 'items-start' : 'items-end'}">
-                            <span class="text-[10px] text-slate-400 mb-0.5">${msg.remetente}</span>
+                            <span class="text-[10px] text-slate-400 mb-0.5">${msg.remetent}</span>
                             <div class="max-w-[80%] px-3 py-2 rounded-lg text-sm ${ehAdmin ? 'bg-slate-700 text-slate-200' : 'bg-indigo-600 text-white'}">${msg.texto}</div>
                         </div>
                     `;
@@ -354,24 +491,22 @@
 
                     if (user.role === 'professor') {
                         db.ref('chats/' + username).limitToLast(1).once('value', (chatSnap) => {
-                            let ultimaMsg = "Sem mensagens no chat";
+                            let ultimaMsg = "Sem mensagens";
                             if (chatSnap.exists()) {
                                 chatSnap.forEach((m) => { ultimaMsg = `${m.val().remetente}: ${m.val().texto}`; });
                             }
 
-                            let statusBadge = user.status === 'aprovado' 
-                                ? '<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-semibold">Ativo (Aprovado)</span>' 
-                                : '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-semibold">Pendente Pagamento</span>';
+                            let statusBadge = user.status === 'ativo_trial' 
+                                ? '<span class="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 rounded-full text-xs font-semibold">Em Teste (7 Dias)</span>' 
+                                : '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-semibold">Expirado / Pendente</span>';
 
-                            let botaoAcao = user.status === 'pendente_pagamento'
-                                ? `<button onclick="aprovarProfessor('${username}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">Aprovar Pagamento</button>`
-                                : `<button onclick="bloquearProfessor('${username}')" class="bg-amber-600/20 hover:bg-amber-600 text-amber-300 hover:text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">Bloquear</button>`;
+                            let botaoAcao = `<button onclick="renovarProfessor('${username}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">Renovar / Liberar</button>`;
 
                             tbody.innerHTML += `
                                 <tr class="border-b border-slate-700/50">
                                     <td class="p-4 font-medium">${username} <span class="text-xs text-indigo-400 block">Turma: ${user.turmaCode || 'PROF-' + username.toUpperCase()}</span></td>
                                     <td class="p-4 text-sm text-slate-300">${statusBadge}<p class="text-xs text-slate-400 mt-1 truncate max-w-xs">${ultimaMsg}</p></td>
-                                    <td class="p-4 text-right space-x-2">${botaoAcao}</td>
+                                    <td class="p-4 text-right">${botaoAcao}</td>
                                 </tr>
                             `;
                         });
@@ -380,16 +515,11 @@
             });
         }
 
-        function aprovarProfessor(username) {
-            db.ref('users/' + username).update({ status: 'aprovado' }).then(() => {
-                alert(`Professor ${username} aprovado com sucesso!`);
-                carregarPainelAdmin();
-            });
-        }
-
-        function bloquearProfessor(username) {
-            db.ref('users/' + username).update({ status: 'pendente_pagamento' }).then(() => {
-                alert(`Acesso do professor ${username} colocado como pendente.`);
+        function renovarProfessor(username) {
+            // Estende a expiração por mais 30 dias a partir de hoje
+            const novaExpiracao = Date.now() + (30 * 24 * 60 * 60 * 1000);
+            db.ref('users/' + username).update({ status: 'ativo_pago', expiracao: novaExpiracao }).then(() => {
+                alert(`Assinatura do professor ${username} renovada por 30 dias com sucesso!`);
                 carregarPainelAdmin();
             });
         }
