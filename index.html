@@ -27,14 +27,20 @@
             </div>
             
             <div class="flex items-center gap-3">
+                <!-- SININHO DE NOTIFICAÇÕES DINÂMICAS -->
                 <div id="notificationArea" class="relative hidden">
                     <button onclick="toggleNotifications(event)" class="relative p-2 text-indigo-200 hover:text-white transition">
                         <i class="fa-solid fa-bell text-xl"></i>
                         <span id="notifBadge" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
                     </button>
                     <div id="notifDropdown" class="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 hidden p-3 z-50 text-slate-800">
-                        <h4 class="text-xs font-bold uppercase text-slate-400 mb-2 border-b pb-1">Novidades para você</h4>
-                        <div id="notifList" class="space-y-2 max-h-60 overflow-y-auto text-xs"></div>
+                        <h4 class="text-xs font-bold uppercase text-slate-400 mb-2 border-b pb-1 flex justify-between items-center">
+                            <span>Notificações</span>
+                            <i class="fa-solid fa-bell text-indigo-600"></i>
+                        </h4>
+                        <div id="notifList" class="space-y-2 max-h-60 overflow-y-auto text-xs">
+                            <p class="text-slate-400 text-center py-2">Sem novas notificações.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -71,7 +77,7 @@
         </div>
     </div>
 
-    <!-- TELA DE ESPERA / BLOQUEIO TRIAL (PARA PROFESSORES) -->
+    <!-- TELA DE ESPERA / BLOQUEIO TRIAL (PARA PROFESSORES EXPIRADOS) -->
     <div id="pendingView" class="flex-grow flex items-center justify-center p-6 hidden">
         <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl text-center space-y-4 border border-slate-100">
             <div class="inline-flex p-4 bg-amber-50 text-amber-600 rounded-full text-3xl">
@@ -79,7 +85,7 @@
             </div>
             <h3 class="text-xl font-bold text-slate-800">Período de Teste Expirado</h3>
             <p class="text-xs text-slate-500">
-                Os seus 7 dias de teste grátis terminaram. Envie o link do comprovativo do plano (R$ 29,90/mês) pelo chat de suporte abaixo para renovar o acesso.
+                Os seus 7 dias de teste grátis terminaram. Envie o link do comprovativo do plano (R$ 29,90/mês) pelo chat de suporte com o Administrativo para renovar o acesso.
             </p>
 
             <div class="bg-slate-50 border rounded-xl p-3 h-36 overflow-y-auto text-left text-xs space-y-2" id="supportChatBox">
@@ -123,16 +129,20 @@
             </div>
             
             <!-- GERENCIAR TURMA (PARA O PROFESSOR) -->
-            <div id="professorStudentManage" class="pt-4 border-t border-slate-100 hidden">
-                <h3 class="text-xs font-bold text-indigo-700 mb-2 flex items-center justify-between">
+            <div id="professorStudentManage" class="pt-4 border-t border-slate-100 hidden space-y-2">
+                <h3 class="text-xs font-bold text-indigo-700 mb-1 flex items-center justify-between">
                     <span>Gerenciar Turma</span>
                     <i class="fa-solid fa-users"></i>
                 </h3>
-                <button onclick="openStudentsModal()" class="relative w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 mb-2 flex items-center justify-center gap-2">
+                <button onclick="openStudentsModal()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-user-gear"></i> Gerenciar Alunos & Chat
                 </button>
                 <button onclick="copyInviteLink()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2 rounded-xl transition border border-slate-200 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-copy"></i> Copiar Link de Convite
+                </button>
+                <!-- SUPORTE DO PROFESSOR COM O ADMINISTRATIVO -->
+                <button onclick="openProfessorAdminSupportModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2 rounded-xl transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-headset"></i> Suporte Administrativo
                 </button>
             </div>
 
@@ -205,6 +215,18 @@
             </div>
         </section>
     </main>
+
+    <!-- POP-UP / MODAL CUSTOMIZADO E DINÂMICO PARA AVISOS E ALERTAS -->
+    <div id="customAlertModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center space-y-4 border border-slate-100">
+            <div id="customAlertIcon" class="inline-flex p-4 rounded-full text-3xl"></div>
+            <h3 class="text-lg font-bold text-slate-800" id="customAlertTitle">Aviso</h3>
+            <p class="text-xs text-slate-500" id="customAlertDesc"></p>
+            <button onclick="closeCustomAlert()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-semibold transition">
+                Entendido
+            </button>
+        </div>
+    </div>
 
     <!-- MODAL DE AUTENTICAÇÃO -->
     <div id="authModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
@@ -300,11 +322,30 @@
         </div>
     </div>
 
+    <!-- MODAL DE SUPORTE DO PROFESSOR COM O ADMINISTRATIVO -->
+    <div id="professorAdminSupportModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+            <h3 class="font-bold text-indigo-700 text-base mb-1"><i class="fa-solid fa-headset"></i> Suporte com o Administrativo</h3>
+            <p class="text-xs text-slate-500 mb-3">Envie mensagens ou comprovativos de renovação diretamente para a administração.</p>
+            <div class="bg-slate-50 border rounded-xl p-3 h-56 overflow-y-auto text-xs space-y-2 mb-3" id="profAdminChatBox">
+                <p class="text-slate-400 text-center py-10">A carregar mensagens...</p>
+            </div>
+            <div class="space-y-2 text-left mb-3">
+                <input type="text" id="profAdminMsgInput" placeholder="Escreva sua mensagem..." class="w-full text-xs px-3 py-2 border rounded-lg">
+                <div class="flex gap-2">
+                    <input type="url" id="profAdminLinkInput" placeholder="Link do comprovativo (opcional)..." class="flex-1 text-xs px-3 py-2 border rounded-lg">
+                    <button onclick="sendProfAdminSupportMsg()" class="bg-indigo-600 text-white text-xs px-4 py-2 rounded-lg font-semibold">Enviar</button>
+                </div>
+            </div>
+            <button onclick="closeProfessorAdminSupportModal()" class="w-full bg-slate-200 text-slate-700 py-2 rounded-xl text-xs font-semibold">Fechar</button>
+        </div>
+    </div>
+
     <!-- MODAL DE GERENCIAR ALUNOS E CHAT (PARA O PROFESSOR) -->
     <div id="studentsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl relative">
             <h3 class="font-bold text-indigo-700 text-lg mb-1"><i class="fa-solid fa-users-gear"></i> Gerenciamento de Alunos e Mensagens</h3>
-            <p class="text-xs text-slate-500 mb-4">Veja os alunos inscritos na sua turma e responda a dúvidas/mensagens individuais.</p>
+            <p class="text-xs text-slate-500 mb-4">Veja os alunos inscritos na sua turma e responda a dúvidas individuais.</p>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="border rounded-xl p-3 bg-slate-50 max-h-72 overflow-y-auto" id="studentsListContainer">
@@ -345,7 +386,7 @@
     <div id="masterAdminModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl border border-rose-100 relative">
             <h3 class="font-bold text-rose-600 text-lg mb-1"><i class="fa-solid fa-shield-halved"></i> Painel Master do Proprietário</h3>
-            <p class="text-xs text-slate-500 mb-4">Controle de assinaturas, mensagens de suporte e liberação de professores (R$ 29,90/mês)</p>
+            <p class="text-xs text-slate-500 mb-4">Controle dinâmico de assinaturas, status e mensagens de suporte (R$ 29,90/mês)</p>
             <div class="space-y-3 max-h-96 overflow-y-auto" id="masterAdminList">
                 <p class="text-xs text-slate-400">A carregar professores...</p>
             </div>
@@ -367,11 +408,11 @@
         </div>
     </div>
 
-    <!-- SCRIPT DA APLICAÇÃO -->
+    <!-- SCRIPT DA APLICAÇÃO COM POP-UPS CUSTOMIZADOS E TEMPO REAL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, updateDoc, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCTNab5Tf_7q69r-JLzyK2u-bDF_4YRQxU",
@@ -392,6 +433,34 @@
         let selectedStudentUid = null;
         let subjectsData = [];
         let materialsData = [];
+
+        // FUNÇÃO DE POP-UP CUSTOMIZADO (Substitui os alerts nativos)
+        window.showCustomAlert = function(title, desc, type = 'success') {
+            const modal = document.getElementById('customAlertModal');
+            const titleEl = document.getElementById('customAlertTitle');
+            const descEl = document.getElementById('customAlertDesc');
+            const iconEl = document.getElementById('customAlertIcon');
+
+            titleEl.innerText = title;
+            descEl.innerText = desc;
+
+            if (type === 'success') {
+                iconEl.className = 'inline-flex p-4 rounded-full text-3xl bg-emerald-50 text-emerald-600';
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            } else if (type === 'error') {
+                iconEl.className = 'inline-flex p-4 rounded-full text-3xl bg-rose-50 text-rose-600';
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+            } else {
+                iconEl.className = 'inline-flex p-4 rounded-full text-3xl bg-amber-50 text-amber-600';
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.closeCustomAlert = function() {
+            document.getElementById('customAlertModal').classList.add('hidden');
+        };
 
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -416,7 +485,7 @@
                 document.getElementById('masterAdminModal').classList.remove('hidden');
                 carregarPainelMaster();
             } else {
-                alert("Chave mestra incorreta!");
+                showCustomAlert("Acesso Negado", "Chave mestra incorreta!", "error");
             }
         };
 
@@ -447,6 +516,7 @@
             const addSubContainer = document.getElementById('addSubjectContainer');
             const profStudentManage = document.getElementById('professorStudentManage');
             const studentChatContainer = document.getElementById('studentChatContainer');
+            const notificationArea = document.getElementById('notificationArea');
 
             if (user) {
                 closeAuthModal();
@@ -461,6 +531,9 @@
                     </div>
                     <button onclick="handleLogout()" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-indigo-500 ml-1">Sair</button>
                 `;
+
+                notificationArea.classList.remove('hidden');
+                iniciarOuvinteNotificacoes(user.uid, currentUserData.role);
 
                 if (currentUserData.role === 'professor') {
                     const agora = Date.now();
@@ -498,6 +571,7 @@
                 welcomeView.classList.remove('hidden');
                 pendingView.classList.add('hidden');
                 mainAppView.classList.add('hidden');
+                notificationArea.classList.add('hidden');
                 currentUserData = null;
                 headerArea.innerHTML = `
                     <button onclick="openAuthModal('login')" class="bg-indigo-600 text-white text-xs px-3.5 py-2 rounded-xl">Entrar</button>
@@ -506,13 +580,108 @@
             }
         });
 
+        // SISTEMA DE NOTIFICAÇÕES EM TEMPO REAL (SININHO DINÂMICO)
+        function iniciarOuvinteNotificacoes(uid, role) {
+            if (role === 'professor') {
+                onSnapshot(collection(db, "users", uid, "supportMessages"), (snap) => {
+                    atualizarSininho(snap, "Nova mensagem do Administrador / Suporte", () => openProfessorAdminSupportModal());
+                });
+            } else if (role === 'aluno') {
+                onSnapshot(collection(db, "users", uid, "directChat"), (snap) => {
+                    atualizarSininho(snap, "Nova mensagem do seu Professor", () => openStudentChatModal());
+                });
+            }
+        }
+
+        function atualizarSininho(snap, tituloNotif, onClickAction) {
+            const badge = document.getElementById('notifBadge');
+            const list = document.getElementById('notifList');
+            
+            let novas = snap.docs.filter(d => d.data().sender !== currentUserData.role);
+            if (novas.length > 0) {
+                badge.innerText = novas.length;
+                badge.classList.remove('hidden');
+                list.innerHTML = `
+                    <div onclick="(${onClickAction.toString()})()" class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg cursor-pointer transition">
+                        <b>${tituloNotif}</b>
+                        <span class="block text-[10px] text-slate-500">Clique para ver e responder.</span>
+                    </div>
+                `;
+            } else {
+                badge.classList.add('hidden');
+                list.innerHTML = '<p class="text-slate-400 text-center py-2">Sem novas notificações.</p>';
+            }
+        }
+
+        window.toggleNotifications = function(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('notifDropdown');
+            dropdown.classList.toggle('hidden');
+        };
+
+        window.addEventListener('click', () => {
+            const dropdown = document.getElementById('notifDropdown');
+            if (dropdown && !dropdown.classList.contains('hidden')) dropdown.classList.add('hidden');
+        });
+
         // COPIAR LINK DE CONVITE
         window.copyInviteLink = function() {
             if (!currentUserData || !currentUserData.turmaCode) return;
             const link = `${window.location.origin}${window.location.pathname}?turma=${currentUserData.turmaCode}`;
             navigator.clipboard.writeText(link).then(() => {
-                alert("Link de convite copiado para a área de transferência!");
+                showCustomAlert("Sucesso", "Link de convite copiado para a área de transferência!", "success");
             });
+        };
+
+        // SUPORTE DO PROFESSOR COM O ADMINISTRATIVO
+        window.openProfessorAdminSupportModal = function() {
+            document.getElementById('professorAdminSupportModal').classList.remove('hidden');
+            carregarChatProfAdmin();
+        };
+
+        window.closeProfessorAdminSupportModal = function() {
+            document.getElementById('professorAdminSupportModal').classList.add('hidden');
+        };
+
+        window.carregarChatProfAdmin = async function() {
+            const box = document.getElementById('profAdminChatBox');
+            const snap = await getDocs(collection(db, "users", currentUserData.uid, "supportMessages"));
+            box.innerHTML = '';
+            if (snap.empty) {
+                box.innerHTML = '<p class="text-slate-400 text-center py-10">Envie uma mensagem ou link do comprovativo para o Admin.</p>';
+                return;
+            }
+            let msgs = snap.docs.map(d => d.data());
+            msgs.sort((a, b) => a.timestamp - b.timestamp);
+            box.innerHTML = msgs.map(m => `
+                <div class="${m.sender === 'admin' ? 'text-left text-indigo-700 bg-indigo-50' : 'text-right text-slate-700 bg-slate-100'} p-2.5 rounded-lg space-y-1">
+                    <b class="text-[10px] block">${m.sender === 'admin' ? 'Administrativo' : 'Você'}:</b>
+                    <p class="text-xs">${m.text}</p>
+                    ${m.link ? `<a href="${m.link}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-white border px-2 py-1 rounded-md text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-external-link-alt"></i> Ver Comprovativo</a>` : ''}
+                </div>
+            `).join('');
+            box.scrollTop = box.scrollHeight;
+        };
+
+        window.sendProfAdminSupportMsg = async function() {
+            const input = document.getElementById('profAdminMsgInput');
+            const linkInput = document.getElementById('profAdminLinkInput');
+            const text = input.value.trim();
+            const link = linkInput.value.trim();
+
+            if (!text && !link) return;
+
+            await addDoc(collection(db, "users", currentUserData.uid, "supportMessages"), {
+                sender: 'professor',
+                text: text || "Enviei o link do comprovativo de pagamento.",
+                link: link || null,
+                timestamp: Date.now()
+            });
+
+            input.value = '';
+            linkInput.value = '';
+            showCustomAlert("Sucesso", "Link do comprovativo anexado e enviado com sucesso!", "success");
+            carregarChatProfAdmin();
         };
 
         // GERENCIAR ALUNOS E CHAT DO PROFESSOR
@@ -630,7 +799,7 @@
             carregarMensagensAlunoDireto();
         };
 
-        // SUPORTE TRIAL PROFESSOR COM LINK DE COMPROVATIVO
+        // SUPORTE TRIAL PROFESSOR (TELA DE BLOQUEIO)
         window.carregarChatSuporteProfessor = async function() {
             const box = document.getElementById('supportChatBox');
             const messagesRef = collection(db, "users", currentUserData.uid, "supportMessages");
@@ -647,9 +816,9 @@
 
             box.innerHTML = msgs.map(m => `
                 <div class="${m.sender === 'admin' ? 'text-left text-indigo-700 bg-indigo-50' : 'text-right text-slate-700 bg-slate-100'} p-2.5 rounded-lg space-y-1">
-                    <b class="text-[10px] block">${m.sender === 'admin' ? 'Proprietário' : 'Você'}:</b> 
+                    <b class="text-[10px] block">${m.sender === 'admin' ? 'Administrativo' : 'Você'}:</b> 
                     <p class="text-xs">${m.text}</p>
-                    ${m.link ? `<a href="${m.link}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-white border px-2 py-1 rounded-md text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-external-link-alt"></i> Ver Comprovativo (${m.link})</a>` : ''}
+                    ${m.link ? `<a href="${m.link}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-white border px-2 py-1 rounded-md text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-external-link-alt"></i> Ver Comprovativo</a>` : ''}
                 </div>
             `).join('');
             box.scrollTop = box.scrollHeight;
@@ -672,6 +841,7 @@
 
             input.value = '';
             linkInput.value = '';
+            showCustomAlert("Sucesso", "Link do comprovativo enviado para análise!", "success");
             carregarChatSuporteProfessor();
         };
 
@@ -685,7 +855,7 @@
             try {
                 await signInWithEmailAndPassword(auth, internalEmail, pass);
             } catch (err) {
-                alert('Erro ao entrar: Utilizador ou senha incorretos.');
+                showCustomAlert("Erro de Acesso", "Utilizador ou senha incorretos.", "error");
             }
         };
 
@@ -698,7 +868,7 @@
             const secretWord = document.getElementById('regSecret').value.trim().toLowerCase();
 
             if (pass !== passConfirm) {
-                alert('Erro: As senhas não coincidem.');
+                showCustomAlert("Atenção", "As senhas não coincidem.", "error");
                 return;
             }
 
@@ -724,9 +894,9 @@
                 }
 
                 await setDoc(doc(db, "users", cred.user.uid), userData);
-                alert(role === 'professor' ? 'Conta criada! Tem 7 dias grátis de período de teste.' : 'Cadastro realizado com sucesso!');
+                showCustomAlert("Sucesso", role === 'professor' ? 'Conta criada! Tem 7 dias grátis de período de teste.' : 'Cadastro realizado com sucesso!', "success");
             } catch (err) {
-                alert('Erro no cadastro: ' + err.message);
+                showCustomAlert("Erro no Cadastro", err.message, "error");
             }
         };
 
@@ -734,33 +904,54 @@
             await signOut(auth);
         };
 
+        // PAINEL MASTER COM INDICADORES VISUAIS CLAROS DE STATUS
         window.carregarPainelMaster = async function() {
             const listContainer = document.getElementById('masterAdminList');
             const snap = await getDocs(collection(db, "users"));
             listContainer.innerHTML = '';
+            
+            let temProfessores = false;
             snap.forEach(d => {
                 const u = d.data();
                 if (u.role === 'professor') {
-                    const diasRestantes = Math.max(0, 7 - Math.floor((Date.now() - (u.createdAt || Date.now())) / (1000 * 60 * 60 * 24)));
+                    temProfessores = true;
+                    const agora = Date.now();
+                    const criacao = u.createdAt || agora;
+                    const diasRestantes = Math.max(0, 7 - Math.floor((agora - criacao) / (1000 * 60 * 60 * 24)));
+                    const expirado = diasRestantes === 0 && u.status !== 'pago';
+
+                    let statusBadge = '';
+                    if (u.status === 'pago') {
+                        statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-bold">🟢 LIBERADO (Pago)</span>';
+                    } else if (expirado) {
+                        statusBadge = '<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-bold">🔴 BLOQUEADO (Expirado)</span>';
+                    } else {
+                        statusBadge = `<span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full font-bold">🟡 TRIAL (${diasRestantes} dias restantes)</span>`;
+                    }
+
                     listContainer.innerHTML += `
                         <div class="bg-slate-50 p-3 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
                             <div>
-                                <span class="font-bold text-slate-800">${u.username}</span> (Turma: ${u.turmaCode})<br>
-                                <span class="text-slate-500">Status: <b>${u.status || 'trial'}</b> | Restam ${diasRestantes} dias de teste</span>
+                                <span class="font-bold text-slate-800 text-sm">${u.username}</span> (Turma: ${u.turmaCode})<br>
+                                <div class="mt-1 flex items-center gap-2">Status: ${statusBadge}</div>
                             </div>
                             <div class="flex gap-2">
-                                <button onclick="abrirChatAdmin('${d.id}', '${u.username}')" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg font-semibold">Ver Suporte / Chat</button>
-                                <button onclick="liberarProfessor('${d.id}')" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-semibold">Liberar / Renovar (R$ 29,90)</button>
+                                <button onclick="abrirChatAdmin('${d.id}', '${u.username}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-semibold transition">Suporte / Chat</button>
+                                <button onclick="liberarProfessor('${d.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-semibold transition">Liberar / Renovar</button>
                             </div>
                         </div>
                     `;
                 }
             });
+
+            if (!temProfessores) {
+                listContainer.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Nenhum professor cadastrado no sistema.</p>';
+            }
         };
 
         window.liberarProfessor = async function(uid) {
             await updateDoc(doc(db, "users", uid), { status: 'pago', createdAt: Date.now() });
-            alert("Professor renovado com sucesso por mais 30 dias!");
+            showCustomAlert("Sucesso", "Professor renovado e liberado com sucesso por mais 30 dias!", "success");
             carregarPainelMaster();
         };
 
@@ -784,9 +975,9 @@
             msgs.sort((a, b) => a.timestamp - b.timestamp);
             box.innerHTML = msgs.map(m => `
                 <div class="${m.sender === 'admin' ? 'text-right text-indigo-700 bg-indigo-50' : 'text-left text-slate-700 bg-slate-100'} p-2.5 rounded-lg space-y-1">
-                    <b class="text-[10px] block">${m.sender === 'admin' ? 'Você (Proprietário)' : 'Professor'}:</b> 
+                    <b class="text-[10px] block">${m.sender === 'admin' ? 'Você (Administrativo)' : 'Professor'}:</b> 
                     <p class="text-xs">${m.text}</p>
-                    ${m.link ? `<a href="${m.link}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-white border px-2 py-1 rounded-md text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-external-link-alt"></i> Ver Comprovativo (${m.link})</a>` : ''}
+                    ${m.link ? `<a href="${m.link}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-white border px-2 py-1 rounded-md text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-external-link-alt"></i> Ver Comprovativo</a>` : ''}
                 </div>
             `).join('');
             box.scrollTop = box.scrollHeight;
@@ -840,6 +1031,7 @@
             const turma = currentUserData.turmaCode;
             await addDoc(collection(db, "turmas", turma, "subjects"), { name, createdAt: Date.now() });
             document.getElementById('newSubjectName').value = '';
+            showCustomAlert("Sucesso", "Matéria criada com sucesso!", "success");
             loadDataFromCloud();
         };
 
@@ -864,8 +1056,8 @@
             });
 
             document.getElementById('uploadForm').reset();
+            showCustomAlert("Sucesso", "Material publicado com sucesso!", "success");
             loadDataFromCloud();
-            alert("Material publicado com sucesso!");
         };
 
         function renderSidebarSubjects() {
