@@ -27,8 +27,8 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <!-- BOTÃO DE ATUALIZAR GERAL NO TOPO -->
-                <button onclick="recarregarPaginaCompleta()" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 border border-indigo-500" title="Atualizar Página">
+                <!-- BOTÃO DE ATUALIZAR DADOS (SÓ APARECE QUANDO LOGADO) -->
+                <button id="globalRefreshBtn" onclick="loadDataFromCloud()" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2 rounded-xl text-xs font-semibold transition hidden items-center gap-1.5 border border-indigo-500 shadow-sm" title="Atualizar Dados">
                     <i class="fa-solid fa-rotate"></i> <span class="hidden sm:inline">Atualizar</span>
                 </button>
 
@@ -130,10 +130,6 @@
                     <label class="block text-[10px] font-bold text-indigo-700 uppercase mb-1">Turma / Professor Ativo</label>
                     <select id="activeTurmaSelect" onchange="mudarTurmaAtiva(this.value)" class="w-full text-xs px-3 py-2 border rounded-xl bg-indigo-50 font-bold text-indigo-800 focus:outline-none"></select>
                 </div>
-
-                <button onclick="loadDataFromCloud()" class="w-full items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 mb-4 flex">
-                    <i class="fa-solid fa-rotate-right"></i> Atualizar Dados da Turma
-                </button>
                 
                 <h2 class="text-base font-bold text-slate-700 mb-3 flex items-center justify-between">
                     <span>Matérias</span>
@@ -549,10 +545,6 @@
             document.getElementById('customAlertModal').classList.add('hidden');
         };
 
-        window.recarregarPaginaCompleta = function() {
-            window.location.reload();
-        };
-
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             urlTurmaCode = urlParams.get('turma');
@@ -622,6 +614,7 @@
             const studentTurmaSelectorContainer = document.getElementById('studentTurmaSelectorContainer');
             const professorTurmasContainer = document.getElementById('professorTurmasContainer');
             const notificationArea = document.getElementById('notificationArea');
+            const globalRefreshBtn = document.getElementById('globalRefreshBtn');
 
             if (user) {
                 closeAuthModal();
@@ -642,6 +635,8 @@
                 `;
 
                 notificationArea.classList.remove('hidden');
+                globalRefreshBtn.classList.remove('hidden');
+                globalRefreshBtn.classList.add('flex');
                 iniciarOuvinteNotificacoes(user.uid, currentUserData.role);
 
                 if (currentUserData.role === 'professor') {
@@ -704,6 +699,8 @@
                 pendingView.classList.add('hidden');
                 mainAppView.classList.add('hidden');
                 notificationArea.classList.add('hidden');
+                globalRefreshBtn.classList.add('hidden');
+                globalRefreshBtn.classList.remove('flex');
                 currentUserData = null;
                 activeTurmaCode = '';
                 headerArea.innerHTML = `
@@ -1193,7 +1190,6 @@
             try {
                 await signInWithEmailAndPassword(auth, internalEmail, pass);
             } catch (err) {
-                // Mensagem inteligente sugerindo criar conta se o utilizador não existir/errar
                 const botoesAcao = `
                     <button onclick="closeCustomAlert(); openAuthModal('register'); document.getElementById('regName').value='${rawInput}';" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-xs font-semibold transition mb-2">
                         Criar Conta com este Nome
