@@ -27,12 +27,12 @@
             </div>
             
             <div class="flex items-center gap-3">
-                <!-- BOTÃO DE ATUALIZAR DADOS (SÓ APARECE QUANDO LOGADO) -->
+                <!-- BOTÃO DE ATUALIZAR DADOS -->
                 <button id="globalRefreshBtn" onclick="loadDataFromCloud()" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2 rounded-xl text-xs font-semibold transition hidden items-center gap-1.5 border border-indigo-500 shadow-sm" title="Atualizar Dados">
                     <i class="fa-solid fa-rotate"></i> <span class="hidden sm:inline">Atualizar</span>
                 </button>
 
-                <!-- SININHO DE NOTIFICAÇÕES DINÂMICAS -->
+                <!-- SININHO DE NOTIFICAÇÕES -->
                 <div id="notificationArea" class="relative hidden">
                     <button onclick="toggleNotifications(event)" class="relative p-2 text-indigo-200 hover:text-white transition">
                         <i class="fa-solid fa-bell text-xl"></i>
@@ -276,95 +276,108 @@
         </div>
     </div>
 
-    <!-- MODAL DE AUTENTICAÇÃO -->
-    <div id="authModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-slate-100 relative">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- MODAL DE AUTENTICAÇÃO (MELHORADO) -->
+    <div id="authModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl border border-slate-100 relative transform transition-all">
+            <button onclick="closeAuthModal()" class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition"><i class="fa-solid fa-xmark"></i></button>
             
-            <div id="viewLogin" class="space-y-4">
-                <div class="text-center mb-6">
-                    <h3 class="font-bold text-slate-800 text-xl">Acessar o AVA</h3>
-                    <p class="text-xs text-slate-500 mt-1">Entre com seu usuário e senha</p>
+            <!-- VISTA DE LOGIN -->
+            <div id="viewLogin" class="space-y-5">
+                <div class="text-center space-y-1">
+                    <div class="inline-flex p-3 bg-indigo-50 text-indigo-600 rounded-2xl text-2xl mb-1 shadow-inner">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    </div>
+                    <h3 class="font-extrabold text-slate-800 text-2xl">Bem-vindo de volta!</h3>
+                    <p class="text-xs text-slate-500">Insira suas credenciais para acessar o AVA</p>
                 </div>
-                <form id="formLogin" onsubmit="handleLoginSubmit(event)" class="space-y-3">
+                <form id="formLogin" onsubmit="handleLoginSubmit(event)" class="space-y-3.5">
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
                         <input type="text" id="loginUser" required placeholder="Ex: JoaoSilva" autocomplete="off"
-                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            class="w-full text-sm px-4 py-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50/50">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha</label>
-                        <input type="password" id="loginPass" required placeholder="••••••••" autocomplete="new-password"
-                            class="w-full text-sm px-3.5 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Senha</label>
+                        <input type="password" id="loginPass" required placeholder="••••••••" autocomplete="current-password"
+                            class="w-full text-sm px-4 py-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50/50">
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
-                        Entrar
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-2xl font-bold text-sm transition shadow-lg shadow-indigo-200 mt-2">
+                        Entrar na Plataforma
                     </button>
                 </form>
-                <div class="flex justify-between items-center text-xs pt-2">
-                    <button onclick="switchAuthView('forgot')" class="text-indigo-600 hover:underline">Esqueci a senha</button>
-                    <button onclick="switchAuthView('register')" class="text-slate-600 font-semibold hover:underline">Criar conta nova (Professor)</button>
+                <div class="flex justify-between items-center text-xs pt-2 border-t border-slate-100">
+                    <button onclick="switchAuthView('forgot')" class="text-indigo-600 hover:text-indigo-800 font-semibold transition">Esqueci a senha</button>
+                    <button onclick="switchAuthView('register')" class="text-slate-600 hover:text-slate-900 font-bold transition">Criar conta nova</button>
                 </div>
             </div>
 
+            <!-- VISTA DE REGISTO -->
             <div id="viewRegister" class="space-y-4 hidden">
-                <div class="text-center mb-4">
-                    <h3 class="font-bold text-slate-800 text-xl" id="registerTitle">Criar Conta (Professor - 7 Dias Grátis)</h3>
-                    <p class="text-xs text-slate-500" id="registerSubtitle">Preencha os dados para iniciar o teste</p>
+                <div class="text-center space-y-1">
+                    <div class="inline-flex p-3 bg-indigo-50 text-indigo-600 rounded-2xl text-2xl mb-1 shadow-inner">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <h3 class="font-extrabold text-slate-800 text-xl" id="registerTitle">Criar Conta no AVA</h3>
+                    <p class="text-xs text-slate-500" id="registerSubtitle">Preencha os campos para iniciar</p>
                 </div>
                 <form id="formRegister" onsubmit="handleRegisterSubmit(event)" class="space-y-3">
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
                         <input type="text" id="regName" required placeholder="Ex: ProfCarlos" autocomplete="off"
-                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            class="w-full text-sm px-4 py-2.5 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50/50">
                     </div>
                     <input type="hidden" id="regRole" value="professor">
                     <div id="turmaCodeGroup" class="hidden">
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Código da Turma</label>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Código da Turma</label>
                         <input type="text" id="regTurmaCode" placeholder="Ex: PROF-CARLOS" readonly
-                            class="w-full text-sm px-3.5 py-2 border rounded-xl bg-slate-100 text-slate-600 uppercase font-bold cursor-not-allowed">
+                            class="w-full text-sm px-4 py-2.5 border border-slate-200 rounded-2xl bg-slate-100 text-slate-600 uppercase font-bold cursor-not-allowed">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Senha (Mínimo 6 caracteres)</label>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Senha (Mínimo 6 caracteres)</label>
                         <input type="password" id="regPass" required placeholder="••••••••" autocomplete="new-password"
-                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            class="w-full text-sm px-4 py-2.5 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50/50">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Confirmar Senha</label>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Confirmar Senha</label>
                         <input type="password" id="regPassConfirm" required placeholder="••••••••" autocomplete="new-password"
-                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            class="w-full text-sm px-4 py-2.5 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50/50">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Palavra Secreta (Recuperação)</label>
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Palavra Secreta (Recuperação)</label>
                         <input type="text" id="regSecret" required placeholder="Ex: pet" autocomplete="off"
-                            class="w-full text-sm px-3.5 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            class="w-full text-sm px-4 py-2.5 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50/50">
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition mt-2">
-                        Criar Conta
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-2xl font-bold text-sm transition shadow-lg shadow-indigo-200 mt-2">
+                        Finalizar Cadastro
                     </button>
                 </form>
-                <div class="text-center pt-2">
-                    <button onclick="switchAuthView('login')" class="text-xs text-indigo-600 hover:underline">Já tem conta? Faça login</button>
+                <div class="text-center pt-1 border-t border-slate-100">
+                    <button onclick="switchAuthView('login')" class="text-xs text-indigo-600 hover:underline font-bold">Já tem conta? Faça login</button>
                 </div>
             </div>
 
+            <!-- VISTA DE RECUPERAÇÃO DE SENHA -->
             <div id="viewForgot" class="space-y-4 hidden">
-                <div class="text-center mb-4">
-                    <h3 class="font-bold text-slate-800 text-xl">Recuperar Senha</h3>
+                <div class="text-center space-y-1">
+                    <div class="inline-flex p-3 bg-amber-50 text-amber-600 rounded-2xl text-2xl mb-1 shadow-inner">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <h3 class="font-extrabold text-slate-800 text-xl">Recuperar Senha</h3>
+                    <p class="text-xs text-slate-500">Informe seu usuário e palavra secreta</p>
                 </div>
                 <form id="formForgot" onsubmit="handleForgotSubmit(event)" class="space-y-3">
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
-                        <input type="text" id="forgotUser" required autocomplete="off" class="w-full text-sm px-3.5 py-2.5 border rounded-xl">
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Nome de Usuário</label>
+                        <input type="text" id="forgotUser" required autocomplete="off" class="w-full text-sm px-4 py-2.5 border border-slate-200 rounded-2xl bg-slate-50/50">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Palavra Secreta</label>
-                        <input type="text" id="forgotSecret" required autocomplete="off" class="w-full text-sm px-3.5 py-2.5 border rounded-xl">
+                        <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Palavra Secreta</label>
+                        <input type="text" id="forgotSecret" required autocomplete="off" class="w-full text-sm px-4 py-2.5 border border-slate-200 rounded-2xl bg-slate-50/50">
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-semibold">Validar</button>
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-2xl font-bold text-sm transition">Validar Dados</button>
                 </form>
-                <div class="text-center pt-2">
-                    <button onclick="switchAuthView('login')" class="text-xs text-indigo-600 hover:underline">Voltar</button>
+                <div class="text-center pt-2 border-t border-slate-100">
+                    <button onclick="switchAuthView('login')" class="text-xs text-indigo-600 hover:underline font-bold">Voltar ao login</button>
                 </div>
             </div>
         </div>
@@ -1194,13 +1207,12 @@
             try {
                 await signInWithEmailAndPassword(auth, internalEmail, pass);
             } catch (err) {
-                // TRANSIÇÃO AUTOMÁTICA INTELIGENTE: Se a conta não existir, abre direto o registo preenchido
-                closeAuthModal();
+                // TRANSIÇÃO AUTOMÁTICA FLUIDA: Fecha login e abre registo preenchido
                 openAuthModal('register');
                 document.getElementById('regName').value = rawInput;
                 document.getElementById('regPass').value = '';
                 document.getElementById('regPassConfirm').value = '';
-                document.getElementById('registerSubtitle').innerText = `Conta não encontrada para "${rawInput}". Crie a sua conta agora!`;
+                document.getElementById('registerSubtitle').innerText = `Conta "${rawInput}" não encontrada. Crie sua conta abaixo!`;
             }
         };
 
@@ -1248,7 +1260,12 @@
                 }
 
                 await setDoc(doc(db, "users", cred.user.uid), userData);
-                showCustomAlert("Sucesso", role === 'professor' ? 'Conta criada! Tem 7 dias grátis de período de teste.' : 'Cadastro realizado! Aguarde a aprovação do professor.', "success");
+                
+                // MELHORia DE USABILIDADE: Após criar, avisa e leva automaticamente para o login com os dados preenchidos
+                switchAuthView('login');
+                document.getElementById('loginUser').value = rawUsername;
+                document.getElementById('loginPass').value = '';
+                showCustomAlert("Conta Criada com Sucesso!", "Faça login agora com sua senha recém-criada.", "success");
             } catch (err) {
                 showCustomAlert("Erro no Cadastro", "Este nome de usuário já está em uso ou ocorreu um erro.", "error");
             }
