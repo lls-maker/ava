@@ -74,11 +74,11 @@
     <!-- TELA DE ESPERA / BLOQUEIO TRIAL (PARA PROFESSORES) -->
     <div id="pendingView" class="flex-grow flex items-center justify-center p-6 hidden">
         <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl text-center space-y-4 border border-slate-100">
-            <div class="inline-flex p-4 bg-amber-50 text-amber-600 rounded-full text-3xl" id="pendingIcon">
+            <div class="inline-flex p-4 bg-amber-50 text-amber-600 rounded-full text-3xl">
                 <i class="fa-solid fa-clock-rotate-left"></i>
             </div>
-            <h3 class="text-xl font-bold text-slate-800" id="pendingTitle">Período de Teste Expirado</h3>
-            <p class="text-xs text-slate-500" id="pendingDesc">
+            <h3 class="text-xl font-bold text-slate-800">Período de Teste Expirado</h3>
+            <p class="text-xs text-slate-500">
                 Os seus 7 dias de teste grátis terminaram. Envie o comprovativo do plano (R$ 29,90/mês) pelo chat de suporte abaixo para renovar o acesso.
             </p>
 
@@ -86,9 +86,12 @@
                 <p class="text-slate-400 text-center py-4">A carregar chat de suporte...</p>
             </div>
             
-            <div class="flex gap-2">
-                <input type="text" id="supportMsgInput" placeholder="Escreva a mensagem ou comprovativo..." class="flex-1 text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <button onclick="sendSupportMessage()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg font-semibold transition">Enviar</button>
+            <div class="space-y-2 text-left">
+                <input type="text" id="supportMsgInput" placeholder="Escreva uma mensagem..." class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <div class="flex items-center justify-between gap-2">
+                    <input type="file" id="supportFileInput" accept=".pdf,image/*" class="text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                    <button onclick="sendSupportMessage()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg font-semibold transition">Enviar</button>
+                </div>
             </div>
 
             <button onclick="handleLogout()" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-2.5 rounded-xl text-xs font-semibold transition">
@@ -101,7 +104,7 @@
     <main id="mainAppView" class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6 hidden">
         <aside class="lg:col-span-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 h-fit space-y-4">
             <div>
-                <button id="desktopRefreshBtn" onclick="refreshAppData()" class="hidden lg:flex w-full items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 mb-4">
+                <button id="desktopRefreshBtn" onclick="loadDataFromCloud()" class="hidden lg:flex w-full items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 mb-4">
                     <i class="fa-solid fa-rotate-right"></i> Atualizar Conteúdos
                 </button>
                 <h2 class="text-base font-bold text-slate-700 mb-3 flex items-center justify-between">
@@ -118,17 +121,29 @@
                     </form>
                 </div>
             </div>
+            
+            <!-- GERENCIAR TURMA (PARA O PROFESSOR) -->
             <div id="professorStudentManage" class="pt-4 border-t border-slate-100 hidden">
                 <h3 class="text-xs font-bold text-indigo-700 mb-2 flex items-center justify-between">
                     <span>Gerenciar Turma</span>
                     <i class="fa-solid fa-users"></i>
                 </h3>
                 <button onclick="openStudentsModal()" class="relative w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition border border-indigo-200 mb-2 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-user-gear"></i> Gerenciar Alunos
-                    <span id="pendingStudentsBadge" class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                    <i class="fa-solid fa-user-gear"></i> Gerenciar Alunos & Chat
                 </button>
                 <button onclick="copyInviteLink()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2 rounded-xl transition border border-slate-200 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-copy"></i> Copiar Link de Convite
+                </button>
+            </div>
+
+            <!-- BOTÃO DE CHAT COM O PROFESSOR (APENAS PARA ALUNOS) -->
+            <div id="studentChatContainer" class="pt-4 border-t border-slate-100 hidden">
+                <h3 class="text-xs font-bold text-indigo-700 mb-2 flex items-center justify-between">
+                    <span>Suporte / Professor</span>
+                    <i class="fa-solid fa-comments"></i>
+                </h3>
+                <button onclick="openStudentChatModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2.5 rounded-xl transition shadow-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-comment-dots"></i> Chat com o Professor
                 </button>
             </div>
         </aside>
@@ -285,6 +300,47 @@
         </div>
     </div>
 
+    <!-- MODAL DE GERENCIAR ALUNOS E CHAT (PARA O PROFESSOR) -->
+    <div id="studentsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl relative">
+            <h3 class="font-bold text-indigo-700 text-lg mb-1"><i class="fa-solid fa-users-gear"></i> Gerenciamento de Alunos e Mensagens</h3>
+            <p class="text-xs text-slate-500 mb-4">Veja os alunos inscritos na sua turma e responda a dúvidas/mensagens individuais.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="border rounded-xl p-3 bg-slate-50 max-h-72 overflow-y-auto" id="studentsListContainer">
+                    <p class="text-xs text-slate-400">A carregar alunos...</p>
+                </div>
+                <div class="border rounded-xl p-3 bg-white flex flex-col justify-between h-72">
+                    <div class="border-b pb-2 mb-2 font-bold text-xs text-indigo-700" id="chatStudentTitle">Selecione um aluno ao lado</div>
+                    <div class="flex-1 overflow-y-auto space-y-2 text-xs p-1" id="professorStudentChatBox">
+                        <p class="text-slate-400 text-center py-6">Nenhuma conversa selecionada.</p>
+                    </div>
+                    <div class="flex gap-2 pt-2 border-t">
+                        <input type="text" id="professorStudentInput" placeholder="Escrever mensagem..." class="flex-1 text-xs px-2.5 py-1.5 border rounded-lg">
+                        <button onclick="sendProfessorStudentMsg()" class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">Enviar</button>
+                    </div>
+                </div>
+            </div>
+            <button onclick="closeStudentsModal()" class="mt-4 w-full bg-slate-200 text-slate-700 py-2 rounded-xl text-xs font-semibold">Fechar</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE CHAT DO ALUNO COM O PROFESSOR -->
+    <div id="studentChatModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+            <h3 class="font-bold text-indigo-700 text-base mb-1"><i class="fa-solid fa-comments"></i> Chat com o Professor</h3>
+            <p class="text-xs text-slate-500 mb-3">Tire as suas dúvidas diretamente com o professor da turma.</p>
+            <div class="bg-slate-50 border rounded-xl p-3 h-64 overflow-y-auto text-xs space-y-2 mb-3" id="studentDirectChatBox">
+                <p class="text-slate-400 text-center py-10">A carregar mensagens...</p>
+            </div>
+            <div class="flex gap-2 mb-3">
+                <input type="text" id="studentDirectInput" placeholder="Escreva a sua dúvida..." class="flex-1 text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button onclick="sendStudentDirectMsg()" class="bg-indigo-600 text-white text-xs px-4 py-2 rounded-lg font-semibold">Enviar</button>
+            </div>
+            <button onclick="closeStudentChatModal()" class="w-full bg-slate-200 text-slate-700 py-2 rounded-xl text-xs font-semibold">Fechar</button>
+        </div>
+    </div>
+
     <!-- MODAL DE ADMIN / PROPRIETÁRIO -->
     <div id="masterAdminModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl border border-rose-100 relative">
@@ -333,6 +389,9 @@
         let currentUserData = null;
         let urlTurmaCode = '';
         let activeChatProfUid = null;
+        let selectedStudentUid = null;
+        let subjectsData = [];
+        let materialsData = [];
 
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -348,7 +407,7 @@
             }
         });
 
-        // Validação direta configurada com a nova senha "adminfacil!"
+        // Validação com senha adminfacil!
         window.acessarPainelAdminMaster = function() {
             const senhaDono = prompt("Digite a Chave Mestra do Proprietário:");
             if (!senhaDono) return;
@@ -387,6 +446,7 @@
             const profPanel = document.getElementById('professorPanel');
             const addSubContainer = document.getElementById('addSubjectContainer');
             const profStudentManage = document.getElementById('professorStudentManage');
+            const studentChatContainer = document.getElementById('studentChatContainer');
 
             if (user) {
                 closeAuthModal();
@@ -425,7 +485,13 @@
                     profPanel.classList.remove('hidden');
                     addSubContainer.classList.remove('hidden');
                     profStudentManage.classList.remove('hidden');
+                    studentChatContainer.classList.add('hidden');
                     document.getElementById('professorTurmaBadge').innerText = `Turma: ${currentUserData.turmaCode || 'N/A'}`;
+                } else {
+                    profPanel.classList.add('hidden');
+                    addSubContainer.classList.add('hidden');
+                    profStudentManage.classList.add('hidden');
+                    studentChatContainer.classList.remove('hidden');
                 }
                 loadDataFromCloud();
             } else {
@@ -440,6 +506,131 @@
             }
         });
 
+        // COPIAR LINK DE CONVITE
+        window.copyInviteLink = function() {
+            if (!currentUserData || !currentUserData.turmaCode) return;
+            const link = `${window.location.origin}${window.location.pathname}?turma=${currentUserData.turmaCode}`;
+            navigator.clipboard.writeText(link).then(() => {
+                alert("Link de convite copiado para a área de transferência!");
+            });
+        };
+
+        // GERENCIAR ALUNOS E CHAT DO PROFESSOR
+        window.openStudentsModal = async function() {
+            document.getElementById('studentsModal').classList.remove('hidden');
+            const container = document.getElementById('studentsListContainer');
+            container.innerHTML = '<p class="text-xs text-slate-400">A carregar alunos...</p>';
+
+            const q = query(collection(db, "users"), where("turmaCode", "==", currentUserData.turmaCode), where("role", "==", "aluno"));
+            const snap = await getDocs(q);
+
+            if (snap.empty) {
+                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Nenhum aluno cadastrado nesta turma.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            snap.forEach(d => {
+                const aluno = d.data();
+                container.innerHTML += `
+                    <div onclick="selecionarAlunoChat('${d.id}', '${aluno.username}')" class="p-2.5 mb-2 bg-white rounded-xl border hover:border-indigo-500 cursor-pointer transition flex items-center justify-between text-xs">
+                        <div>
+                            <span class="font-bold text-slate-800">${aluno.username}</span>
+                            <span class="block text-[10px] text-slate-400">Aluno</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-400 text-[10px]"></i>
+                    </div>
+                `;
+            });
+        };
+
+        window.closeStudentsModal = function() {
+            document.getElementById('studentsModal').classList.add('hidden');
+            selectedStudentUid = null;
+        };
+
+        window.selecionarAlunoChat = async function(alunoUid, alunoName) {
+            selectedStudentUid = alunoUid;
+            document.getElementById('chatStudentTitle').innerText = `Chat com: ${alunoName}`;
+            carregarMensagensProfessorAluno();
+        };
+
+        window.carregarMensagensProfessorAluno = async function() {
+            if (!selectedStudentUid) return;
+            const box = document.getElementById('professorStudentChatBox');
+            const snap = await getDocs(collection(db, "users", selectedStudentUid, "directChat"));
+            box.innerHTML = '';
+            if (snap.empty) {
+                box.innerHTML = '<p class="text-slate-400 text-center py-6">Nenhuma mensagem ainda.</p>';
+                return;
+            }
+            let msgs = snap.docs.map(d => d.data());
+            msgs.sort((a, b) => a.timestamp - b.timestamp);
+            box.innerHTML = msgs.map(m => `
+                <div class="${m.sender === 'professor' ? 'text-right text-indigo-700 bg-indigo-50' : 'text-left text-slate-700 bg-slate-100'} p-2 rounded-lg">
+                    <b class="text-[10px]">${m.sender === 'professor' ? 'Você' : 'Aluno'}:</b> ${m.text}
+                </div>
+            `).join('');
+            box.scrollTop = box.scrollHeight;
+        };
+
+        window.sendProfessorStudentMsg = async function() {
+            const input = document.getElementById('professorStudentInput');
+            const text = input.value.trim();
+            if (!text || !selectedStudentUid) return;
+
+            await addDoc(collection(db, "users", selectedStudentUid, "directChat"), {
+                sender: 'professor',
+                text,
+                timestamp: Date.now()
+            });
+            input.value = '';
+            carregarMensagensProfessorAluno();
+        };
+
+        // CHAT DO ALUNO COM O PROFESSOR
+        window.openStudentChatModal = function() {
+            document.getElementById('studentChatModal').classList.remove('hidden');
+            carregarMensagensAlunoDireto();
+        };
+
+        window.closeStudentChatModal = function() {
+            document.getElementById('studentChatModal').classList.add('hidden');
+        };
+
+        window.carregarMensagensAlunoDireto = async function() {
+            const box = document.getElementById('studentDirectChatBox');
+            const snap = await getDocs(collection(db, "users", currentUserData.uid, "directChat"));
+            box.innerHTML = '';
+            if (snap.empty) {
+                box.innerHTML = '<p class="text-slate-400 text-center py-10">Envie uma mensagem para o professor.</p>';
+                return;
+            }
+            let msgs = snap.docs.map(d => d.data());
+            msgs.sort((a, b) => a.timestamp - b.timestamp);
+            box.innerHTML = msgs.map(m => `
+                <div class="${m.sender === 'aluno' ? 'text-right text-indigo-700 bg-indigo-50' : 'text-left text-slate-700 bg-slate-100'} p-2 rounded-lg">
+                    <b class="text-[10px]">${m.sender === 'aluno' ? 'Você' : 'Professor'}:</b> ${m.text}
+                </div>
+            `).join('');
+            box.scrollTop = box.scrollHeight;
+        };
+
+        window.sendStudentDirectMsg = async function() {
+            const input = document.getElementById('studentDirectInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            await addDoc(collection(db, "users", currentUserData.uid, "directChat"), {
+                sender: 'aluno',
+                text,
+                timestamp: Date.now()
+            });
+            input.value = '';
+            carregarMensagensAlunoDireto();
+        };
+
+        // SUPORTE TRIAL PROFESSOR COM COMPROVATIVO < 5MB
         window.carregarChatSuporteProfessor = async function() {
             const box = document.getElementById('supportChatBox');
             const messagesRef = collection(db, "users", currentUserData.uid, "supportMessages");
@@ -447,7 +638,7 @@
             
             box.innerHTML = '';
             if (snap.empty) {
-                box.innerHTML = `<p class="text-slate-400 text-center py-2">Envie uma mensagem com o comprovativo (R$ 29,90).</p>`;
+                box.innerHTML = `<p class="text-slate-400 text-center py-2">Envie uma mensagem ou o comprovativo (R$ 29,90).</p>`;
                 return;
             }
 
@@ -455,8 +646,10 @@
             msgs.sort((a, b) => a.timestamp - b.timestamp);
 
             box.innerHTML = msgs.map(m => `
-                <div class="${m.sender === 'admin' ? 'text-left text-indigo-700 bg-indigo-50' : 'text-right text-slate-700 bg-slate-100'} p-2 rounded-lg">
-                    <b class="text-[10px]">${m.sender === 'admin' ? 'Proprietário' : 'Você'}:</b> ${m.text}
+                <div class="${m.sender === 'admin' ? 'text-left text-indigo-700 bg-indigo-50' : 'text-right text-slate-700 bg-slate-100'} p-2.5 rounded-lg space-y-1">
+                    <b class="text-[10px] block">${m.sender === 'admin' ? 'Proprietário' : 'Você'}:</b> 
+                    <p class="text-xs">${m.text}</p>
+                    ${m.file ? `<a href="${m.file.data}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-white border px-2 py-1 rounded-md text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-file-arrow-down"></i> Ver Comprovativo (${m.file.name})</a>` : ''}
                 </div>
             `).join('');
             box.scrollTop = box.scrollHeight;
@@ -464,15 +657,37 @@
 
         window.sendSupportMessage = async function() {
             const input = document.getElementById('supportMsgInput');
+            const fileInput = document.getElementById('supportFileInput');
             const text = input.value.trim();
-            if (!text) return;
+            let fileData = null;
+
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                
+                // Validação estrita: menor que 5MB (5 * 1024 * 1024 bytes)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert("O arquivo é muito grande! O comprovativo deve ser menor que 5MB.");
+                    return;
+                }
+
+                fileData = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve({ name: file.name, data: e.target.result });
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            if (!text && !fileData) return;
 
             await addDoc(collection(db, "users", currentUserData.uid, "supportMessages"), {
                 sender: 'professor',
-                text,
+                text: text || "Enviei um comprovativo de pagamento.",
+                file: fileData,
                 timestamp: Date.now()
             });
+
             input.value = '';
+            if (fileInput) fileInput.value = '';
             carregarChatSuporteProfessor();
         };
 
@@ -584,8 +799,10 @@
             let msgs = snap.docs.map(d => d.data());
             msgs.sort((a, b) => a.timestamp - b.timestamp);
             box.innerHTML = msgs.map(m => `
-                <div class="${m.sender === 'admin' ? 'text-right text-indigo-700 bg-indigo-50' : 'text-left text-slate-700 bg-slate-100'} p-2 rounded-lg">
-                    <b class="text-[10px]">${m.sender === 'admin' ? 'Você (Proprietário)' : 'Professor'}:</b> ${m.text}
+                <div class="${m.sender === 'admin' ? 'text-right text-indigo-700 bg-indigo-50' : 'text-left text-slate-700 bg-slate-100'} p-2.5 rounded-lg space-y-1">
+                    <b class="text-[10px] block">${m.sender === 'admin' ? 'Você (Proprietário)' : 'Professor'}:</b> 
+                    <p class="text-xs">${m.text}</p>
+                    ${m.file ? `<a href="${m.file.data}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-white border px-2 py-1 rounded-md text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-file-arrow-down"></i> Ver Comprovativo (${m.file.name})</a>` : ''}
                 </div>
             `).join('');
             box.scrollTop = box.scrollHeight;
@@ -614,9 +831,115 @@
             document.getElementById('masterAdminModal').classList.add('hidden');
         };
 
-        async function loadDataFromCloud() {
-            // Mantém carregamento padrão
+        // CARREGAMENTO DE MATÉRIAS E MATERIAIS
+        window.loadDataFromCloud = async function() {
+            if (!currentUserData) return;
+            const turma = currentUserData.turmaCode;
+            if (!turma) return;
+
+            const subjectsSnap = await getDocs(collection(db, "turmas", turma, "subjects"));
+            subjectsData = subjectsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            renderSidebarSubjects();
+            renderSubjectSelect();
+
+            const materialsSnap = await getDocs(collection(db, "turmas", turma, "materials"));
+            materialsData = materialsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderMaterials();
+        };
+
+        window.handleAddSubject = async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('newSubjectName').value.trim();
+            if (!name || !currentUserData || currentUserData.role !== 'professor') return;
+
+            const turma = currentUserData.turmaCode;
+            await addDoc(collection(db, "turmas", turma, "subjects"), { name, createdAt: Date.now() });
+            document.getElementById('newSubjectName').value = '';
+            loadDataFromCloud();
+        };
+
+        window.handleUploadMaterial = async function(e) {
+            e.preventDefault();
+            const title = document.getElementById('materialTitle').value.trim();
+            const subjectId = document.getElementById('materialSubjectSelect').value;
+            const desc = document.getElementById('materialDesc').value.trim();
+            const link = document.getElementById('materialLink').value.trim();
+            const linkName = document.getElementById('materialLinkName').value.trim();
+
+            if (!title || !subjectId || !link || !linkName) return;
+
+            const turma = currentUserData.turmaCode;
+            await addDoc(collection(db, "turmas", turma, "materials"), {
+                title,
+                subjectId,
+                desc,
+                link,
+                linkName,
+                createdAt: Date.now()
+            });
+
+            document.getElementById('uploadForm').reset();
+            loadDataFromCloud();
+            alert("Material publicado com sucesso!");
+        };
+
+        function renderSidebarSubjects() {
+            const container = document.getElementById('sidebarSubjects');
+            if (subjectsData.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400">Nenhuma matéria criada.</p>';
+                return;
+            }
+            container.innerHTML = subjectsData.map(s => `
+                <button onclick="filterBySubject('${s.id}', '${s.name}')" class="w-full text-left text-xs px-3 py-2 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-semibold transition border border-slate-100 flex items-center justify-between">
+                    <span>${s.name}</span>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+            `).join('');
         }
+
+        function renderSubjectSelect() {
+            const select = document.getElementById('materialSubjectSelect');
+            if (!select) return;
+            select.innerHTML = subjectsData.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        }
+
+        let selectedSubjectFilter = null;
+        window.filterBySubject = function(subjectId, subjectName) {
+            selectedSubjectFilter = subjectId;
+            document.getElementById('currentCategoryTitle').innerText = subjectName;
+            renderMaterials();
+        };
+
+        window.renderMaterials = function() {
+            const grid = document.getElementById('materialsGrid');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = materialsData;
+            if (selectedSubjectFilter) {
+                filtered = filtered.filter(m => m.subjectId === selectedSubjectFilter);
+            }
+            if (search) {
+                filtered = filtered.filter(m => m.title.toLowerCase().includes(search) || (m.desc && m.desc.toLowerCase().includes(search)));
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p class="text-xs text-slate-400 col-span-full text-center py-6">Nenhum conteúdo encontrado.</p>';
+                return;
+            }
+
+            grid.innerHTML = filtered.map(m => `
+                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 flex flex-col justify-between space-y-2">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-xs">${m.title}</h4>
+                        <p class="text-[11px] text-slate-500 mt-0.5">${m.desc || ''}</p>
+                    </div>
+                    <a href="${m.link}" target="_blank" class="inline-flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold py-2 px-3 rounded-xl transition shadow-sm">
+                        <i class="fa-solid fa-external-link-alt text-[10px]"></i> ${m.linkName || 'Acessar Link'}
+                    </a>
+                </div>
+            `).join('');
+        };
     </script>
 </body>
 </html>
