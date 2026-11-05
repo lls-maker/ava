@@ -634,13 +634,18 @@
             }
         }
 
-        // MONITOR GLOBAL DE NOTIFICAÇÕES PARA O ADMINISTRADOR (CORRIGIDO PARA APAGAR AO VER)
+        // MONITOR GLOBAL DE NOTIFICAÇÕES PARA O ADMINISTRADOR COM ATUALIZAÇÃO DE LEITURA
         async function iniciarOuvinteGlobalAdmin() {
             adminUnsubscribes.forEach(unsub => unsub());
             adminUnsubscribes = [];
 
             const snapUsers = await getDocs(collection(db, "users"));
+            const list = document.getElementById('adminNotifList');
+            const badge = document.getElementById('adminNotifBadge');
             
+            list.innerHTML = '';
+            let totalNaoLidas = 0;
+
             snapUsers.forEach(userDoc => {
                 const u = userDoc.data();
                 if (u.role === 'professor') {
@@ -649,28 +654,22 @@
                         msgs.sort((a,b) => b.timestamp - a.timestamp);
                         let ultimaMsg = msgs[0];
                         
-                        // Só notifica se a última mensagem foi enviada pelo professor (não respondida ainda)
-                        const badge = document.getElementById('adminNotifBadge');
-                        const list = document.getElementById('adminNotifList');
+                        const itemExistente = document.getElementById(`notif-prof-${userDoc.id}`);
+                        if (itemExistente) itemExistente.remove();
 
-                        if (ultimaMsg && ultimaMsg.sender === 'professor') {
+                        // Verifica se a última mensagem é do professor E não foi lida
+                        if (ultimaMsg && ultimaMsg.sender === 'professor' && ultimaMsg.lidoAdmin !== true) {
+                            totalNaoLidas++;
                             badge.classList.remove('hidden');
                             badge.innerText = "!";
                             
-                            // Evita duplicar na lista dropdown
-                            if (!document.getElementById(`notif-prof-${userDoc.id}`)) {
-                                list.innerHTML += `
-                                    <div id="notif-prof-${userDoc.id}" onclick="abrirChatAdmin('${userDoc.id}', '${u.username}')" class="p-2 bg-rose-50 hover:bg-rose-100 rounded-lg cursor-pointer transition mb-1">
-                                        <b>Prof. ${u.username}</b>
-                                        <span class="block text-[10px] text-slate-500 truncate">${ultimaMsg.text}</span>
-                                    </div>
-                                `;
-                            }
+                            list.innerHTML += `
+                                <div id="notif-prof-${userDoc.id}" onclick="abrirChatAdmin('${userDoc.id}', '${u.username}')" class="p-2 bg-rose-50 hover:bg-rose-100 rounded-lg cursor-pointer transition mb-1">
+                                    <b>Prof. ${u.username}</b>
+                                    <span class="block text-[10px] text-slate-500 truncate">${ultimaMsg.text}</span>
+                                </div>
+                            `;
                         } else {
-                            // Se a última mensagem foi do admin, remove o alerta visual
-                            const itemNotif = document.getElementById(`notif-prof-${userDoc.id}`);
-                            if (itemNotif) itemNotif.remove();
-                            
                             if (list.children.length === 0 || (list.children.length === 1 && list.children[0].tagName === 'P')) {
                                 badge.classList.add('hidden');
                             }
@@ -767,7 +766,8 @@
                 sender: 'professor',
                 text: text || "Enviei o link do comprovativo de pagamento.",
                 link: link || null,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                lidoAdmin: false
             });
 
             input.value = '';
@@ -936,7 +936,8 @@
                 sender: 'professor',
                 text: text || "Enviei o link do comprovativo de pagamento.",
                 link: link || null,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                lidoAdmin: false
             });
 
             input.value = '';
@@ -1082,10 +1083,20 @@
             }
         };
 
+        // ABRE O CHAT E MARCA AS MENSAGENS COMO LIDAS PARA APAGAR O SININHO
         window.abrirChatAdmin = async function(profUid, profName) {
             activeChatProfUid = profUid;
             document.getElementById('adminChatTitle').innerText = `Suporte com: ${profName}`;
             document.getElementById('adminChatModal').classList.remove('hidden');
+            
+            // Marca as mensagens do professor como lidas no banco
+            const snap = await getDocs(collection(db, "users", profUid, "supportMessages"));
+            for (let d of snap.docs) {
+                if (d.data().sender === 'professor' && d.data().lidoAdmin !== true) {
+                    await updateDoc(doc(db, "users", profUid, "supportMessages", d.id), { lidoAdmin: true });
+                }
+            }
+            
             carregarMensagensAdminChat();
         };
 
@@ -1118,7 +1129,8 @@
             await addDoc(collection(db, "users", activeChatProfUid, "supportMessages"), {
                 sender: 'admin',
                 text,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                lidoAdmin: true
             });
             input.value = '';
             carregarMensagensAdminChat();
