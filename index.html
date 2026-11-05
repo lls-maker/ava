@@ -380,11 +380,32 @@
         </div>
     </div>
 
-    <!-- PAINEL MASTER DO PROPRIETÁRIO -->
+    <!-- PAINEL MASTER DO PROPRIETÁRIO (COM SININHO DE NOTIFICAÇÕES GLOBAIS) -->
     <div id="masterAdminModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl border border-rose-100 relative">
-            <h3 class="font-bold text-rose-600 text-lg mb-1"><i class="fa-solid fa-shield-halved"></i> Painel Master do Proprietário</h3>
-            <p class="text-xs text-slate-500 mb-4">Gestão de acessos, assinaturas e exclusão de professores (R$ 29,90/mês)</p>
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <h3 class="font-bold text-rose-600 text-lg"><i class="fa-solid fa-shield-halved"></i> Painel Master do Proprietário</h3>
+                    <p class="text-xs text-slate-500">Gestão de acessos, assinaturas e suporte aos professores</p>
+                </div>
+                <!-- SININHO DO ADMINISTRADOR -->
+                <div class="relative">
+                    <button onclick="toggleAdminNotifications(event)" class="relative p-2 bg-slate-100 hover:bg-slate-200 rounded-xl transition text-slate-700">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                        <span id="adminNotifBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                    </button>
+                    <div id="adminNotifDropdown" class="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 hidden p-3 z-50 text-slate-800">
+                        <h4 class="text-xs font-bold uppercase text-slate-400 mb-2 border-b pb-1 flex justify-between items-center">
+                            <span>Avisos de Professores</span>
+                            <i class="fa-solid fa-bell text-rose-600"></i>
+                        </h4>
+                        <div id="adminNotifList" class="space-y-2 max-h-60 overflow-y-auto text-xs">
+                            <p class="text-slate-400 text-center py-2">Sem novas mensagens.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="space-y-3 max-h-96 overflow-y-auto" id="masterAdminList">
                 <p class="text-xs text-slate-400">A carregar professores...</p>
             </div>
@@ -431,6 +452,7 @@
         let selectedStudentUid = null;
         let subjectsData = [];
         let materialsData = [];
+        let adminUnsubscribes = [];
 
         window.showCustomAlert = function(title, desc, type = 'success') {
             const modal = document.getElementById('customAlertModal');
@@ -480,6 +502,7 @@
             if (senhaDono === "adminfacil!") {
                 document.getElementById('masterAdminModal').classList.remove('hidden');
                 carregarPainelMaster();
+                iniciarOuvinteGlobalAdmin();
             } else {
                 showCustomAlert("Acesso Negado", "Chave mestra incorreta!", "error");
             }
@@ -605,6 +628,54 @@
             }
         }
 
+        // MONITOR GLOBAL DE NOTIFICAÇÕES PARA O ADMINISTRADOR
+        async function iniciarOuvinteGlobalAdmin() {
+            adminUnsubscribes.forEach(unsub => unsub());
+            adminUnsubscribes = [];
+
+            const snapUsers = await getDocs(collection(db, "users"));
+            let totalNotificacoes = 0;
+            let notificacoesHtml = '';
+
+            snapUsers.forEach(userDoc => {
+                const u = userDoc.data();
+                if (u.role === 'professor') {
+                    const unsub = onSnapshot(collection(db, "users", userDoc.id, "supportMessages"), (msgSnap) => {
+                        // Filtra mensagens enviadas pelo professor que ainda não foram respondidas pelo admin
+                        let msgs = msgSnap.docs.map(d => d.data());
+                        let ultimaMsg = msgs.sort((a,b) => b.timestamp - a.timestamp)[0];
+                        
+                        if (ultimaMsg && ultimaMsg.sender === 'professor') {
+                            const badge = document.getElementById('adminNotifBadge');
+                            const list = document.getElementById('adminNotifList');
+                            
+                            badge.classList.remove('hidden');
+                            badge.innerText = "!";
+                            
+                            list.innerHTML += `
+                                <div onclick="abrirChatAdmin('${userDoc.id}', '${u.username}')" class="p-2 bg-rose-50 hover:bg-rose-100 rounded-lg cursor-pointer transition mb-1">
+                                    <b>Prof. ${u.username}</b>
+                                    <span class="block text-[10px] text-slate-500 truncate">${ultimaMsg.text}</span>
+                                </div>
+                            `;
+                        }
+                    });
+                    adminUnsubscribes.push(unsub);
+                }
+            });
+        }
+
+        window.toggleAdminNotifications = function(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('adminNotifDropdown');
+            dropdown.classList.toggle('hidden');
+        };
+
+        window.addEventListener('click', () => {
+            const dropdown = document.getElementById('adminNotifDropdown');
+            if (dropdown && !dropdown.classList.contains('hidden')) dropdown.classList.add('hidden');
+        });
+
         function atualizarSininho(snap, tituloNotif, onClickAction) {
             const badge = document.getElementById('notifBadge');
             const list = document.getElementById('notifList');
@@ -630,11 +701,6 @@
             const dropdown = document.getElementById('notifDropdown');
             dropdown.classList.toggle('hidden');
         };
-
-        window.addEventListener('click', () => {
-            const dropdown = document.getElementById('notifDropdown');
-            if (dropdown && !dropdown.classList.contains('hidden')) dropdown.classList.add('hidden');
-        });
 
         window.copyInviteLink = function() {
             if (!currentUserData || !currentUserData.turmaCode) return;
@@ -916,7 +982,6 @@
             await signOut(auth);
         };
 
-        // PAINEL MASTER (CORRIGIDO PARA COMUNICAÇÃO TOTAL COM O PROFESSOR)
         window.carregarPainelMaster = async function() {
             const listContainer = document.getElementById('masterAdminList');
             const snap = await getDocs(collection(db, "users"));
@@ -1040,6 +1105,8 @@
 
         window.closeMasterAdmin = function() {
             document.getElementById('masterAdminModal').classList.add('hidden');
+            adminUnsubscribes.forEach(unsub => unsub());
+            adminUnsubscribes = [];
         };
 
         window.loadDataFromCloud = async function() {
