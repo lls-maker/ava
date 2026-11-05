@@ -12,42 +12,83 @@
 </head>
 <body class="h-full flex flex-col text-slate-100 font-sans">
 
-    <!-- TELA DE LOGIN / CADASTRO DE ALUNOS -->
+    <!-- TELA DE AUTENTICAÇÃO (LOGIN / ESCOLHA) -->
     <div id="authScreen" class="flex-1 flex items-center justify-center p-4">
         <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700">
             <h1 class="text-3xl font-bold text-center mb-2 text-indigo-400">AVA</h1>
-            <p class="text-center text-slate-400 mb-6 text-sm">Ambiente Virtual de Aprendizagem</p>
+            <p id="subtituloTopo" class="text-center text-slate-400 mb-6 text-sm">Ambiente Virtual de Aprendizagem</p>
 
-            <!-- Formulário de Login -->
-            <div id="loginForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Nome de Utilizador</label>
-                    <input type="text" id="loginUser" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500" placeholder="Digite o seu utilizador">
-                </div>
-                <button onclick="fazerLogin()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg transition-colors">Entrar</button>
-                <p class="text-center text-sm text-slate-400 mt-4">
-                    Novo por aqui? <button onclick="alternarTelaCadastro()" class="text-indigo-400 hover:underline font-medium">Cadastre-se na Turma</button>
-                </p>
+            <!-- SELEÇÃO DE TIPO DE LOGIN (Proprietário, Professor ou Aluno via link) -->
+            <div id="tipoLoginDiv" class="space-y-3">
+                <button onclick="mostrarFormulario('aluno')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                    🎓 Sou Aluno (Entrar por Turma)
+                </button>
+                <button onclick="mostrarFormulario('professor')" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+                    👨‍🏫 Sou Professor (Criar / Entrar)
+                </button>
+                <button onclick="mostrarFormulario('admin')" class="w-full bg-slate-900 border border-slate-700 hover:bg-slate-900/80 text-slate-400 hover:text-slate-200 text-xs py-2 rounded-lg transition-colors mt-4">
+                    🔒 Acesso Restrito (Proprietário)
+                </button>
             </div>
 
-            <!-- Formulário de Cadastro (Exclusivo para Alunos com Código de Turma) -->
-            <div id="registerForm" class="space-y-4 hidden">
+            <!-- FORMULÁRIO DO ALUNO -->
+            <div id="formAluno" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Nome de Utilizador</label>
+                    <input type="text" id="alunoUser" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500" placeholder="Seu utilizador">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Código da Turma (Ex: PROF-JOAO)</label>
+                    <input type="text" id="alunoTurma" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 uppercase focus:outline-none focus:border-indigo-500" placeholder="Código fornecido pelo professor">
+                </div>
+                <button onclick="entrarOuCadastrarAluno()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg transition-colors">Entrar na Turma</button>
+                <button onclick="voltarSelecao()" class="w-full text-slate-400 text-sm hover:underline mt-2">← Voltar</button>
+            </div>
+
+            <!-- FORMULÁRIO DO PROFESSOR (COM PLANO DE R$ 29,90) -->
+            <div id="formProfessor" class="space-y-4 hidden">
                 <div class="bg-indigo-950/40 border border-indigo-900/50 p-3 rounded-lg mb-2">
-                    <p class="text-xs text-indigo-300 text-center">Cadastro de Aluno. Informe o código fornecido pelo seu professor.</p>
+                    <p class="text-xs text-indigo-300 text-center">Plano Professor: R$ 29,90/mês. Faça login ou cadastre-se para solicitar ativação.</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Nome de Utilizador</label>
-                    <input type="text" id="regUser" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500" placeholder="Escolha um utilizador">
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Utilizador do Professor</label>
+                    <input type="text" id="profUser" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500" placeholder="Seu utilizador">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-1">Código da Turma do Professor</label>
-                    <input type="text" id="regCodigoTurma" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500 uppercase" placeholder="Ex: PROF-JOAO">
-                </div>
-                <button onclick="fazerCadastroAluno()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg transition-colors">Criar Conta e Entrar</button>
-                <p class="text-center text-sm text-slate-400 mt-4">
-                    Já tem conta? <button onclick="alternarTelaCadastro()" class="text-indigo-400 hover:underline font-medium">Faça Login</button>
-                </p>
+                <button onclick="loginOuCadastroProfessor()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg transition-colors">Aceder ao Painel / Ativação</button>
+                <button onclick="voltarSelecao()" class="w-full text-slate-400 text-sm hover:underline mt-2">← Voltar</button>
             </div>
+
+            <!-- FORMULÁRIO EXCLUSIVO DO PROPRIETÁRIO (ADMIN) -->
+            <div id="formAdmin" class="space-y-4 hidden">
+                <div class="bg-rose-950/40 border border-rose-900/50 p-3 rounded-lg mb-2">
+                    <p class="text-xs text-rose-300 text-center">Área restrita do Proprietário do Sistema.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Palavra-passe / Chave Mestra</label>
+                    <input type="password" id="adminKey" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-indigo-500" placeholder="Chave de acesso">
+                </div>
+                <button onclick="fazerLoginAdmin()" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2.5 rounded-lg transition-colors">Entrar como Proprietário</button>
+                <button onclick="voltarSelecao()" class="w-full text-slate-400 text-sm hover:underline mt-2">← Voltar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA DE PENDENTE PARA O PROFESSOR (COM CHAT DE PAGAMENTO) -->
+    <div id="pendingScreen" class="flex-1 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-slate-700">
+            <h2 class="text-2xl font-bold text-amber-400 mb-2 text-center">Ativação de Professor Pendente</h2>
+            <p class="text-slate-300 mb-4 text-sm text-center">Para liberar o seu acesso completo e gerar o link da sua turma (R$ 29,90/mês), envie a mensagem com o comprovativo para o proprietário abaixo:</p>
+            
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 h-48 overflow-y-auto flex flex-col space-y-3 mb-4" id="chatMensagensPendente">
+                <!-- Mensagens do chat interno -->
+            </div>
+
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="inputMensagemChat" placeholder="Escreva sua mensagem ou informe o pagamento..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                <button onclick="enviarMensagemSuporte()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors">Enviar</button>
+            </div>
+
+            <button onclick="fazerLogout()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg transition-colors text-sm">Terminar Sessão</button>
         </div>
     </div>
 
@@ -65,8 +106,8 @@
                 </div>
                 <nav class="space-y-2">
                     <a href="#" class="flex items-center gap-3 px-4 py-2.5 bg-indigo-600 text-white rounded-lg font-medium">🏠 Início</a>
-                    <!-- Link do Super Admin (Visível apenas para o Criador) -->
-                    <a href="#" id="navAdmin" onclick="mudarAba('admin')" class="flex items-center gap-3 px-4 py-2.5 text-slate-300 hover:bg-slate-700 rounded-lg font-medium hidden">⚙️ Super Admin</a>
+                    <!-- Link do Super Admin (Visível APENAS para o Proprietário) -->
+                    <a href="#" id="navAdmin" onclick="mudarAba('admin')" class="flex items-center gap-3 px-4 py-2.5 text-slate-300 hover:bg-slate-700 rounded-lg font-medium hidden">⚙️ Gestão de Professores</a>
                 </nav>
             </div>
             <div class="border-t border-slate-700 pt-4">
@@ -84,32 +125,22 @@
                 <p id="userRoleInfo" class="text-slate-400">Ambiente carregado e sincronizado com o Firebase.</p>
             </div>
 
-            <!-- ABA EXCLUSIVA DO SUPER ADMIN (GESTÃO DE PROFESSORES E LICENÇAS) -->
+            <!-- PAINEL EXCLUSIVO DO PROPRIETÁRIO (ADMIN) -->
             <div id="viewAdmin" class="hidden">
-                <h1 class="text-3xl font-bold mb-2 text-indigo-400">Painel do Super Administrador</h1>
-                <p class="text-slate-400 mb-6">Registe novos professores (R$ 29,90/mês) e faça a gestão de acessos.</p>
+                <h1 class="text-3xl font-bold mb-2 text-indigo-400">Painel do Proprietário</h1>
+                <p class="text-slate-400 mb-6">Aprove os pagamentos (R$ 29,90) e visualize as mensagens dos professores.</p>
                 
-                <!-- Caixa para Adicionar Novo Professor Manualmente -->
-                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 mb-8 max-w-xl">
-                    <h3 class="text-lg font-bold text-slate-200 mb-4">Cadastrar Novo Professor (Ativação)</h3>
-                    <div class="flex gap-3">
-                        <input type="text" id="novoProfUser" placeholder="Nome de utilizador do professor" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                        <button onclick="cadastrarNovoProfessor()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-2 rounded-lg text-sm transition-colors">Criar e Liberar</button>
-                    </div>
-                </div>
-
-                <!-- Lista de Professores Cadastrados -->
                 <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-                    <div class="p-4 bg-slate-700/30 border-b border-slate-700 font-semibold text-slate-300 text-sm">Professores Ativos na Plataforma</div>
+                    <div class="p-4 bg-slate-700/30 border-b border-slate-700 font-semibold text-slate-300 text-sm">Professores Cadastrados e Pendentes</div>
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-700/50 text-slate-300 text-sm">
-                                <th class="p-4">Utilizador</th>
-                                <th class="p-4">Status</th>
+                                <th class="p-4">Utilizador / Turma</th>
+                                <th class="p-4">Status / Última Mensagem</th>
                                 <th class="p-4 text-right">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="listaProfessoresAtivos">
+                        <tbody id="listaProfessoresAdmin">
                             <!-- Inserido via JavaScript -->
                         </tbody>
                     </table>
@@ -133,86 +164,111 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // DEFINA AQUI O SEU NOME DE UTILIZADOR MESTRE (SUPER ADMIN)
-        const MEU_USER_ADMIN = "admin"; 
+        // CHAVE SECRETA DO PROPRIETÁRIO (Mude para a palavra-passe que quiser)
+        const CHAVE_MESTRA_ADMIN = "meuadmin123"; 
         let currentUser = null;
 
-        function alternarTelaCadastro() {
-            document.getElementById('loginForm').classList.toggle('hidden');
-            document.getElementById('registerForm').classList.toggle('hidden');
+        // Verifica se o aluno entrou através de um link de turma personalizado (Ex: site.com/?turma=PROF-JOAO)
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const turmaLink = urlParams.get('turma');
+            if (turmaLink) {
+                document.getElementById('tipoLoginDiv').classList.add('hidden');
+                document.getElementById('formAluno').classList.remove('hidden');
+                document.getElementById('alunoTurma').value = turmaLink.toUpperCase();
+                document.getElementById('alunoTurma').readOnly = true;
+                document.getElementById('subtituloTopo').textContent = `Entrando na Turma: ${turmaLink.toUpperCase()}`;
+            } else {
+                verificarEstadoSessao();
+            }
+        };
+
+        function mostrarFormulario(tipo) {
+            document.getElementById('tipoLoginDiv').classList.add('hidden');
+            document.getElementById('formAluno').classList.add('hidden');
+            document.getElementById('formProfessor').classList.add('hidden');
+            document.getElementById('formAdmin').classList.add('hidden');
+
+            if (tipo === 'aluno') document.getElementById('formAluno').classList.remove('hidden');
+            if (tipo === 'professor') document.getElementById('formProfessor').classList.remove('hidden');
+            if (tipo === 'admin') document.getElementById('formAdmin').classList.remove('hidden');
         }
 
-        function fazerLogin() {
-            const username = document.getElementById('loginUser').value.trim().toLowerCase();
-            if (!username) return alert('Digite o nome de utilizador!');
+        function voltarSelecao() {
+            document.getElementById('tipoLoginDiv').classList.remove('hidden');
+            document.getElementById('formAluno').classList.add('hidden');
+            document.getElementById('formProfessor').classList.add('hidden');
+            document.getElementById('formAdmin').classList.add('hidden');
+        }
 
-            db.ref('users/' + username).once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    currentUser = snapshot.val();
-                    currentUser.username = username;
+        // Lógica de Aluno
+        function entrarOuCadastrarAluno() {
+            const username = document.getElementById('alunoUser').value.trim().toLowerCase();
+            const turma = document.getElementById('alunoTurma').value.trim().toUpperCase();
+
+            if (!username || !turma) return alert('Preencha todos os campos!');
+
+            db.ref('users/' + username).once('value', (snap) => {
+                if (snap.exists()) {
+                    let user = snap.val();
+                    if (user.role !== 'aluno') return alert('Este utilizador não é um aluno.');
                     localStorage.setItem('ava_user', username);
                     verificarEstadoSessao();
                 } else {
-                    alert('Utilizador não encontrado!');
+                    let newAluno = { role: 'aluno', status: 'aprovado', codigoTurma: turma };
+                    db.ref('users/' + username).set(newAluno).then(() => {
+                        localStorage.setItem('ava_user', username);
+                        verificarEstadoSessao();
+                    });
                 }
             });
         }
 
-        // Cadastro exclusivo para Alunos via link/código da turma
-        function fazerCadastroAluno() {
-            const username = document.getElementById('regUser').value.trim().toLowerCase();
-            const codigoTurma = document.getElementById('regCodigoTurma').value.trim().toUpperCase();
+        // Lógica de Professor (Cria pendente se não existir, ou loga)
+        function loginOuCadastroProfessor() {
+            const username = document.getElementById('profUser').value.trim().toLowerCase();
+            if (!username) return alert('Digite o seu utilizador!');
 
-            if (!username || !codigoTurma) {
-                return alert('Preencha o nome de utilizador e o código da turma!');
+            db.ref('users/' + username).once('value', (snap) => {
+                if (snap.exists()) {
+                    let user = snap.val();
+                    if (user.role !== 'professor') return alert('Este utilizador já está registado como aluno.');
+                    localStorage.setItem('ava_user', username);
+                    verificarEstadoSessao();
+                } else {
+                    let newProf = { role: 'professor', status: 'pendente_pagamento', turmaCode: `PROF-${username.toUpperCase()}` };
+                    db.ref('users/' + username).set(newProf).then(() => {
+                        localStorage.setItem('ava_user', username);
+                        verificarEstadoSessao();
+                    });
+                }
+            });
+        }
+
+        // Lógica do Proprietário (Admin)
+        function fazerLoginAdmin() {
+            const senha = document.getElementById('adminKey').value;
+            if (senha === CHAVE_MESTRA_ADMIN) {
+                localStorage.setItem('ava_user', 'PROPRIETARIO_MASTER');
+                verificarEstadoSessao();
+            } else {
+                alert('Chave mestra incorreta!');
             }
-
-            db.ref('users/' + username).once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    alert('Este nome de utilizador já existe!');
-                } else {
-                    let userData = {
-                        role: 'aluno',
-                        status: 'aprovado',
-                        codigoTurma: codigoTurma
-                    };
-
-                    db.ref('users/' + username).set(userData).then(() => {
-                        alert('Conta de aluno criada com sucesso!');
-                        document.getElementById('loginUser').value = username;
-                        alternarTelaCadastro();
-                    });
-                }
-            });
-        }
-
-        // Apenas o Super Admin pode registar novos professores mediante pagamento
-        function cadastrarNovoProfessor() {
-            const username = document.getElementById('novoProfUser').value.trim().toLowerCase();
-            if (!username) return alert('Digite o utilizador do professor!');
-
-            db.ref('users/' + username).once('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    alert('Este utilizador já existe no sistema!');
-                } else {
-                    let professorData = {
-                        role: 'professor',
-                        status: 'aprovado',
-                        turmaCode: `PROF-${username.toUpperCase()}`
-                    };
-
-                    db.ref('users/' + username).set(professorData).then(() => {
-                        alert(`Professor ${username} cadastrado e liberado com sucesso! Código da turma gerado: PROF-${username.toUpperCase()}`);
-                        document.getElementById('novoProfUser').value = '';
-                        carregarProfessoresAdmin();
-                    });
-                }
-            });
         }
 
         function verificarEstadoSessao() {
             const savedUser = localStorage.getItem('ava_user');
             if (!savedUser) return;
+
+            if (savedUser === 'PROPRIETARIO_MASTER') {
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('appScreen').classList.remove('hidden');
+                document.getElementById('userNameDisplay').textContent = 'Proprietário';
+                document.getElementById('navAdmin').classList.remove('hidden');
+                document.getElementById('userRoleInfo').textContent = 'Painel de Controlo Master do Sistema';
+                carregarPainelAdmin();
+                return;
+            }
 
             db.ref('users/' + savedUser).once('value', (snapshot) => {
                 if (snapshot.exists()) {
@@ -220,19 +276,23 @@
                     currentUser.username = savedUser;
 
                     document.getElementById('authScreen').classList.add('hidden');
+
+                    // Se for professor aguardando pagamento
+                    if (currentUser.role === 'professor' && currentUser.status === 'pendente_pagamento') {
+                        document.getElementById('pendingScreen').classList.remove('hidden');
+                        escutarChatProfessor(currentUser.username);
+                        return;
+                    }
+
+                    // App normal liberado
                     document.getElementById('appScreen').classList.remove('hidden');
                     document.getElementById('userNameDisplay').textContent = currentUser.username;
 
                     if (currentUser.role === 'aluno') {
-                        document.getElementById('userRoleInfo').textContent = `Aluno vinculado à turma: ${currentUser.codigoTurma}`;
+                        document.getElementById('userRoleInfo').textContent = `Aluno da Turma: ${currentUser.codigoTurma}`;
                     } else if (currentUser.role === 'professor') {
-                        document.getElementById('userRoleInfo').textContent = `Painel do Professor | Código da sua Turma: ${currentUser.turmaCode || 'PROF-' + currentUser.username.toUpperCase()}`;
-                    }
-
-                    // Se for o Super Admin, exibe o painel de administração exclusivo
-                    if (currentUser.username === MEU_USER_ADMIN) {
-                        document.getElementById('navAdmin').classList.remove('hidden');
-                        carregarProfessoresAdmin();
+                        let linkTurma = `${window.location.origin}${window.location.pathname}?turma=${currentUser.turmaCode || 'PROF-' + currentUser.username.toUpperCase()}`;
+                        document.getElementById('userRoleInfo').innerHTML = `Painel do Professor | O seu link de convite para os alunos é: <br><a href="${linkTurma}" target="_blank" class="text-indigo-400 underline font-mono text-sm">${linkTurma}</a>`;
                     }
                 } else {
                     fazerLogout();
@@ -240,8 +300,38 @@
             });
         }
 
+        function enviarMensagemSuporte() {
+            const input = document.getElementById('inputMensagemChat');
+            const texto = input.value.trim();
+            if (!texto) return;
+
+            const msgData = { remetente: currentUser.username, texto: texto, timestamp: Date.now() };
+            db.ref('chats/' + currentUser.username).push(msgData).then(() => { input.value = ''; });
+        }
+
+        function escutarChatProfessor(username) {
+            const chatBox = document.getElementById('chatMensagensPendente');
+            db.ref('chats/' + username).on('value', (snapshot) => {
+                chatBox.innerHTML = '';
+                if (!snapshot.exists()) {
+                    chatBox.innerHTML = `<p class="text-slate-500 text-xs text-center my-auto">Envie aqui a mensagem informando o pagamento da mensalidade (R$ 29,90).</p>`;
+                    return;
+                }
+                snapshot.forEach((child) => {
+                    const msg = child.val();
+                    const ehAdmin = msg.remetente === 'Proprietário';
+                    chatBox.innerHTML += `
+                        <div class="flex flex-col ${ehAdmin ? 'items-start' : 'items-end'}">
+                            <span class="text-[10px] text-slate-400 mb-0.5">${msg.remetente}</span>
+                            <div class="max-w-[80%] px-3 py-2 rounded-lg text-sm ${ehAdmin ? 'bg-slate-700 text-slate-200' : 'bg-indigo-600 text-white'}">${msg.texto}</div>
+                        </div>
+                    `;
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
         function refreshAppData() {
-            console.log("Recarregando dados do Firebase...");
             verificarEstadoSessao();
             alert('Dados atualizados com sucesso!');
         }
@@ -253,9 +343,9 @@
             }
         }
 
-        function carregarProfessoresAdmin() {
+        function carregarPainelAdmin() {
             db.ref('users').once('value', (snapshot) => {
-                const tbody = document.getElementById('listaProfessoresAtivos');
+                const tbody = document.getElementById('listaProfessoresAdmin');
                 tbody.innerHTML = '';
 
                 snapshot.forEach((child) => {
@@ -263,37 +353,51 @@
                     const username = child.key;
 
                     if (user.role === 'professor') {
-                        tbody.innerHTML += `
-                            <tr class="border-b border-slate-700/50">
-                                <td class="p-4 font-medium">${username} <span class="text-xs text-indigo-400 block">Turma: ${user.turmaCode || 'PROF-' + username.toUpperCase()}</span></td>
-                                <td class="p-4"><span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-semibold">Ativo (R$ 29,90/mês)</span></td>
-                                <td class="p-4 text-right">
-                                    <button onclick="removerUtilizador('${username}')" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">Remover Acesso</button>
-                                </td>
-                            </tr>
-                        `;
+                        db.ref('chats/' + username).limitToLast(1).once('value', (chatSnap) => {
+                            let ultimaMsg = "Sem mensagens no chat";
+                            if (chatSnap.exists()) {
+                                chatSnap.forEach((m) => { ultimaMsg = `${m.val().remetente}: ${m.val().texto}`; });
+                            }
+
+                            let statusBadge = user.status === 'aprovado' 
+                                ? '<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-semibold">Ativo (Aprovado)</span>' 
+                                : '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-semibold">Pendente Pagamento</span>';
+
+                            let botaoAcao = user.status === 'pendente_pagamento'
+                                ? `<button onclick="aprovarProfessor('${username}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">Aprovar Pagamento</button>`
+                                : `<button onclick="bloquearProfessor('${username}')" class="bg-amber-600/20 hover:bg-amber-600 text-amber-300 hover:text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">Bloquear</button>`;
+
+                            tbody.innerHTML += `
+                                <tr class="border-b border-slate-700/50">
+                                    <td class="p-4 font-medium">${username} <span class="text-xs text-indigo-400 block">Turma: ${user.turmaCode || 'PROF-' + username.toUpperCase()}</span></td>
+                                    <td class="p-4 text-sm text-slate-300">${statusBadge}<p class="text-xs text-slate-400 mt-1 truncate max-w-xs">${ultimaMsg}</p></td>
+                                    <td class="p-4 text-right space-x-2">${botaoAcao}</td>
+                                </tr>
+                            `;
+                        });
                     }
                 });
             });
         }
 
-        function removerUtilizador(username) {
-            if (confirm(`Tem certeza que deseja remover o acesso do professor ${username}?`)) {
-                db.ref('users/' + username).remove().then(() => {
-                    alert('Utilizador removido com sucesso!');
-                    carregarProfessoresAdmin();
-                });
-            }
+        function aprovarProfessor(username) {
+            db.ref('users/' + username).update({ status: 'aprovado' }).then(() => {
+                alert(`Professor ${username} aprovado com sucesso!`);
+                carregarPainelAdmin();
+            });
+        }
+
+        function bloquearProfessor(username) {
+            db.ref('users/' + username).update({ status: 'pendente_pagamento' }).then(() => {
+                alert(`Acesso do professor ${username} colocado como pendente.`);
+                carregarPainelAdmin();
+            });
         }
 
         function fazerLogout() {
             localStorage.removeItem('ava_user');
             location.reload();
         }
-
-        window.onload = function() {
-            verificarEstadoSessao();
-        };
     </script>
 </body>
 </html>
